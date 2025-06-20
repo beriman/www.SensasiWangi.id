@@ -25,7 +25,7 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
             <span className="text-base font-medium text-[#1D1D1F]">
-              Sensasiwangi.id
+              SensasiWangi.id
             </span>
           </Link>
 
