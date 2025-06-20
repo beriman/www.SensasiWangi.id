@@ -100,13 +100,35 @@ function App() {
               stones.
             </p>
 
-            {!isUserLoaded ? (
-              <div className="flex gap-4 pt-8">
+            <div className="flex gap-4 pt-8">
+              {!isUserLoaded ? (
                 <div className="h-14 px-10 w-[180px] rounded-[20px] bg-gray-200 animate-pulse neumorphic-card"></div>
-              </div>
-            ) : (
-              <></>
-            )}
+              ) : (
+                <>
+                  <Authenticated>
+                    <Button
+                      onClick={() => navigate("/dashboard")}
+                      className="neumorphic-button h-14 px-10 text-lg text-[#2d3748] bg-transparent font-semibold border-0 shadow-none transition-all"
+                    >
+                      <ArrowRight className="mr-2 h-5 w-5" />
+                      Dashboard
+                    </Button>
+                  </Authenticated>
+                  <Unauthenticated>
+                    <SignInButton
+                      mode="modal"
+                      signUpFallbackRedirectUrl="/dashboard"
+                      signInFallbackRedirectUrl="/dashboard"
+                    >
+                      <Button className="neumorphic-button h-14 px-10 text-lg text-[#2d3748] bg-transparent font-semibold border-0 shadow-none transition-all">
+                        <ArrowRight className="mr-2 h-5 w-5" />
+                        Mulai Sekarang
+                      </Button>
+                    </SignInButton>
+                  </Unauthenticated>
+                </>
+              )}
+            </div>
           </div>
           {/* Navigation Cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 py-20">

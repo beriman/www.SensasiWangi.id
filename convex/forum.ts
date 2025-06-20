@@ -93,6 +93,34 @@ export const hasUserLikedTopic = query({
   },
 });
 
+// Query untuk mendapatkan topik berdasarkan author
+export const getTopicsByAuthor = query({
+  args: { authorId: v.id("users") },
+  handler: async (ctx, args) => {
+    const topics = await ctx.db
+      .query("topics")
+      .withIndex("by_author", (q) => q.eq("authorId", args.authorId))
+      .order("desc")
+      .collect();
+
+    return topics;
+  },
+});
+
+// Query untuk mendapatkan komentar berdasarkan author
+export const getCommentsByAuthor = query({
+  args: { authorId: v.id("users") },
+  handler: async (ctx, args) => {
+    const comments = await ctx.db
+      .query("comments")
+      .withIndex("by_author", (q) => q.eq("authorId", args.authorId))
+      .order("desc")
+      .collect();
+
+    return comments;
+  },
+});
+
 // Mutation untuk membuat topik baru
 export const createTopic = mutation({
   args: {

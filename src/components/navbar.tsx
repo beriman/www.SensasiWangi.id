@@ -37,7 +37,7 @@ export function Navbar() {
                 <div className="hidden md:flex items-center gap-3">
                   <Link
                     to="/dashboard"
-                    className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-colors duration-200 border-0 shadow-none"
+                    className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
                   >
                     <svg
                       className="w-4 h-4 mr-1.5"
@@ -54,13 +54,48 @@ export function Navbar() {
                     </svg>
                     Dashboard
                   </Link>
-                  <UserButton afterSignOutUrl="/" />
+                  <Link
+                    to="/profile"
+                    className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-1.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                    Profil
+                  </Link>
+                  <UserButton
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        avatarBox:
+                          "w-8 h-8 rounded-full neumorphic-button-sm border-0",
+                        userButtonPopoverCard:
+                          "neumorphic-card border-0 shadow-none",
+                        userButtonPopoverActionButton:
+                          "neumorphic-button-sm text-[#2d3748] hover:bg-transparent",
+                      },
+                    }}
+                  />
                 </div>
               </Authenticated>
               <Unauthenticated>
-                <SignInButton mode="modal" signUpFallbackRedirectUrl="/">
-                  <Button className="neumorphic-button h-10 px-6 text-sm text-[#2d3748] bg-transparent font-semibold border-0 shadow-none transition-all">
-                    Sign In
+                <SignInButton
+                  mode="modal"
+                  signUpFallbackRedirectUrl="/dashboard"
+                  signInFallbackRedirectUrl="/dashboard"
+                >
+                  <Button className="neumorphic-button h-10 px-6 text-sm text-[#2d3748] bg-transparent font-semibold border-0 shadow-none transition-all hover:scale-105 active:scale-95">
+                    Masuk
                   </Button>
                 </SignInButton>
               </Unauthenticated>
