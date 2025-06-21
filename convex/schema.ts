@@ -75,4 +75,204 @@ export default defineSchema({
     .index("by_comment", ["commentId"])
     .index("by_user", ["userId"])
     .index("by_comment_user", ["commentId", "userId"]),
+
+  products: defineTable({
+    title: v.string(),
+    description: v.string(),
+    price: v.number(),
+    originalPrice: v.optional(v.number()),
+    category: v.string(),
+    condition: v.string(), // "new", "like-new", "good", "fair"
+    brand: v.string(),
+    size: v.string(),
+    images: v.array(v.string()),
+    sellerId: v.id("users"),
+    sellerName: v.string(),
+    status: v.string(), // "active", "sold", "inactive"
+    location: v.string(),
+    shippingOptions: v.array(v.string()),
+    tags: v.array(v.string()),
+    views: v.number(),
+    likes: v.number(),
+    sambatCount: v.number(),
+    isNegotiable: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_seller", ["sellerId"])
+    .index("by_category", ["category"])
+    .index("by_status", ["status"])
+    .index("by_created_at", ["createdAt"])
+    .index("by_price", ["price"])
+    .index("by_views", ["views"])
+    .index("by_likes", ["likes"]),
+
+  productLikes: defineTable({
+    productId: v.id("products"),
+    userId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_product", ["productId"])
+    .index("by_user", ["userId"])
+    .index("by_product_user", ["productId", "userId"]),
+
+  sambats: defineTable({
+    productId: v.id("products"),
+    userId: v.id("users"),
+    userName: v.string(),
+    message: v.string(),
+    offerPrice: v.optional(v.number()),
+    status: v.string(), // "pending", "accepted", "rejected", "expired"
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_product", ["productId"])
+    .index("by_user", ["userId"])
+    .index("by_status", ["status"])
+    .index("by_created_at", ["createdAt"]),
+
+  orders: defineTable({
+    productId: v.id("products"),
+    buyerId: v.id("users"),
+    sellerId: v.id("users"),
+    buyerName: v.string(),
+    sellerName: v.string(),
+    productTitle: v.string(),
+    price: v.number(),
+    shippingAddress: v.object({
+      name: v.string(),
+      phone: v.string(),
+      address: v.string(),
+      city: v.string(),
+      postalCode: v.string(),
+      province: v.string(),
+    }),
+    shippingMethod: v.string(),
+    shippingCost: v.number(),
+    totalAmount: v.number(),
+    paymentMethod: v.string(),
+    paymentStatus: v.string(), // "pending", "paid", "failed", "refunded"
+    orderStatus: v.string(), // "pending", "confirmed", "shipped", "delivered", "cancelled"
+    virtualAccountNumber: v.optional(v.string()),
+    paymentExpiry: v.optional(v.number()),
+    trackingNumber: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_buyer", ["buyerId"])
+    .index("by_seller", ["sellerId"])
+    .index("by_product", ["productId"])
+    .index("by_payment_status", ["paymentStatus"])
+    .index("by_order_status", ["orderStatus"])
+    .index("by_created_at", ["createdAt"]),
+
+  reviews: defineTable({
+    orderId: v.id("orders"),
+    productId: v.id("products"),
+    reviewerId: v.id("users"),
+    reviewerName: v.string(),
+    targetUserId: v.id("users"), // seller or buyer being reviewed
+    targetUserName: v.string(),
+    rating: v.number(), // 1-5
+    comment: v.string(),
+    type: v.string(), // "seller" or "buyer"
+    createdAt: v.number(),
+  })
+    .index("by_order", ["orderId"])
+    .index("by_product", ["productId"])
+    .index("by_reviewer", ["reviewerId"])
+    .index("by_target_user", ["targetUserId"])
+    .index("by_rating", ["rating"])
+    .index("by_created_at", ["createdAt"]),
+
+  sambatProducts: defineTable({
+    title: v.string(),
+    description: v.string(),
+    brand: v.string(),
+    category: v.string(),
+    originalPrice: v.number(), // harga asli produk
+    pricePerPortion: v.number(), // harga per porsi
+    totalPortions: v.number(), // total porsi yang tersedia
+    minParticipants: v.number(), // minimum peserta untuk sambatan berhasil
+    maxParticipants: v.number(), // maksimum peserta
+    currentParticipants: v.number(), // jumlah peserta saat ini
+    images: v.array(v.string()),
+    sellerId: v.id("users"),
+    sellerName: v.string(),
+    status: v.string(), // "active", "full", "completed", "cancelled"
+    location: v.string(),
+    shippingOptions: v.array(v.string()),
+    tags: v.array(v.string()),
+    views: v.number(),
+    likes: v.number(),
+    deadline: v.number(), // deadline untuk sambatan
+    portionSize: v.string(), // ukuran per porsi (misal: 10ml, 5ml)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_seller", ["sellerId"])
+    .index("by_category", ["category"])
+    .index("by_status", ["status"])
+    .index("by_created_at", ["createdAt"])
+    .index("by_deadline", ["deadline"])
+    .index("by_views", ["views"])
+    .index("by_likes", ["likes"]),
+
+  sambatEnrollments: defineTable({
+    sambatProductId: v.id("sambatProducts"),
+    userId: v.id("users"),
+    userName: v.string(),
+    portionsRequested: v.number(), // jumlah porsi yang diminta
+    totalAmount: v.number(), // total yang harus dibayar
+    paymentStatus: v.string(), // "pending", "paid", "failed", "refunded"
+    shippingAddress: v.object({
+      name: v.string(),
+      phone: v.string(),
+      address: v.string(),
+      city: v.string(),
+      postalCode: v.string(),
+      province: v.string(),
+    }),
+    shippingMethod: v.string(),
+    shippingCost: v.number(),
+    virtualAccountNumber: v.optional(v.string()),
+    paymentExpiry: v.optional(v.number()),
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_sambat_product", ["sambatProductId"])
+    .index("by_user", ["userId"])
+    .index("by_payment_status", ["paymentStatus"])
+    .index("by_created_at", ["createdAt"]),
+
+  sambatProductLikes: defineTable({
+    sambatProductId: v.id("sambatProducts"),
+    userId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_sambat_product", ["sambatProductId"])
+    .index("by_user", ["userId"])
+    .index("by_sambat_product_user", ["sambatProductId", "userId"]),
+
+  userProfiles: defineTable({
+    userId: v.id("users"),
+    bio: v.optional(v.string()),
+    location: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    whatsapp: v.optional(v.string()),
+    instagram: v.optional(v.string()),
+    avatar: v.optional(v.string()),
+    isVerified: v.boolean(),
+    rating: v.number(),
+    totalReviews: v.number(),
+    totalSales: v.number(),
+    totalPurchases: v.number(),
+    joinedAt: v.number(),
+    lastActive: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_rating", ["rating"])
+    .index("by_verified", ["isVerified"]),
 });

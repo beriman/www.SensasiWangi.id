@@ -148,7 +148,10 @@ function App() {
               </p>
             </div>
 
-            <div className="neumorphic-card-large group p-10 transition-all duration-500 cursor-pointer">
+            <div
+              className="neumorphic-card-large group p-10 transition-all duration-500 cursor-pointer"
+              onClick={() => navigate("/marketplace")}
+            >
               <div className="text-[#667eea] mb-8 transform-gpu transition-all duration-300 group-hover:scale-125 group-hover:rotate-6">
                 <Trophy className="h-12 w-12" />
               </div>
@@ -160,7 +163,10 @@ function App() {
               </p>
             </div>
 
-            <div className="neumorphic-card-large group p-10 transition-all duration-500 cursor-pointer">
+            <div
+              className="neumorphic-card-large group p-10 transition-all duration-500 cursor-pointer"
+              onClick={() => navigate("/kursus")}
+            >
               <div className="text-[#667eea] mb-8 transform-gpu transition-all duration-300 group-hover:scale-125 group-hover:rotate-6">
                 <Award className="h-12 w-12" />
               </div>
