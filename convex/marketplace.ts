@@ -927,3 +927,163 @@ export const incrementSambatProductViews = mutation({
     });
   },
 });
+
+// ===== SUGGESTIONS & BUG REPORTS =====
+
+// Query untuk mendapatkan semua saran dan laporan bug
+export const getSuggestions = query({
+  args: {
+    paginationOpts: v.object({
+      numItems: v.number(),
+      cursor: v.optional(v.union(v.string(), v.null())),
+    }),
+    type: v.optional(v.string()),
+    status: v.optional(v.string()),
+    priority: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    let query = ctx.db
+      .query("suggestions")
+      .withIndex("by_created_at")
+      .order("desc");
+
+    const suggestions = await query.paginate(args.paginationOpts);
+
+    // Filter berdasarkan kriteria
+    let filteredSuggestions = suggestions.page;
+
+    if (args.type) {
+      filteredSuggestions = filteredSuggestions.filter(
+        (suggestion) => suggestion.type === args.type,
+      );
+    }
+
+    if (args.status) {
+      filteredSuggestions = filteredSuggestions.filter(
+        (suggestion) => suggestion.status === args.status,
+      );
+    }
+
+    if (args.priority) {
+      filteredSuggestions = filteredSuggestions.filter(
+        (suggestion) => suggestion.priority === args.priority,
+      );
+    }
+
+    return {
+      ...suggestions,
+      page: filteredSuggestions,
+    };
+  },
+});
+
+// Query untuk mendapatkan saran berdasarkan ID
+export const getSuggestionById = query({
+  args: { suggestionId: v.id("suggestions") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.suggestionId);
+  },
+});
+
+// Query untuk mendapatkan statistik saran dan laporan bug
+export const getSuggestionStats = query({
+  handler: async (ctx) => {
+    const allSuggestions = await ctx.db.query("suggestions").collect();
+
+    const suggestions = allSuggestions.filter((s) => s.type === "suggestion");
+    const bugReports = allSuggestions.filter((s) => s.type === "bug_report");
+    const pending = allSuggestions.filter((s) => s.status === "pending");
+    const resolved = allSuggestions.filter((s) => s.status === "resolved");
+    const urgent = allSuggestions.filter((s) => s.priority === "urgent");
+
+    return {
+      total: allSuggestions.length,
+      suggestions: suggestions.length,
+      bugReports: bugReports.length,
+      pending: pending.length,
+      resolved: resolved.length,
+      urgent: urgent.length,
+    };
+  },
+});
+
+// Mutation untuk membuat saran atau laporan bug
+export const createSuggestion = mutation({
+  args: {
+    name: v.string(),
+    email: v.string(),
+    type: v.string(),
+    subject: v.string(),
+    message: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    let userId = undefined;
+
+    if (identity) {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+        .unique();
+
+      if (user) {
+        userId = user._id;
+      }
+    }
+
+    const now = Date.now();
+
+    return await ctx.db.insert("suggestions", {
+      name: args.name,
+      email: args.email,
+      type: args.type,
+      subject: args.subject,
+      message: args.message,
+      status: "pending",
+      priority: "medium",
+      userId,
+      createdAt: now,
+      updatedAt: now,
+    });
+  },
+});
+
+// Mutation untuk update status saran
+export const updateSuggestionStatus = mutation({
+  args: {
+    suggestionId: v.id("suggestions"),
+    status: v.string(),
+    adminNotes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const suggestion = await ctx.db.get(args.suggestionId);
+    if (!suggestion) {
+      throw new Error("Saran tidak ditemukan");
+    }
+
+    await ctx.db.patch(args.suggestionId, {
+      status: args.status,
+      adminNotes: args.adminNotes,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Mutation untuk update prioritas saran
+export const updateSuggestionPriority = mutation({
+  args: {
+    suggestionId: v.id("suggestions"),
+    priority: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const suggestion = await ctx.db.get(args.suggestionId);
+    if (!suggestion) {
+      throw new Error("Saran tidak ditemukan");
+    }
+
+    await ctx.db.patch(args.suggestionId, {
+      priority: args.priority,
+      updatedAt: Date.now(),
+    });
+  },
+});

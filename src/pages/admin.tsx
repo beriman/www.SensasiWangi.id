@@ -139,6 +139,13 @@ export default function Admin() {
               <TrendingUp className="w-4 h-4 mr-2" />
               Analitik
             </TabsTrigger>
+            <TabsTrigger
+              value="feedback"
+              className="neumorphic-button-sm data-[state=active]:bg-white data-[state=active]:shadow-inner text-[#1D1D1F]"
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Masukan
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -603,6 +610,215 @@ export default function Admin() {
                     ),
                   )}
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="feedback" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="neumorphic-card border-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-[#1D1D1F]">
+                    Total Masukan
+                  </CardTitle>
+                  <MessageSquare className="h-4 w-4 text-[#86868B]" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-[#1D1D1F]">47</div>
+                  <p className="text-xs text-[#86868B]">+5 minggu ini</p>
+                </CardContent>
+              </Card>
+
+              <Card className="neumorphic-card border-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-[#1D1D1F]">
+                    Saran
+                  </CardTitle>
+                  <MessageSquare className="h-4 w-4 text-[#86868B]" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-[#1D1D1F]">32</div>
+                  <p className="text-xs text-[#86868B]">68% dari total</p>
+                </CardContent>
+              </Card>
+
+              <Card className="neumorphic-card border-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-[#1D1D1F]">
+                    Laporan Bug
+                  </CardTitle>
+                  <Flag className="h-4 w-4 text-[#86868B]" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-[#1D1D1F]">15</div>
+                  <p className="text-xs text-[#86868B]">32% dari total</p>
+                </CardContent>
+              </Card>
+
+              <Card className="neumorphic-card border-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-[#1D1D1F]">
+                    Pending
+                  </CardTitle>
+                  <TrendingUp className="h-4 w-4 text-[#86868B]" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-[#1D1D1F]">8</div>
+                  <p className="text-xs text-[#86868B]">Perlu ditinjau</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="neumorphic-card border-0">
+              <CardHeader>
+                <CardTitle className="text-[#1D1D1F]">
+                  Masukan & Laporan Terbaru
+                </CardTitle>
+                <CardDescription className="text-[#86868B]">
+                  Kelola saran dan laporan bug dari pengguna
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[#1D1D1F]">Jenis</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Subjek</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Pengirim</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Status</TableHead>
+                      <TableHead className="text-[#1D1D1F]">
+                        Prioritas
+                      </TableHead>
+                      <TableHead className="text-[#1D1D1F]">Tanggal</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>
+                        <Badge className="bg-blue-100 text-blue-800">
+                          Saran
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-[#1D1D1F] max-w-xs truncate">
+                        Tambahkan fitur notifikasi real-time
+                      </TableCell>
+                      <TableCell className="text-[#86868B]">
+                        Ahmad Rizki
+                      </TableCell>
+                      <TableCell>
+                        <Badge className="bg-yellow-100 text-yellow-800">
+                          Pending
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className="bg-orange-100 text-orange-800">
+                          High
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-[#86868B]">
+                        2024-01-15
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            className="neumorphic-button-sm h-8 px-3 text-xs"
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            Lihat
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="neumorphic-button-sm h-8 px-3 text-xs text-green-600"
+                          >
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Proses
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Badge className="bg-red-100 text-red-800">Bug</Badge>
+                      </TableCell>
+                      <TableCell className="text-[#1D1D1F] max-w-xs truncate">
+                        Error saat upload gambar produk
+                      </TableCell>
+                      <TableCell className="text-[#86868B]">
+                        Sari Dewi
+                      </TableCell>
+                      <TableCell>
+                        <Badge className="bg-blue-100 text-blue-800">
+                          In Progress
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className="bg-red-100 text-red-800">
+                          Urgent
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-[#86868B]">
+                        2024-01-14
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            className="neumorphic-button-sm h-8 px-3 text-xs"
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            Lihat
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="neumorphic-button-sm h-8 px-3 text-xs text-green-600"
+                          >
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Selesai
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Badge className="bg-blue-100 text-blue-800">
+                          Saran
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-[#1D1D1F] max-w-xs truncate">
+                        Perbaiki tampilan mobile
+                      </TableCell>
+                      <TableCell className="text-[#86868B]">
+                        Budi Santoso
+                      </TableCell>
+                      <TableCell>
+                        <Badge className="bg-green-100 text-green-800">
+                          Resolved
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className="bg-gray-100 text-gray-800">
+                          Medium
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-[#86868B]">
+                        2024-01-13
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            className="neumorphic-button-sm h-8 px-3 text-xs"
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            Lihat
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </TabsContent>

@@ -275,4 +275,23 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_rating", ["rating"])
     .index("by_verified", ["isVerified"]),
+
+  suggestions: defineTable({
+    name: v.string(),
+    email: v.string(),
+    type: v.string(), // "suggestion" or "bug_report"
+    subject: v.string(),
+    message: v.string(),
+    status: v.string(), // "pending", "in_progress", "resolved", "closed"
+    priority: v.string(), // "low", "medium", "high", "urgent"
+    userId: v.optional(v.id("users")),
+    adminNotes: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_type", ["type"])
+    .index("by_status", ["status"])
+    .index("by_priority", ["priority"])
+    .index("by_user", ["userId"])
+    .index("by_created_at", ["createdAt"]),
 });
