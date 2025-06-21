@@ -294,4 +294,132 @@ export default defineSchema({
     .index("by_priority", ["priority"])
     .index("by_user", ["userId"])
     .index("by_created_at", ["createdAt"]),
+
+  brands: defineTable({
+    name: v.string(),
+    description: v.string(),
+    logo: v.optional(v.string()),
+    website: v.optional(v.string()),
+    country: v.string(), // "Indonesia"
+    city: v.optional(v.string()),
+    foundedYear: v.optional(v.number()),
+    category: v.string(), // "Local", "Artisan", "Commercial", "Niche"
+    isActive: v.boolean(),
+    totalProducts: v.number(),
+    rating: v.number(),
+    totalReviews: v.number(),
+    tags: v.array(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_country", ["country"])
+    .index("by_category", ["category"])
+    .index("by_active", ["isActive"])
+    .index("by_rating", ["rating"])
+    .index("by_created_at", ["createdAt"]),
+
+  perfumers: defineTable({
+    name: v.string(),
+    bio: v.string(),
+    photo: v.optional(v.string()),
+    nationality: v.string(), // "Indonesia"
+    city: v.optional(v.string()),
+    birthYear: v.optional(v.number()),
+    education: v.optional(v.string()),
+    experience: v.string(), // "Beginner", "Intermediate", "Expert", "Master"
+    specialties: v.array(v.string()), // ["Floral", "Woody", "Oriental", etc.]
+    brandsWorkedWith: v.array(v.string()),
+    achievements: v.array(v.string()),
+    socialMedia: v.optional(
+      v.object({
+        instagram: v.optional(v.string()),
+        website: v.optional(v.string()),
+        linkedin: v.optional(v.string()),
+      }),
+    ),
+    isActive: v.boolean(),
+    totalCreations: v.number(),
+    rating: v.number(),
+    totalReviews: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_nationality", ["nationality"])
+    .index("by_experience", ["experience"])
+    .index("by_active", ["isActive"])
+    .index("by_rating", ["rating"])
+    .index("by_created_at", ["createdAt"]),
+
+  fragrances: defineTable({
+    name: v.string(),
+    brandId: v.id("brands"),
+    brandName: v.string(),
+    perfumerId: v.optional(v.id("perfumers")),
+    perfumerName: v.optional(v.string()),
+    description: v.string(),
+    images: v.array(v.string()),
+    category: v.string(), // "Citrus", "Floral", "Woody", "Oriental", "Fresh", "Gourmand"
+    concentration: v.string(), // "EDT", "EDP", "Parfum", "Cologne"
+    topNotes: v.array(v.string()),
+    middleNotes: v.array(v.string()),
+    baseNotes: v.array(v.string()),
+    sillage: v.string(), // "Light", "Moderate", "Heavy", "Enormous"
+    longevity: v.string(), // "Very Weak", "Weak", "Moderate", "Long Lasting", "Eternal"
+    season: v.array(v.string()), // ["Spring", "Summer", "Fall", "Winter"]
+    occasion: v.array(v.string()), // ["Daily", "Office", "Evening", "Special"]
+    gender: v.string(), // "Unisex", "Men", "Women"
+    launchYear: v.optional(v.number()),
+    price: v.optional(v.number()),
+    sizes: v.array(v.string()), // ["30ml", "50ml", "100ml"]
+    isDiscontinued: v.boolean(),
+    rating: v.number(),
+    totalReviews: v.number(),
+    totalLikes: v.number(),
+    views: v.number(),
+    tags: v.array(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_brand", ["brandId"])
+    .index("by_perfumer", ["perfumerId"])
+    .index("by_category", ["category"])
+    .index("by_concentration", ["concentration"])
+    .index("by_gender", ["gender"])
+    .index("by_rating", ["rating"])
+    .index("by_views", ["views"])
+    .index("by_likes", ["totalLikes"])
+    .index("by_created_at", ["createdAt"]),
+
+  fragranceReviews: defineTable({
+    fragranceId: v.id("fragrances"),
+    userId: v.id("users"),
+    userName: v.string(),
+    rating: v.number(), // 1-5
+    title: v.string(),
+    content: v.string(),
+    pros: v.array(v.string()),
+    cons: v.array(v.string()),
+    sillageRating: v.number(), // 1-5
+    longevityRating: v.number(), // 1-5
+    valueRating: v.number(), // 1-5
+    recommendedFor: v.array(v.string()),
+    photos: v.optional(v.array(v.string())),
+    isVerifiedPurchase: v.boolean(),
+    helpfulVotes: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_fragrance", ["fragranceId"])
+    .index("by_user", ["userId"])
+    .index("by_rating", ["rating"])
+    .index("by_created_at", ["createdAt"]),
+
+  fragranceLikes: defineTable({
+    fragranceId: v.id("fragrances"),
+    userId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_fragrance", ["fragranceId"])
+    .index("by_user", ["userId"])
+    .index("by_fragrance_user", ["fragranceId", "userId"]),
 });

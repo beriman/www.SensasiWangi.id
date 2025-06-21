@@ -928,6 +928,573 @@ export const incrementSambatProductViews = mutation({
   },
 });
 
+// ===== DATABASE QUERIES =====
+
+// Query untuk mendapatkan semua brand Indonesia
+export const getIndonesianBrands = query({
+  args: {
+    paginationOpts: v.object({
+      numItems: v.number(),
+      cursor: v.optional(v.union(v.string(), v.null())),
+    }),
+    category: v.optional(v.string()),
+    sortBy: v.optional(v.string()),
+    searchQuery: v.optional(v.string()),
+    city: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    let query = ctx.db
+      .query("brands")
+      .withIndex("by_country", (q) => q.eq("country", "Indonesia"))
+      .filter((q) => q.eq(q.field("isActive"), true));
+
+    // Sorting
+    if (args.sortBy === "rating") {
+      query = ctx.db
+        .query("brands")
+        .withIndex("by_rating")
+        .order("desc")
+        .filter((q) => q.eq(q.field("country"), "Indonesia"))
+        .filter((q) => q.eq(q.field("isActive"), true));
+    } else if (args.sortBy === "name") {
+      query = ctx.db
+        .query("brands")
+        .withIndex("by_created_at")
+        .order("asc")
+        .filter((q) => q.eq(q.field("country"), "Indonesia"))
+        .filter((q) => q.eq(q.field("isActive"), true));
+    } else {
+      query = ctx.db
+        .query("brands")
+        .withIndex("by_created_at")
+        .order("desc")
+        .filter((q) => q.eq(q.field("country"), "Indonesia"))
+        .filter((q) => q.eq(q.field("isActive"), true));
+    }
+
+    const brands = await query.paginate(args.paginationOpts);
+
+    // Filter berdasarkan kriteria
+    let filteredBrands = brands.page;
+
+    if (args.category) {
+      filteredBrands = filteredBrands.filter(
+        (brand) => brand.category === args.category,
+      );
+    }
+
+    if (args.city) {
+      filteredBrands = filteredBrands.filter((brand) =>
+        brand.city?.toLowerCase().includes(args.city!.toLowerCase()),
+      );
+    }
+
+    if (args.searchQuery) {
+      const searchLower = args.searchQuery.toLowerCase();
+      filteredBrands = filteredBrands.filter(
+        (brand) =>
+          brand.name.toLowerCase().includes(searchLower) ||
+          brand.description.toLowerCase().includes(searchLower) ||
+          brand.tags.some((tag) => tag.toLowerCase().includes(searchLower)),
+      );
+    }
+
+    return {
+      ...brands,
+      page: filteredBrands,
+    };
+  },
+});
+
+// Query untuk mendapatkan semua perfumer Indonesia
+export const getIndonesianPerfumers = query({
+  args: {
+    paginationOpts: v.object({
+      numItems: v.number(),
+      cursor: v.optional(v.union(v.string(), v.null())),
+    }),
+    experience: v.optional(v.string()),
+    specialty: v.optional(v.string()),
+    sortBy: v.optional(v.string()),
+    searchQuery: v.optional(v.string()),
+    city: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    let query = ctx.db
+      .query("perfumers")
+      .withIndex("by_nationality", (q) => q.eq("nationality", "Indonesia"))
+      .filter((q) => q.eq(q.field("isActive"), true));
+
+    // Sorting
+    if (args.sortBy === "rating") {
+      query = ctx.db
+        .query("perfumers")
+        .withIndex("by_rating")
+        .order("desc")
+        .filter((q) => q.eq(q.field("nationality"), "Indonesia"))
+        .filter((q) => q.eq(q.field("isActive"), true));
+    } else if (args.sortBy === "experience") {
+      query = ctx.db
+        .query("perfumers")
+        .withIndex("by_experience")
+        .order("desc")
+        .filter((q) => q.eq(q.field("nationality"), "Indonesia"))
+        .filter((q) => q.eq(q.field("isActive"), true));
+    } else {
+      query = ctx.db
+        .query("perfumers")
+        .withIndex("by_created_at")
+        .order("desc")
+        .filter((q) => q.eq(q.field("nationality"), "Indonesia"))
+        .filter((q) => q.eq(q.field("isActive"), true));
+    }
+
+    const perfumers = await query.paginate(args.paginationOpts);
+
+    // Filter berdasarkan kriteria
+    let filteredPerfumers = perfumers.page;
+
+    if (args.experience) {
+      filteredPerfumers = filteredPerfumers.filter(
+        (perfumer) => perfumer.experience === args.experience,
+      );
+    }
+
+    if (args.specialty) {
+      filteredPerfumers = filteredPerfumers.filter((perfumer) =>
+        perfumer.specialties.includes(args.specialty!),
+      );
+    }
+
+    if (args.city) {
+      filteredPerfumers = filteredPerfumers.filter((perfumer) =>
+        perfumer.city?.toLowerCase().includes(args.city!.toLowerCase()),
+      );
+    }
+
+    if (args.searchQuery) {
+      const searchLower = args.searchQuery.toLowerCase();
+      filteredPerfumers = filteredPerfumers.filter(
+        (perfumer) =>
+          perfumer.name.toLowerCase().includes(searchLower) ||
+          perfumer.bio.toLowerCase().includes(searchLower) ||
+          perfumer.specialties.some((specialty) =>
+            specialty.toLowerCase().includes(searchLower),
+          ) ||
+          perfumer.brandsWorkedWith.some((brand) =>
+            brand.toLowerCase().includes(searchLower),
+          ),
+      );
+    }
+
+    return {
+      ...perfumers,
+      page: filteredPerfumers,
+    };
+  },
+});
+
+// Query untuk mendapatkan semua parfum Indonesia
+export const getIndonesianFragrances = query({
+  args: {
+    paginationOpts: v.object({
+      numItems: v.number(),
+      cursor: v.optional(v.union(v.string(), v.null())),
+    }),
+    category: v.optional(v.string()),
+    concentration: v.optional(v.string()),
+    gender: v.optional(v.string()),
+    brandId: v.optional(v.id("brands")),
+    perfumerId: v.optional(v.id("perfumers")),
+    sortBy: v.optional(v.string()),
+    searchQuery: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    let query = ctx.db.query("fragrances");
+
+    // Filter by brand first if specified
+    if (args.brandId) {
+      query = query.withIndex("by_brand", (q) => q.eq("brandId", args.brandId));
+    } else if (args.perfumerId) {
+      query = query.withIndex("by_perfumer", (q) =>
+        q.eq("perfumerId", args.perfumerId),
+      );
+    } else {
+      // Sorting
+      if (args.sortBy === "rating") {
+        query = query.withIndex("by_rating").order("desc");
+      } else if (args.sortBy === "popular") {
+        query = query.withIndex("by_views").order("desc");
+      } else if (args.sortBy === "liked") {
+        query = query.withIndex("by_likes").order("desc");
+      } else {
+        query = query.withIndex("by_created_at").order("desc");
+      }
+    }
+
+    const fragrances = await query.paginate(args.paginationOpts);
+
+    // Filter untuk hanya parfum dari brand Indonesia
+    const indonesianBrands = await ctx.db
+      .query("brands")
+      .withIndex("by_country", (q) => q.eq("country", "Indonesia"))
+      .collect();
+    const indonesianBrandIds = new Set(indonesianBrands.map((b) => b._id));
+
+    let filteredFragrances = fragrances.page.filter((fragrance) =>
+      indonesianBrandIds.has(fragrance.brandId),
+    );
+
+    // Filter berdasarkan kriteria
+    if (args.category) {
+      filteredFragrances = filteredFragrances.filter(
+        (fragrance) => fragrance.category === args.category,
+      );
+    }
+
+    if (args.concentration) {
+      filteredFragrances = filteredFragrances.filter(
+        (fragrance) => fragrance.concentration === args.concentration,
+      );
+    }
+
+    if (args.gender) {
+      filteredFragrances = filteredFragrances.filter(
+        (fragrance) => fragrance.gender === args.gender,
+      );
+    }
+
+    if (args.searchQuery) {
+      const searchLower = args.searchQuery.toLowerCase();
+      filteredFragrances = filteredFragrances.filter(
+        (fragrance) =>
+          fragrance.name.toLowerCase().includes(searchLower) ||
+          fragrance.description.toLowerCase().includes(searchLower) ||
+          fragrance.brandName.toLowerCase().includes(searchLower) ||
+          fragrance.perfumerName?.toLowerCase().includes(searchLower) ||
+          fragrance.topNotes.some((note) =>
+            note.toLowerCase().includes(searchLower),
+          ) ||
+          fragrance.middleNotes.some((note) =>
+            note.toLowerCase().includes(searchLower),
+          ) ||
+          fragrance.baseNotes.some((note) =>
+            note.toLowerCase().includes(searchLower),
+          ) ||
+          fragrance.tags.some((tag) => tag.toLowerCase().includes(searchLower)),
+      );
+    }
+
+    return {
+      ...fragrances,
+      page: filteredFragrances,
+    };
+  },
+});
+
+// Query untuk mendapatkan statistik database
+export const getDatabaseStats = query({
+  handler: async (ctx) => {
+    const indonesianBrands = await ctx.db
+      .query("brands")
+      .withIndex("by_country", (q) => q.eq("country", "Indonesia"))
+      .filter((q) => q.eq(q.field("isActive"), true))
+      .collect();
+
+    const indonesianPerfumers = await ctx.db
+      .query("perfumers")
+      .withIndex("by_nationality", (q) => q.eq("nationality", "Indonesia"))
+      .filter((q) => q.eq(q.field("isActive"), true))
+      .collect();
+
+    const indonesianBrandIds = new Set(indonesianBrands.map((b) => b._id));
+    const allFragrances = await ctx.db.query("fragrances").collect();
+    const indonesianFragrances = allFragrances.filter((f) =>
+      indonesianBrandIds.has(f.brandId),
+    );
+
+    return {
+      totalBrands: indonesianBrands.length,
+      totalPerfumers: indonesianPerfumers.length,
+      totalFragrances: indonesianFragrances.length,
+      activeBrands: indonesianBrands.filter((b) => b.isActive).length,
+      activePerfumers: indonesianPerfumers.filter((p) => p.isActive).length,
+      averageBrandRating:
+        indonesianBrands.reduce((sum, b) => sum + b.rating, 0) /
+        indonesianBrands.length,
+      averagePerfumerRating:
+        indonesianPerfumers.reduce((sum, p) => sum + p.rating, 0) /
+        indonesianPerfumers.length,
+      averageFragranceRating:
+        indonesianFragrances.reduce((sum, f) => sum + f.rating, 0) /
+        indonesianFragrances.length,
+    };
+  },
+});
+
+// Mutation untuk menginisialisasi data sample
+export const initializeSampleData = mutation({
+  handler: async (ctx) => {
+    const now = Date.now();
+
+    // Sample Indonesian Brands
+    const sampleBrands = [
+      {
+        name: "Wardah",
+        description: "Brand kosmetik dan parfum halal terkemuka di Indonesia",
+        logo: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=200&q=80",
+        website: "https://wardahbeauty.com",
+        country: "Indonesia",
+        city: "Jakarta",
+        foundedYear: 1995,
+        category: "Commercial",
+        isActive: true,
+        totalProducts: 25,
+        rating: 4.2,
+        totalReviews: 1250,
+        tags: ["Halal", "Local", "Affordable"],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: "Mustika Ratu",
+        description:
+          "Brand kecantikan tradisional Indonesia dengan warisan budaya",
+        logo: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=200&q=80",
+        website: "https://www.mustika-ratu.co.id",
+        country: "Indonesia",
+        city: "Jakarta",
+        foundedYear: 1978,
+        category: "Commercial",
+        isActive: true,
+        totalProducts: 18,
+        rating: 4.0,
+        totalReviews: 890,
+        tags: ["Traditional", "Heritage", "Natural"],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: "Kahf",
+        description: "Brand grooming halal untuk pria modern Indonesia",
+        logo: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=200&q=80",
+        website: "https://kahf.co.id",
+        country: "Indonesia",
+        city: "Jakarta",
+        foundedYear: 2019,
+        category: "Commercial",
+        isActive: true,
+        totalProducts: 12,
+        rating: 4.5,
+        totalReviews: 567,
+        tags: ["Halal", "Men", "Modern"],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: "Sensatia Botanicals",
+        description: "Brand natural skincare dan parfum artisan dari Bali",
+        logo: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&q=80",
+        website: "https://sensatiabotanicals.com",
+        country: "Indonesia",
+        city: "Bali",
+        foundedYear: 2008,
+        category: "Artisan",
+        isActive: true,
+        totalProducts: 8,
+        rating: 4.7,
+        totalReviews: 234,
+        tags: ["Natural", "Artisan", "Bali"],
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+
+    // Sample Indonesian Perfumers
+    const samplePerfumers = [
+      {
+        name: "Andi Suherman",
+        bio: "Perfumer berpengalaman dengan spesialisasi aroma oriental dan woody. Telah menciptakan lebih dari 50 formula parfum untuk berbagai brand lokal.",
+        photo:
+          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80",
+        nationality: "Indonesia",
+        city: "Jakarta",
+        birthYear: 1975,
+        education: "Grasse Institute of Perfumery, France",
+        experience: "Expert",
+        specialties: ["Oriental", "Woody", "Spicy"],
+        brandsWorkedWith: ["Wardah", "Mustika Ratu"],
+        achievements: [
+          "Best Indonesian Perfumer 2020",
+          "Fragrance Innovation Award 2019",
+        ],
+        socialMedia: {
+          instagram: "@andisuherman_perfumer",
+          website: "https://andisuherman.com",
+        },
+        isActive: true,
+        totalCreations: 52,
+        rating: 4.6,
+        totalReviews: 89,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: "Sari Dewi Kusuma",
+        bio: "Perfumer muda berbakat yang fokus pada aroma floral dan fresh. Lulusan terbaik dari program perfumery di Singapura.",
+        photo:
+          "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&q=80",
+        nationality: "Indonesia",
+        city: "Bandung",
+        birthYear: 1988,
+        education: "Singapore Perfumery Institute",
+        experience: "Intermediate",
+        specialties: ["Floral", "Fresh", "Citrus"],
+        brandsWorkedWith: ["Kahf", "Sensatia Botanicals"],
+        achievements: ["Young Perfumer Award 2021"],
+        socialMedia: {
+          instagram: "@saridewi_scents",
+        },
+        isActive: true,
+        totalCreations: 28,
+        rating: 4.4,
+        totalReviews: 45,
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+
+    // Insert brands
+    const brandIds = [];
+    for (const brand of sampleBrands) {
+      const brandId = await ctx.db.insert("brands", brand);
+      brandIds.push(brandId);
+    }
+
+    // Insert perfumers
+    const perfumerIds = [];
+    for (const perfumer of samplePerfumers) {
+      const perfumerId = await ctx.db.insert("perfumers", perfumer);
+      perfumerIds.push(perfumerId);
+    }
+
+    // Sample Fragrances
+    const sampleFragrances = [
+      {
+        name: "Wardah Exclusive Musk",
+        brandId: brandIds[0],
+        brandName: "Wardah",
+        perfumerId: perfumerIds[0],
+        perfumerName: "Andi Suherman",
+        description:
+          "Parfum musk yang elegan dengan sentuhan oriental yang memikat",
+        images: [
+          "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&q=80",
+        ],
+        category: "Oriental",
+        concentration: "EDP",
+        topNotes: ["Bergamot", "Pink Pepper", "Cardamom"],
+        middleNotes: ["Rose", "Jasmine", "White Musk"],
+        baseNotes: ["Sandalwood", "Amber", "Vanilla"],
+        sillage: "Moderate",
+        longevity: "Long Lasting",
+        season: ["Fall", "Winter"],
+        occasion: ["Evening", "Special"],
+        gender: "Unisex",
+        launchYear: 2022,
+        price: 150000,
+        sizes: ["30ml", "50ml"],
+        isDiscontinued: false,
+        rating: 4.3,
+        totalReviews: 156,
+        totalLikes: 89,
+        views: 1234,
+        tags: ["Musk", "Oriental", "Elegant"],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: "Mustika Ratu Sari Bunga",
+        brandId: brandIds[1],
+        brandName: "Mustika Ratu",
+        perfumerId: perfumerIds[1],
+        perfumerName: "Sari Dewi Kusuma",
+        description:
+          "Parfum floral tradisional dengan aroma bunga-bunga nusantara",
+        images: [
+          "https://images.unsplash.com/photo-1588405748880-12d1d2a59d32?w=400&q=80",
+        ],
+        category: "Floral",
+        concentration: "EDT",
+        topNotes: ["Frangipani", "Ylang-Ylang", "Lemon"],
+        middleNotes: ["Jasmine", "Rose", "Tuberose"],
+        baseNotes: ["Sandalwood", "White Musk", "Cedar"],
+        sillage: "Light",
+        longevity: "Moderate",
+        season: ["Spring", "Summer"],
+        occasion: ["Daily", "Office"],
+        gender: "Women",
+        launchYear: 2021,
+        price: 120000,
+        sizes: ["30ml", "50ml", "100ml"],
+        isDiscontinued: false,
+        rating: 4.1,
+        totalReviews: 203,
+        totalLikes: 145,
+        views: 2156,
+        tags: ["Floral", "Traditional", "Indonesian"],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: "Kahf Signature Oud",
+        brandId: brandIds[2],
+        brandName: "Kahf",
+        perfumerId: perfumerIds[0],
+        perfumerName: "Andi Suherman",
+        description:
+          "Parfum oud modern untuk pria dengan karakter maskulin yang kuat",
+        images: [
+          "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&q=80",
+        ],
+        category: "Woody",
+        concentration: "EDP",
+        topNotes: ["Bergamot", "Black Pepper", "Cardamom"],
+        middleNotes: ["Oud", "Rose", "Saffron"],
+        baseNotes: ["Sandalwood", "Amber", "Musk"],
+        sillage: "Heavy",
+        longevity: "Long Lasting",
+        season: ["Fall", "Winter"],
+        occasion: ["Evening", "Special"],
+        gender: "Men",
+        launchYear: 2023,
+        price: 200000,
+        sizes: ["50ml", "100ml"],
+        isDiscontinued: false,
+        rating: 4.5,
+        totalReviews: 98,
+        totalLikes: 67,
+        views: 876,
+        tags: ["Oud", "Masculine", "Luxury"],
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+
+    // Insert fragrances
+    for (const fragrance of sampleFragrances) {
+      await ctx.db.insert("fragrances", fragrance);
+    }
+
+    return {
+      message: "Sample data berhasil diinisialisasi",
+      brands: sampleBrands.length,
+      perfumers: samplePerfumers.length,
+      fragrances: sampleFragrances.length,
+    };
+  },
+});
+
 // ===== SUGGESTIONS & BUG REPORTS =====
 
 // Query untuk mendapatkan semua saran dan laporan bug

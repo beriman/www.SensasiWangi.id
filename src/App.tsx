@@ -11,6 +11,7 @@ import MarketplaceSambat from "./pages/marketplace-sambat";
 import MarketplaceSambatCreate from "./pages/marketplace-sambat-create";
 import Admin from "./pages/admin";
 import Kursus from "./pages/kursus";
+import Database from "./pages/database";
 import Privacy from "./pages/privacy";
 import Terms from "./pages/terms";
 
@@ -32,6 +33,7 @@ function App() {
           />
           <Route path="/admin" element={<Admin />} />
           <Route path="/kursus" element={<Kursus />} />
+          <Route path="/database" element={<Database />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
         </Routes>

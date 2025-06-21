@@ -179,7 +179,10 @@ function App() {
               </p>
             </div>
 
-            <div className="neumorphic-card-large group p-10 transition-all duration-500 cursor-pointer">
+            <div
+              className="neumorphic-card-large group p-10 transition-all duration-500 cursor-pointer"
+              onClick={() => navigate("/database")}
+            >
               <div className="text-[#667eea] mb-8 transform-gpu transition-all duration-300 group-hover:scale-125 group-hover:rotate-6">
                 <Palette className="h-12 w-12" />
               </div>
@@ -187,8 +190,7 @@ function App() {
                 Database
               </h3>
               <p className="text-lg text-[#718096] leading-relaxed">
-                Explore comprehensive fragrance database with notes and
-                compositions
+                Jelajahi database parfum lengkap dengan catatan dan komposisi
               </p>
             </div>
           </div>
