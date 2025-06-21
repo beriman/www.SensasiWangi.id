@@ -22,6 +22,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { useUser } from "@clerk/clerk-react";
 import {
   Search,
@@ -36,6 +39,12 @@ import {
   Truck,
   Shield,
   TrendingUp,
+  Clock,
+  Users,
+  Package,
+  Zap,
+  Grid,
+  List,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -66,7 +75,13 @@ const SORT_OPTIONS = [
   { value: "liked", label: "Paling Disukai" },
 ];
 
-function ProductCard({ product }: { product: any }) {
+function ProductCard({
+  product,
+  viewMode = "grid",
+}: {
+  product: any;
+  viewMode?: "grid" | "list";
+}) {
   const { user } = useUser();
   const navigate = useNavigate();
   const toggleLike = useMutation(api.marketplace.toggleProductLike);
@@ -110,6 +125,96 @@ function ProductCard({ product }: { product: any }) {
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  if (viewMode === "list") {
+    return (
+      <Card
+        className="neumorphic-card cursor-pointer transition-all duration-300 hover:scale-[1.02] border-0"
+        onClick={handleCardClick}
+      >
+        <div className="flex p-4 gap-4">
+          <div className="relative flex-shrink-0">
+            <img
+              src={
+                product.images[0] ||
+                "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&q=80"
+              }
+              alt={product.title}
+              className="w-24 h-24 object-cover rounded-2xl"
+            />
+            <Badge
+              className={`absolute -top-2 -left-2 text-xs ${getConditionColor(product.condition)}`}
+            >
+              {CONDITIONS.find((c) => c.value === product.condition)?.label}
+            </Badge>
+          </div>
+
+          <div className="flex-1 space-y-2">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="font-semibold text-[#2d3748] line-clamp-1">
+                  {product.title}
+                </h3>
+                <p className="text-sm text-[#718096]">{product.brand}</p>
+              </div>
+              <button
+                onClick={handleLike}
+                className={`p-2 rounded-full neumorphic-button-sm transition-colors ${
+                  hasLiked ? "text-red-500" : "text-gray-400"
+                }`}
+              >
+                <Heart
+                  className={`h-4 w-4 ${hasLiked ? "fill-current" : ""}`}
+                />
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-lg font-bold text-[#2d3748]">
+                  {formatPrice(product.price)}
+                </p>
+                {product.originalPrice &&
+                  product.originalPrice > product.price && (
+                    <p className="text-sm text-[#718096] line-through">
+                      {formatPrice(product.originalPrice)}
+                    </p>
+                  )}
+              </div>
+              {product.isNegotiable && (
+                <Badge variant="outline" className="text-xs">
+                  Nego
+                </Badge>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-[#718096]">
+              <div className="flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                <span>{product.location}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  <Eye className="h-3 w-3" />
+                  <span>{product.views}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Heart className="h-3 w-3" />
+                  <span>{product.likes}</span>
+                </div>
+                {product.sambatCount > 0 && (
+                  <div className="flex items-center gap-1">
+                    <MessageCircle className="h-3 w-3" />
+                    <span>{product.sambatCount}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card
@@ -187,6 +292,156 @@ function ProductCard({ product }: { product: any }) {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SambatProductCard({ product }: { product: any }) {
+  const { user } = useUser();
+  const navigate = useNavigate();
+  const toggleLike = useMutation(api.marketplace.toggleSambatProductLike);
+  const incrementViews = useMutation(
+    api.marketplace.incrementSambatProductViews,
+  );
+  const hasLiked = useQuery(
+    api.marketplace.hasUserLikedSambatProduct,
+    user ? { sambatProductId: product._id, userId: user.id as any } : "skip",
+  );
+  const hasEnrolled = useQuery(
+    api.marketplace.hasUserEnrolledSambat,
+    user ? { sambatProductId: product._id, userId: user.id as any } : "skip",
+  );
+
+  const handleCardClick = () => {
+    incrementViews({ sambatProductId: product._id });
+    navigate(`/marketplace/sambat/${product._id}`);
+  };
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (user) {
+      toggleLike({ sambatProductId: product._id });
+    }
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
+  const getTimeLeft = (deadline: number) => {
+    const now = Date.now();
+    const timeLeft = deadline - now;
+    if (timeLeft <= 0) return "Berakhir";
+
+    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(
+      (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+    );
+
+    if (days > 0) return `${days} hari lagi`;
+    return `${hours} jam lagi`;
+  };
+
+  const progressPercentage =
+    (product.currentParticipants / product.maxParticipants) * 100;
+
+  return (
+    <Card
+      className="neumorphic-card cursor-pointer transition-all duration-300 hover:scale-105 border-0 relative overflow-hidden"
+      onClick={handleCardClick}
+    >
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
+
+      <div className="relative">
+        <img
+          src={
+            product.images[0] ||
+            "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&q=80"
+          }
+          alt={product.title}
+          className="w-full h-48 object-cover rounded-t-3xl"
+        />
+        <button
+          onClick={handleLike}
+          className={`absolute top-3 right-3 p-2 rounded-full neumorphic-button-sm transition-colors ${
+            hasLiked ? "text-red-500" : "text-gray-400"
+          }`}
+        >
+          <Heart className={`h-4 w-4 ${hasLiked ? "fill-current" : ""}`} />
+        </button>
+        <Badge className="absolute top-3 left-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+          SAMBAT
+        </Badge>
+        {hasEnrolled && (
+          <Badge className="absolute bottom-3 right-3 bg-green-500 text-white">
+            Terdaftar
+          </Badge>
+        )}
+      </div>
+
+      <CardContent className="p-4">
+        <div className="space-y-3">
+          <h3 className="font-semibold text-[#2d3748] line-clamp-2">
+            {product.title}
+          </h3>
+          <p className="text-sm text-[#718096] line-clamp-1">{product.brand}</p>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-[#718096]">Harga per porsi:</span>
+              <span className="font-bold text-[#2d3748]">
+                {formatPrice(product.pricePerPortion)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-[#718096]">Harga asli:</span>
+              <span className="text-sm text-[#718096] line-through">
+                {formatPrice(product.originalPrice)}
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-[#718096]">Progress:</span>
+              <span className="text-[#2d3748] font-medium">
+                {product.currentParticipants}/{product.maxParticipants}
+              </span>
+            </div>
+            <Progress value={progressPercentage} className="h-2" />
+          </div>
+
+          <div className="flex items-center justify-between text-xs text-[#718096]">
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              <span>{getTimeLeft(product.deadline)}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <Eye className="h-3 w-3" />
+                <span>{product.views}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Heart className="h-3 w-3" />
+                <span>{product.likes}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Users className="h-3 w-3" />
+                <span>{product.currentParticipants}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 text-xs text-[#718096]">
+            <MapPin className="h-3 w-3" />
+            <span>{product.location}</span>
           </div>
         </div>
       </CardContent>
@@ -299,6 +554,8 @@ export default function Marketplace() {
   const [maxPrice, setMaxPrice] = useState("");
   const [location, setLocation] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [showSambatProducts, setShowSambatProducts] = useState(false);
 
   const products = useQuery(api.marketplace.getProducts, {
     paginationOpts: { numItems: 20 },
@@ -306,6 +563,14 @@ export default function Marketplace() {
     condition: selectedCondition || undefined,
     minPrice: minPrice ? parseInt(minPrice) : undefined,
     maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
+    sortBy,
+    searchQuery: searchQuery || undefined,
+    location: location || undefined,
+  });
+
+  const sambatProducts = useQuery(api.marketplace.getSambatProducts, {
+    paginationOpts: { numItems: 20 },
+    category: selectedCategory || undefined,
     sortBy,
     searchQuery: searchQuery || undefined,
     location: location || undefined,
@@ -374,6 +639,37 @@ export default function Marketplace() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="neumorphic-input pl-10 border-0"
                 />
+              </div>
+              <div className="flex items-center gap-2">
+                <Label
+                  htmlFor="sambat-toggle"
+                  className="text-sm text-[#2d3748]"
+                >
+                  Sambat
+                </Label>
+                <Switch
+                  id="sambat-toggle"
+                  checked={showSambatProducts}
+                  onCheckedChange={setShowSambatProducts}
+                />
+              </div>
+              <div className="flex items-center gap-2 neumorphic-button-sm p-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                  className={`p-2 ${viewMode === "grid" ? "bg-white shadow-inner" : ""}`}
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className={`p-2 ${viewMode === "list" ? "bg-white shadow-inner" : ""}`}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
               </div>
               <Button
                 onClick={() => setShowFilters(!showFilters)}
@@ -466,43 +762,100 @@ export default function Marketplace() {
             )}
           </div>
 
-          {/* Products Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products?.page?.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
+          {/* Products Section */}
+          <div className="mb-8">
+            <div className="flex items-center gap-4 mb-6">
+              <h2 className="text-2xl font-bold text-[#2d3748]">
+                {showSambatProducts ? "Produk Sambatan" : "Produk Reguler"}
+              </h2>
+              {showSambatProducts && (
+                <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                  <Zap className="h-3 w-3 mr-1" />
+                  Group Buying
+                </Badge>
+              )}
+            </div>
+
+            {showSambatProducts ? (
+              <div
+                className={`grid gap-6 ${
+                  viewMode === "grid"
+                    ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                    : "grid-cols-1"
+                }`}
+              >
+                {sambatProducts?.page?.map((product) => (
+                  <SambatProductCard key={product._id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div
+                className={`grid gap-6 ${
+                  viewMode === "grid"
+                    ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                    : "grid-cols-1"
+                }`}
+              >
+                {products?.page?.map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    viewMode={viewMode}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Empty State */}
-          {products?.page?.length === 0 && (
+          {((showSambatProducts && sambatProducts?.page?.length === 0) ||
+            (!showSambatProducts && products?.page?.length === 0)) && (
             <div className="text-center py-16">
               <div className="neumorphic-card-inset p-12 max-w-md mx-auto">
-                <ShoppingCart className="h-16 w-16 text-[#718096] mx-auto mb-4" />
+                {showSambatProducts ? (
+                  <Users className="h-16 w-16 text-[#718096] mx-auto mb-4" />
+                ) : (
+                  <ShoppingCart className="h-16 w-16 text-[#718096] mx-auto mb-4" />
+                )}
                 <h3 className="text-xl font-semibold text-[#2d3748] mb-2">
-                  Tidak ada produk ditemukan
+                  {showSambatProducts
+                    ? "Tidak ada produk sambatan ditemukan"
+                    : "Tidak ada produk ditemukan"}
                 </h3>
                 <p className="text-[#718096] mb-6">
-                  Coba ubah filter pencarian atau kata kunci Anda
+                  {showSambatProducts
+                    ? "Belum ada sambatan yang tersedia saat ini"
+                    : "Coba ubah filter pencarian atau kata kunci Anda"}
                 </p>
-                <Button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedCategory("");
-                    setSelectedCondition("");
-                    setMinPrice("");
-                    setMaxPrice("");
-                    setLocation("");
-                  }}
-                  className="neumorphic-button text-[#2d3748] bg-transparent border-0 shadow-none"
-                >
-                  Reset Filter
-                </Button>
+                <div className="flex gap-3 justify-center">
+                  <Button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedCategory("");
+                      setSelectedCondition("");
+                      setMinPrice("");
+                      setMaxPrice("");
+                      setLocation("");
+                    }}
+                    className="neumorphic-button text-[#2d3748] bg-transparent border-0 shadow-none"
+                  >
+                    Reset Filter
+                  </Button>
+                  {showSambatProducts && (
+                    <Button
+                      onClick={() => setShowSambatProducts(false)}
+                      className="neumorphic-button text-[#2d3748] bg-transparent border-0 shadow-none"
+                    >
+                      Lihat Produk Reguler
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           )}
 
           {/* Features */}
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="neumorphic-card p-6 text-center">
               <Shield className="h-12 w-12 text-[#667eea] mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-[#2d3748] mb-2">
@@ -520,6 +873,16 @@ export default function Marketplace() {
               </h3>
               <p className="text-[#718096]">
                 Ekspresikan keinginan membeli dengan fitur sambat yang unik
+              </p>
+            </div>
+
+            <div className="neumorphic-card p-6 text-center">
+              <Users className="h-12 w-12 text-[#667eea] mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-[#2d3748] mb-2">
+                Group Buying
+              </h3>
+              <p className="text-[#718096]">
+                Bergabung dalam pembelian grup untuk harga lebih murah
               </p>
             </div>
 
