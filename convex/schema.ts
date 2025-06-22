@@ -34,8 +34,10 @@ export default defineSchema({
     isHot: v.boolean(),
     isPinned: v.boolean(),
     hasVideo: v.boolean(),
+    hasImages: v.boolean(),
     tags: v.array(v.string()),
     videoUrls: v.optional(v.array(v.string())),
+    imageUrls: v.optional(v.array(v.string())),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
