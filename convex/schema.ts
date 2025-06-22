@@ -180,6 +180,7 @@ export default defineSchema({
     targetUserName: v.string(),
     rating: v.number(), // 1-5
     comment: v.string(),
+    region: v.optional(v.string()),
     type: v.string(), // "seller" or "buyer"
     createdAt: v.number(),
   })
@@ -187,6 +188,7 @@ export default defineSchema({
     .index("by_product", ["productId"])
     .index("by_reviewer", ["reviewerId"])
     .index("by_target_user", ["targetUserId"])
+    .index("by_region", ["region"])
     .index("by_rating", ["rating"])
     .index("by_created_at", ["createdAt"]),
 
@@ -268,6 +270,11 @@ export default defineSchema({
     whatsapp: v.optional(v.string()),
     instagram: v.optional(v.string()),
     avatar: v.optional(v.string()),
+    businessName: v.optional(v.string()),
+    businessType: v.optional(v.string()),
+    npwp: v.optional(v.string()),
+    certifications: v.optional(v.array(v.string())),
+    preferredRegions: v.optional(v.array(v.string())),
     isVerified: v.boolean(),
     rating: v.number(),
     totalReviews: v.number(),
@@ -308,6 +315,9 @@ export default defineSchema({
     city: v.optional(v.string()),
     foundedYear: v.optional(v.number()),
     category: v.string(), // "Local", "Artisan", "Commercial", "Niche"
+    regionalSpecialties: v.array(v.string()),
+    localCertifications: v.array(v.string()),
+    distributionNetworks: v.array(v.string()),
     isActive: v.boolean(),
     totalProducts: v.number(),
     rating: v.number(),
@@ -334,6 +344,8 @@ export default defineSchema({
     specialties: v.array(v.string()), // ["Floral", "Woody", "Oriental", etc.]
     brandsWorkedWith: v.array(v.string()),
     achievements: v.array(v.string()),
+    regionalSpecialties: v.array(v.string()),
+    certifications: v.array(v.string()),
     socialMedia: v.optional(
       v.object({
         instagram: v.optional(v.string()),
@@ -375,6 +387,10 @@ export default defineSchema({
     launchYear: v.optional(v.number()),
     price: v.optional(v.number()),
     sizes: v.array(v.string()), // ["30ml", "50ml", "100ml"]
+    bpomNumber: v.optional(v.string()),
+    halalCertified: v.boolean(),
+    localIngredients: v.array(v.string()),
+    distributionRegions: v.array(v.string()),
     isDiscontinued: v.boolean(),
     rating: v.number(),
     totalReviews: v.number(),
@@ -389,6 +405,7 @@ export default defineSchema({
     .index("by_category", ["category"])
     .index("by_concentration", ["concentration"])
     .index("by_gender", ["gender"])
+    .index("by_bpom", ["bpomNumber"])
     .index("by_rating", ["rating"])
     .index("by_views", ["views"])
     .index("by_likes", ["totalLikes"])
@@ -410,11 +427,13 @@ export default defineSchema({
     photos: v.optional(v.array(v.string())),
     isVerifiedPurchase: v.boolean(),
     helpfulVotes: v.number(),
+    region: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_fragrance", ["fragranceId"])
     .index("by_user", ["userId"])
+    .index("by_region", ["region"])
     .index("by_rating", ["rating"])
     .index("by_created_at", ["createdAt"]),
 
