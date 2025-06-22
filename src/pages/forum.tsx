@@ -152,10 +152,18 @@ export default function Forum() {
     api.forum.updateAllCategoryCounts,
   );
 
+  const [comments, setComments] = useState<Comment[] | null>(null);
+
   const selectedTopicComments = useQuery(
     api.forum.getCommentsByTopic,
     selectedTopic ? { topicId: selectedTopic._id } : "skip",
   );
+
+  useEffect(() => {
+    if (selectedTopicComments) {
+      setComments(selectedTopicComments);
+    }
+  }, [selectedTopicComments]);
 
   const currentUser = useQuery(
     api.users.getUserByToken,
@@ -394,7 +402,20 @@ export default function Forum() {
     }
 
     try {
-      await toggleCommentLikeMutation({ commentId });
+      const liked = await toggleCommentLikeMutation({ commentId });
+
+      if (comments) {
+        setComments(
+          comments.map((c) =>
+            c._id === commentId
+              ? {
+                  ...c,
+                  likes: liked ? c.likes + 1 : Math.max(0, c.likes - 1),
+                }
+              : c,
+          ),
+        );
+      }
     } catch (error) {
       console.error("Error toggling comment like:", error);
       toast({
@@ -893,7 +914,10 @@ export default function Forum() {
                                 <div className="flex items-center gap-1">
                                   <MessageCircle className="h-4 w-4" />
                                   <span>
-                                    {selectedTopicComments?.length || 0} balasan
+                                    {comments?.length ||
+                                      selectedTopicComments?.length ||
+                                      0}{" "}
+                                    balasan
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -1018,7 +1042,10 @@ export default function Forum() {
                               <div className="flex items-center gap-1">
                                 <MessageCircle className="h-4 w-4" />
                                 <span>
-                                  {selectedTopicComments?.length || 0} balasan
+                                  {comments?.length ||
+                                    selectedTopicComments?.length ||
+                                    0}{" "}
+                                  balasan
                                 </span>
                               </div>
                               <div className="flex items-center gap-1">
@@ -1219,7 +1246,10 @@ export default function Forum() {
                           <div className="flex items-center gap-2 text-[#718096]">
                             <MessageCircle className="h-5 w-5" />
                             <span>
-                              {selectedTopicComments?.length || 0} Balasan
+                              {comments?.length ||
+                                selectedTopicComments?.length ||
+                                0}{" "}
+                              Balasan
                             </span>
                           </div>
                           {currentUser &&
@@ -1239,53 +1269,60 @@ export default function Forum() {
                         {/* Comments Section Placeholder */}
                         <div className="space-y-4">
                           <h3 className="text-lg font-semibold text-[#2d3748]">
-                            Balasan ({selectedTopicComments?.length || 0})
+                            Balasan (
+                            {comments?.length ||
+                              selectedTopicComments?.length ||
+                              0}
+                            )
                           </h3>
 
-                          {!selectedTopicComments ||
-                          selectedTopicComments.length === 0 ? (
+                          {!comments || comments.length === 0 ? (
                             <div className="text-center py-8 text-[#718096]">
                               <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
                               <p>Belum ada balasan. Jadilah yang pertama!</p>
                             </div>
                           ) : (
                             <div className="space-y-4">
-                              {selectedTopicComments.map((comment) => (
-                                <div
-                                  key={comment._id}
-                                  className="neumorphic-card-inset p-4"
-                                >
-                                  <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-[#667eea] flex items-center justify-center text-white text-sm font-semibold">
-                                      {comment.authorName
-                                        .charAt(0)
-                                        .toUpperCase()}
-                                    </div>
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-2 mb-1">
-                                        <span className="font-medium text-[#2d3748]">
-                                          {comment.authorName}
-                                        </span>
-                                        <span className="text-xs text-[#718096]">
-                                          {formatDate(comment.createdAt)}
-                                        </span>
+                              {(comments || selectedTopicComments)?.map(
+                                (comment) => (
+                                  <div
+                                    key={comment._id}
+                                    className="neumorphic-card-inset p-4"
+                                  >
+                                    <div className="flex items-start gap-3">
+                                      <div className="w-8 h-8 rounded-full bg-[#667eea] flex items-center justify-center text-white text-sm font-semibold">
+                                        {comment.authorName
+                                          .charAt(0)
+                                          .toUpperCase()}
                                       </div>
-                                      <p className="text-[#2d3748]">
-                                        {comment.content}
-                                      </p>
-                                      <div className="mt-2 flex items-center gap-2 text-sm text-[#718096]">
-                                        <button
-                                          onClick={() => handleLikeComment(comment._id)}
-                                          className="flex items-center gap-1 hover:text-red-500 transition-colors"
-                                        >
-                                          <Heart className="h-4 w-4" />
-                                          <span>{comment.likes}</span>
-                                        </button>
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <span className="font-medium text-[#2d3748]">
+                                            {comment.authorName}
+                                          </span>
+                                          <span className="text-xs text-[#718096]">
+                                            {formatDate(comment.createdAt)}
+                                          </span>
+                                        </div>
+                                        <p className="text-[#2d3748]">
+                                          {comment.content}
+                                        </p>
+                                        <div className="mt-2 flex items-center gap-2 text-sm text-[#718096]">
+                                          <button
+                                            onClick={() =>
+                                              handleLikeComment(comment._id)
+                                            }
+                                            className="flex items-center gap-1 hover:text-red-500 transition-colors"
+                                          >
+                                            <Heart className="h-4 w-4" />
+                                            <span>{comment.likes}</span>
+                                          </button>
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
-                                </div>
-                              ))}
+                                ),
+                              )}
                             </div>
                           )}
 

@@ -113,8 +113,7 @@ export const getPinnedTopics = query({
   args: { category: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const q = args.category
-      ? ctx
-          .db
+      ? ctx.db
           .query("topics")
           .withIndex("by_category", (qq) => qq.eq("category", args.category))
       : ctx.db.query("topics").withIndex("by_created_at");
@@ -281,13 +280,9 @@ export const createTopic = mutation({
     });
 
     // Update category count setelah topic dibuat
-    await ctx.scheduler.runAfter(
-      0,
-      "forum:updateCategoryCount" as any,
-      {
-        categoryName: args.category,
-      },
-    );
+    await ctx.scheduler.runAfter(0, "forum:updateCategoryCount" as any, {
+      categoryName: args.category,
+    });
 
     return topicId;
   },
