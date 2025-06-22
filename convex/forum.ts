@@ -166,6 +166,14 @@ export const createTopic = mutation({
       updatedAt: now,
     });
 
+    // Tambah poin untuk user
+    const newPoints = (user.points || 0) + 10;
+    const newBadges = user.badges || [];
+    if (newPoints >= 100 && !newBadges.includes("Kontributor Aktif")) {
+      newBadges.push("Kontributor Aktif");
+    }
+    await ctx.db.patch(user._id, { points: newPoints, badges: newBadges });
+
     // Update category count setelah topic dibuat
     await ctx.scheduler.runAfter(
       0,
@@ -273,7 +281,7 @@ export const createComment = mutation({
 
     const now = Date.now();
 
-    return await ctx.db.insert("comments", {
+    const commentId = await ctx.db.insert("comments", {
       topicId: args.topicId,
       content: args.content,
       authorId: user._id,
@@ -282,6 +290,16 @@ export const createComment = mutation({
       createdAt: now,
       updatedAt: now,
     });
+
+    // Tambah poin untuk user
+    const newPoints = (user.points || 0) + 5;
+    const newBadges = user.badges || [];
+    if (newPoints >= 100 && !newBadges.includes("Kontributor Aktif")) {
+      newBadges.push("Kontributor Aktif");
+    }
+    await ctx.db.patch(user._id, { points: newPoints, badges: newBadges });
+
+    return commentId;
   },
 });
 

@@ -124,6 +124,13 @@ function ProfileContent() {
                       <Trophy className="h-3 w-3 mr-1" />
                       Enthusiast
                     </Badge>
+                    <Badge
+                      variant="secondary"
+                      className="neumorphic-button-sm bg-transparent text-[#667eea] border-0 shadow-none"
+                    >
+                      <Trophy className="h-3 w-3 mr-1" />
+                      {userData?.points || 0} Poin
+                    </Badge>
                     {user?.primaryEmailAddress?.verification.status ===
                       "verified" && (
                       <Badge
@@ -187,11 +194,40 @@ function ProfileContent() {
                       {totalViews}
                     </span>
                   </div>
-                </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="h-4 w-4 text-[#667eea]" />
+                      <span className="text-sm text-[#86868B]">Poin</span>
+                    </div>
+                    <span className="text-sm font-semibold text-[#1D1D1F]">
+                      {userData?.points || 0}
+                    </span>
+                  </div>
               </div>
             </div>
 
-            {/* Main Content */}
+            {userData?.badges && userData.badges.length > 0 && (
+              <div className="neumorphic-card p-6 mt-6">
+                <h3 className="text-lg font-semibold text-[#1D1D1F] mb-4">
+                  Badge
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {userData.badges.map((badge, idx) => (
+                    <Badge
+                      key={idx}
+                      variant="outline"
+                      className="neumorphic-button-sm px-3 py-1"
+                    >
+                      <Star className="h-3 w-3 mr-1" />
+                      {badge}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
               {/* Account Information */}
               <Card className="neumorphic-card border-0 shadow-none">

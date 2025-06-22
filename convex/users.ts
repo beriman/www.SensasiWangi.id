@@ -43,22 +43,26 @@ export const createOrUpdateUser = mutation({
       )
       .unique();
 
-    if (existingUser) {
-      // Update if needed
-      if (existingUser.name !== identity.name || existingUser.email !== identity.email) {
-        await ctx.db.patch(existingUser._id, {
-          name: identity.name,
-          email: identity.email,
-        });
-      }
-      return existingUser;
+  if (existingUser) {
+    const patch: any = {};
+    if (existingUser.name !== identity.name) patch.name = identity.name;
+    if (existingUser.email !== identity.email) patch.email = identity.email;
+    if (existingUser.points === undefined) patch.points = 0;
+    if (existingUser.badges === undefined) patch.badges = [];
+    if (Object.keys(patch).length > 0) {
+      await ctx.db.patch(existingUser._id, patch);
+      return { ...existingUser, ...patch };
     }
+    return existingUser;
+  }
 
     // Create new user
     const userId = await ctx.db.insert("users", {
       name: identity.name,
       email: identity.email,
       tokenIdentifier: identity.subject,
+      points: 0,
+      badges: [],
     });
 
     return await ctx.db.get(userId);

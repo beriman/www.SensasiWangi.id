@@ -7,6 +7,8 @@ export default defineSchema({
     email: v.optional(v.string()),
     image: v.optional(v.string()),
     tokenIdentifier: v.string(),
+    points: v.optional(v.number()),
+    badges: v.optional(v.array(v.string())),
   }).index("by_token", ["tokenIdentifier"]),
 
   categories: defineTable({
