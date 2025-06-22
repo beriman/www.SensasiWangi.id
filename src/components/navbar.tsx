@@ -11,7 +11,7 @@ import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
 import { LanguageToggle } from "./language-toggle";
 import { Sheet, SheetTrigger, SheetContent } from "./ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, Store } from "lucide-react";
 
 export function Navbar() {
   const { user, isLoaded } = useUser();
@@ -94,13 +94,20 @@ export function Navbar() {
                         strokeWidth={1.5}
                         d="M16 11V7a4 4 0 00-8 0v4M8 11v6h8v-6M8 11H6a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2h-2"
                       />
-                    </svg>
-                    Marketplace
-                  </Link>
-                  <Link
-                    to="/kursus"
-                    className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
-                  >
+                  </svg>
+                  Marketplace
+                </Link>
+                <Link
+                  to="/dashboard/my-shop"
+                  className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
+                >
+                  <Store className="w-4 h-4 mr-1.5" />
+                  My Shop
+                </Link>
+                <Link
+                  to="/kursus"
+                  className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
+                >
                     <svg
                       className="w-4 h-4 mr-1.5"
                       fill="none"
@@ -203,6 +210,7 @@ export function Navbar() {
                       <Link to="/dashboard" className="neumorphic-button-sm w-full text-left">Dashboard</Link>
                       <Link to="/forum" className="neumorphic-button-sm w-full text-left">Forum</Link>
                       <Link to="/marketplace" className="neumorphic-button-sm w-full text-left">Marketplace</Link>
+                      <Link to="/dashboard/my-shop" className="neumorphic-button-sm w-full text-left">My Shop</Link>
                       <Link to="/kursus" className="neumorphic-button-sm w-full text-left">Kursus</Link>
                       <Link to="/polling" className="neumorphic-button-sm w-full text-left">Polling</Link>
                       <Link to="/faq" className="neumorphic-button-sm w-full text-left">FAQ</Link>

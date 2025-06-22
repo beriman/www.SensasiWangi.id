@@ -10,6 +10,8 @@ import Marketplace from "./pages/marketplace";
 import MarketplaceSell from "./pages/marketplace-sell";
 import MarketplaceSambat from "./pages/marketplace-sambat";
 import MarketplaceSambatCreate from "./pages/marketplace-sambat-create";
+import MyShop from "./pages/my-shop";
+import OrderDetail from "./pages/order-detail";
 import Admin from "./pages/admin";
 import Kursus from "./pages/kursus";
 import Database from "./pages/database";
@@ -30,6 +32,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/my-shop" element={<MyShop />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forum" element={<Forum />} />
@@ -50,6 +53,7 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/polling" element={<Polling />} />
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/order/:orderId" element={<OrderDetail />} />
           <Route path="/order/:orderId/review" element={<OrderReviewPage />} />
         </Routes>
         {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
