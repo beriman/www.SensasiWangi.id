@@ -255,6 +255,7 @@ export const createTopic = mutation({
       authorName: user.name || "Anonymous",
       views: 0,
       likes: 0,
+      score: 0,
       isHot: false,
       isPinned: false,
       hasVideo: args.hasVideo,
@@ -352,6 +353,58 @@ export const toggleTopicLike = mutation({
   },
 });
 
+// Mutation untuk upvote/downvote topik
+export const toggleTopicVote = mutation({
+  args: { topicId: v.id("topics"), value: v.union(v.literal(1), v.literal(-1)) },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Anda harus login untuk vote");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) {
+      throw new Error("User tidak ditemukan");
+    }
+
+    const topic = await ctx.db.get(args.topicId);
+    if (!topic) {
+      throw new Error("Topik tidak ditemukan");
+    }
+
+    const existing = await ctx.db
+      .query("topicVotes")
+      .withIndex("by_topic_user", (q) =>
+        q.eq("topicId", args.topicId).eq("userId", user._id),
+      )
+      .unique();
+
+    let newScore = topic.score;
+    if (!existing) {
+      await ctx.db.insert("topicVotes", {
+        topicId: args.topicId,
+        userId: user._id,
+        value: args.value,
+        createdAt: Date.now(),
+      });
+      newScore += args.value;
+    } else if (existing.value === args.value) {
+      await ctx.db.delete(existing._id);
+      newScore -= existing.value;
+    } else {
+      await ctx.db.patch(existing._id, { value: args.value });
+      newScore = newScore - existing.value + args.value;
+    }
+
+    await ctx.db.patch(args.topicId, { score: newScore, updatedAt: Date.now() });
+
+    return newScore;
+  },
+});
+
 // Mutation untuk increment view count
 export const incrementTopicViews = mutation({
   args: { topicId: v.id("topics") },
@@ -402,6 +455,7 @@ export const createComment = mutation({
       authorId: user._id,
       authorName: user.name || "Anonymous",
       likes: 0,
+      score: 0,
       createdAt: now,
       updatedAt: now,
     });
@@ -433,6 +487,51 @@ export const createComment = mutation({
     }
 
     return commentId;
+  },
+});
+
+// Mutation untuk upvote/downvote komentar
+export const toggleCommentVote = mutation({
+  args: { commentId: v.id("comments"), value: v.union(v.literal(1), v.literal(-1)) },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login untuk vote");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    const comment = await ctx.db.get(args.commentId);
+    if (!comment) throw new Error("Komentar tidak ditemukan");
+
+    const existing = await ctx.db
+      .query("commentVotes")
+      .withIndex("by_comment_user", (q) =>
+        q.eq("commentId", args.commentId).eq("userId", user._id),
+      )
+      .unique();
+
+    let newScore = comment.score;
+    if (!existing) {
+      await ctx.db.insert("commentVotes", {
+        commentId: args.commentId,
+        userId: user._id,
+        value: args.value,
+        createdAt: Date.now(),
+      });
+      newScore += args.value;
+    } else if (existing.value === args.value) {
+      await ctx.db.delete(existing._id);
+      newScore -= existing.value;
+    } else {
+      await ctx.db.patch(existing._id, { value: args.value });
+      newScore = newScore - existing.value + args.value;
+    }
+
+    await ctx.db.patch(args.commentId, { score: newScore, updatedAt: Date.now() });
+    return newScore;
   },
 });
 
