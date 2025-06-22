@@ -73,3 +73,70 @@ export const createOrUpdateUser = mutation({
     return await ctx.db.get(userId);
   },
 });
+
+export const getPrivacySettings = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .unique();
+
+    if (!profile) {
+      return {
+        profileVisibility: "public",
+        activityVisibility: "public",
+        commentsVisibility: "public",
+      };
+    }
+
+    return {
+      profileVisibility: profile.profileVisibility ?? "public",
+      activityVisibility: profile.activityVisibility ?? "public",
+      commentsVisibility: profile.commentsVisibility ?? "public",
+    };
+  },
+});
+
+export const updatePrivacySettings = mutation({
+  args: {
+    userId: v.id("users"),
+    profileVisibility: v.string(),
+    activityVisibility: v.string(),
+    commentsVisibility: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .unique();
+
+    if (profile) {
+      await ctx.db.patch(profile._id, {
+        profileVisibility: args.profileVisibility,
+        activityVisibility: args.activityVisibility,
+        commentsVisibility: args.commentsVisibility,
+      });
+    } else {
+      await ctx.db.insert("userProfiles", {
+        userId: args.userId,
+        bio: undefined,
+        location: undefined,
+        phone: undefined,
+        whatsapp: undefined,
+        instagram: undefined,
+        avatar: undefined,
+        isVerified: false,
+        rating: 0,
+        totalReviews: 0,
+        totalSales: 0,
+        totalPurchases: 0,
+        joinedAt: Date.now(),
+        lastActive: Date.now(),
+        profileVisibility: args.profileVisibility,
+        activityVisibility: args.activityVisibility,
+        commentsVisibility: args.commentsVisibility,
+      });
+    }
+  },
+});

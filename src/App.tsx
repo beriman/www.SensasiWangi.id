@@ -19,6 +19,7 @@ import FAQ from "./pages/faq";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import OrderReviewPage from "./pages/order-review";
+import PrivacySettings from "./pages/privacy-settings";
 import { Toaster } from "@/components/ui/toaster";
 import NotificationListener from "@/components/notification-listener";
 
@@ -33,6 +34,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forum" element={<Forum />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/privacy-settings" element={<PrivacySettings />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/marketplace/sell" element={<MarketplaceSell />} />
           <Route path="/marketplace/sambat" element={<MarketplaceSambat />} />

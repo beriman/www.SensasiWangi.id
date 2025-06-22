@@ -20,6 +20,7 @@ import {
   Settings,
   Edit3,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import ProtectedRoute from "@/components/wrappers/ProtectedRoute";
 
 export default function Profile() {
@@ -170,13 +171,15 @@ function ProfileContent() {
                     <Edit3 className="h-4 w-4 mr-2" />
                     Edit Profil
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="neumorphic-button-sm w-full bg-transparent text-[#718096] border-0 shadow-none hover:scale-105 active:scale-95 transition-all"
-                  >
-                    <Settings className="h-4 w-4 mr-2" />
-                    Pengaturan
-                  </Button>
+                  <Link to="/privacy-settings">
+                    <Button
+                      variant="outline"
+                      className="neumorphic-button-sm w-full bg-transparent text-[#718096] border-0 shadow-none hover:scale-105 active:scale-95 transition-all"
+                    >
+                      <Settings className="h-4 w-4 mr-2" />
+                      Pengaturan
+                    </Button>
+                  </Link>
                 </div>
               </div>
 
