@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./theme-toggle";
+import { LanguageToggle } from "./language-toggle";
 import { Sheet, SheetTrigger, SheetContent } from "./ui/sheet";
 import { Menu } from "lucide-react";
 
@@ -37,6 +38,8 @@ export function Navbar() {
           {isLoaded ? (
             <div className="flex items-center gap-4">
               <ThemeToggle />
+              <LanguageToggle />
+              <LanguageToggle />
               <Authenticated>
                 <div className="hidden md:flex items-center gap-3">
                   <Link
