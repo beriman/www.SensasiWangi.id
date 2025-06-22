@@ -73,3 +73,45 @@ export const createOrUpdateUser = mutation({
     return await ctx.db.get(userId);
   },
 });
+
+export const updateUserBio = mutation({
+  args: { bio: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const existing = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .unique();
+    const now = Date.now();
+    if (existing) {
+      await ctx.db.patch(existing._id, { bio: args.bio, lastActive: now });
+      return existing._id;
+    }
+    return await ctx.db.insert("userProfiles", {
+      userId: user._id,
+      bio: args.bio,
+      location: null,
+      phone: null,
+      whatsapp: null,
+      instagram: null,
+      avatar: null,
+      isVerified: false,
+      rating: 0,
+      totalReviews: 0,
+      totalSales: 0,
+      totalPurchases: 0,
+      joinedAt: now,
+      lastActive: now,
+    });
+  },
+});
