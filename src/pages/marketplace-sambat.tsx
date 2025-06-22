@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
@@ -276,17 +276,45 @@ function EnrollDialog({ product }: { product: any }) {
     postalCode: "",
     province: "",
   });
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
+  const [shippingCost, setShippingCost] = useState(0);
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const enrollSambat = useMutation(api.marketplace.enrollSambat);
+  const calculateCost = useAction(api.marketplace.calculateShippingCost);
   const hasEnrolled = useQuery(
     api.marketplace.hasUserEnrolledSambat,
     user ? { sambatProductId: product._id, userId: user.id as any } : "skip",
   );
 
+  useEffect(() => {
+    const loadCost = async () => {
+      if (!origin || !destination || !shippingMethod) return;
+      try {
+        const cost = await calculateCost({
+          origin,
+          destination,
+          courier: shippingMethod,
+        });
+        setShippingCost(cost);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadCost();
+  }, [origin, destination, shippingMethod]);
+
   const handleSubmit = async () => {
-    if (!user || !shippingMethod || !shippingAddress.name.trim()) return;
+    if (
+      !user ||
+      !shippingMethod ||
+      !origin ||
+      !destination ||
+      !shippingAddress.name.trim()
+    )
+      return;
 
     setIsSubmitting(true);
     try {
@@ -294,8 +322,10 @@ function EnrollDialog({ product }: { product: any }) {
         sambatProductId: product._id,
         portionsRequested,
         shippingAddress,
+        origin,
+        destination,
         shippingMethod,
-        shippingCost: 15000, // Default shipping cost
+        shippingCost,
         notes: notes.trim() || undefined,
       });
       setIsOpen(false);
@@ -315,7 +345,8 @@ function EnrollDialog({ product }: { product: any }) {
     }).format(price);
   };
 
-  const totalPrice = portionsRequested * product.pricePerPortion + 15000; // + shipping
+  const totalPrice =
+    portionsRequested * product.pricePerPortion + shippingCost;
   const maxPortions = Math.min(
     5,
     product.maxParticipants - product.currentParticipants,
@@ -447,22 +478,22 @@ function EnrollDialog({ product }: { product: any }) {
                 className="neumorphic-input border-0 mt-1"
                 placeholder="Jalan, RT/RW, Kelurahan"
               />
-            </div>
+          </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label className="text-sm text-[#718096]">Kota</Label>
                 <Input
                   value={shippingAddress.city}
-                  onChange={(e) =>
-                    setShippingAddress((prev) => ({
-                      ...prev,
-                      city: e.target.value,
-                    }))
-                  }
-                  className="neumorphic-input border-0 mt-1"
-                  placeholder="Kota"
-                />
-              </div>
+                onChange={(e) =>
+                  setShippingAddress((prev) => ({
+                    ...prev,
+                    city: e.target.value,
+                  }))
+                }
+                className="neumorphic-input border-0 mt-1"
+                placeholder="Kota"
+              />
+            </div>
               <div>
                 <Label className="text-sm text-[#718096]">Kode Pos</Label>
                 <Input
@@ -487,12 +518,32 @@ function EnrollDialog({ product }: { product: any }) {
                       province: e.target.value,
                     }))
                   }
-                  className="neumorphic-input border-0 mt-1"
-                  placeholder="Provinsi"
-                />
-              </div>
+                className="neumorphic-input border-0 mt-1"
+                placeholder="Provinsi"
+              />
             </div>
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <Label className="text-sm text-[#718096]">Asal</Label>
+              <Input
+                value={origin}
+                onChange={(e) => setOrigin(e.target.value)}
+                className="neumorphic-input border-0 mt-1"
+                placeholder="Kota asal"
+              />
+            </div>
+            <div>
+              <Label className="text-sm text-[#718096]">Tujuan</Label>
+              <Input
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                className="neumorphic-input border-0 mt-1"
+                placeholder="Kota tujuan"
+              />
+            </div>
+          </div>
+        </div>
 
           {/* Shipping Method */}
           <div>
@@ -506,7 +557,7 @@ function EnrollDialog({ product }: { product: any }) {
               <SelectContent className="neumorphic-card border-0">
                 {SHIPPING_METHODS.map((method) => (
                   <SelectItem key={method} value={method}>
-                    {method} - Rp 15.000
+                    {method}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -537,7 +588,7 @@ function EnrollDialog({ product }: { product: any }) {
               </div>
               <div className="flex justify-between text-sm">
                 <span>Ongkir</span>
-                <span>{formatPrice(15000)}</span>
+                <span>{formatPrice(shippingCost)}</span>
               </div>
               <div className="flex justify-between font-semibold text-[#2d3748] pt-2 border-t border-[#e2e8f0]">
                 <span>Total</span>

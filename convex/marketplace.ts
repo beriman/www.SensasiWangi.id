@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, action } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
 // Query untuk mendapatkan semua produk dengan pagination
@@ -400,6 +400,8 @@ export const createOrder = mutation({
       postalCode: v.string(),
       province: v.string(),
     }),
+    origin: v.string(),
+    destination: v.string(),
     shippingMethod: v.string(),
     shippingCost: v.number(),
     paymentMethod: v.string(),
@@ -454,6 +456,8 @@ export const createOrder = mutation({
       productTitle: product.title,
       price: product.price,
       shippingAddress: args.shippingAddress,
+      origin: args.origin,
+      destination: args.destination,
       shippingMethod: args.shippingMethod,
       shippingCost: args.shippingCost,
       totalAmount,
@@ -815,6 +819,8 @@ export const enrollSambat = mutation({
       postalCode: v.string(),
       province: v.string(),
     }),
+    origin: v.string(),
+    destination: v.string(),
     shippingMethod: v.string(),
     shippingCost: v.number(),
     notes: v.optional(v.string()),
@@ -889,6 +895,8 @@ export const enrollSambat = mutation({
       totalAmount,
       paymentStatus: "pending",
       shippingAddress: args.shippingAddress,
+      origin: args.origin,
+      destination: args.destination,
       shippingMethod: args.shippingMethod,
       shippingCost: args.shippingCost,
       virtualAccountNumber: vaNumber,
@@ -1744,5 +1752,45 @@ export const updateSuggestionPriority = mutation({
       priority: args.priority,
       updatedAt: Date.now(),
     });
+  },
+});
+
+export const calculateShippingCost = action({
+  args: {
+    origin: v.string(),
+    destination: v.string(),
+    courier: v.string(),
+    weight: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const key = process.env.RAJAONGKIR_API_KEY;
+    if (!key) {
+      throw new Error("Missing RajaOngkir API key");
+    }
+    const res = await fetch("https://api.rajaongkir.com/starter/cost", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        key,
+      },
+      body: JSON.stringify({
+        origin: args.origin,
+        destination: args.destination,
+        weight: args.weight ?? 1000,
+        courier: args.courier,
+      }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Failed to fetch cost: ${res.status} ${text}`);
+    }
+    const data = await res.json();
+    try {
+      return (
+        data.rajaongkir.results[0].costs[0].cost[0].value as number
+      );
+    } catch (_) {
+      throw new Error("Invalid response from RajaOngkir");
+    }
   },
 });
