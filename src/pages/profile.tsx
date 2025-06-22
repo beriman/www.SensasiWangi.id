@@ -37,6 +37,11 @@ function ProfileContent() {
     user?.id ? { tokenIdentifier: user.id } : "skip",
   );
 
+  const userProfile = useQuery(
+    api.marketplace.getUserProfile,
+    userData ? { userId: userData._id } : "skip",
+  );
+
   // Query untuk mendapatkan statistik user dari forum
   const userTopics = useQuery(
     api.forum.getTopicsByAuthor,
@@ -76,6 +81,8 @@ function ProfileContent() {
     (sum, topic) => sum + topic.views,
     0,
   );
+  const points = userProfile?.profile?.points || 0;
+  const badges = userProfile?.profile?.badges || [];
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
@@ -134,6 +141,16 @@ function ProfileContent() {
                         Terverifikasi
                       </Badge>
                     )}
+                    {badges.map((b: string) => (
+                      <Badge
+                        key={b}
+                        variant="secondary"
+                        className="neumorphic-button-sm bg-transparent text-[#667eea] border-0 shadow-none"
+                      >
+                        <Trophy className="h-3 w-3 mr-1" />
+                        {b}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
 
@@ -185,6 +202,15 @@ function ProfileContent() {
                     </div>
                     <span className="text-sm font-semibold text-[#1D1D1F]">
                       {totalViews}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="h-4 w-4 text-[#667eea]" />
+                      <span className="text-sm text-[#86868B]">Poin</span>
+                    </div>
+                    <span className="text-sm font-semibold text-[#1D1D1F]">
+                      {points}
                     </span>
                   </div>
                 </div>

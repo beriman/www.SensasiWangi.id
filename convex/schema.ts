@@ -264,6 +264,8 @@ export default defineSchema({
     whatsapp: v.optional(v.string()),
     instagram: v.optional(v.string()),
     avatar: v.optional(v.string()),
+    points: v.number(),
+    badges: v.array(v.string()),
     isVerified: v.boolean(),
     rating: v.number(),
     totalReviews: v.number(),

@@ -51,6 +51,30 @@ export const createOrUpdateUser = mutation({
           email: identity.email,
         });
       }
+      const existingProfile = await ctx.db
+        .query("userProfiles")
+        .withIndex("by_user", (q) => q.eq("userId", existingUser._id))
+        .unique();
+      if (!existingProfile) {
+        await ctx.db.insert("userProfiles", {
+          userId: existingUser._id,
+          bio: undefined,
+          location: undefined,
+          phone: undefined,
+          whatsapp: undefined,
+          instagram: undefined,
+          avatar: undefined,
+          points: 0,
+          badges: [],
+          isVerified: false,
+          rating: 0,
+          totalReviews: 0,
+          totalSales: 0,
+          totalPurchases: 0,
+          joinedAt: Date.now(),
+          lastActive: Date.now(),
+        });
+      }
       return existingUser;
     }
 
@@ -61,6 +85,52 @@ export const createOrUpdateUser = mutation({
       tokenIdentifier: identity.subject,
     });
 
+    await ctx.db.insert("userProfiles", {
+      userId,
+      bio: undefined,
+      location: undefined,
+      phone: undefined,
+      whatsapp: undefined,
+      instagram: undefined,
+      avatar: undefined,
+      points: 0,
+      badges: [],
+      isVerified: false,
+      rating: 0,
+      totalReviews: 0,
+      totalSales: 0,
+      totalPurchases: 0,
+      joinedAt: Date.now(),
+      lastActive: Date.now(),
+    });
+
     return await ctx.db.get(userId);
+  },
+});
+
+export const addUserPoints = mutation({
+  args: { userId: v.id("users"), points: v.number() },
+  handler: async (ctx, args) => {
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!profile) return;
+    const newPoints = profile.points + args.points;
+    let badges = profile.badges || [];
+    if (newPoints >= 100 && !badges.includes("Contributor")) {
+      badges = [...badges, "Contributor"];
+    }
+    if (newPoints >= 500 && !badges.includes("Pro Contributor")) {
+      badges = [...badges, "Pro Contributor"];
+    }
+    if (newPoints >= 1000 && !badges.includes("Master Contributor")) {
+      badges = [...badges, "Master Contributor"];
+    }
+    await ctx.db.patch(profile._id, {
+      points: newPoints,
+      badges,
+      lastActive: Date.now(),
+    });
   },
 });

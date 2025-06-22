@@ -149,7 +149,7 @@ export const createTopic = mutation({
 
     const now = Date.now();
 
-    const topicId = await ctx.db.insert("topics", {
+  const topicId = await ctx.db.insert("topics", {
       title: args.title,
       content: args.content,
       category: args.category,
@@ -164,15 +164,20 @@ export const createTopic = mutation({
       videoUrls: args.videoUrls,
       createdAt: now,
       updatedAt: now,
-    });
+  });
 
-    // Update category count setelah topic dibuat
-    await ctx.scheduler.runAfter(0, "forum:updateCategoryCount", {
-      categoryName: args.category,
-    });
+  // Update category count setelah topic dibuat
+  await ctx.scheduler.runAfter(0, "forum:updateCategoryCount", {
+    categoryName: args.category,
+  });
 
-    return topicId;
-  },
+  await ctx.scheduler.runAfter(0, "users:addUserPoints", {
+    userId: user._id,
+    points: 10,
+  });
+
+  return topicId;
+},
 });
 
 // Mutation untuk like/unlike topik
@@ -267,17 +272,24 @@ export const createComment = mutation({
       throw new Error("User tidak ditemukan");
     }
 
-    const now = Date.now();
+  const now = Date.now();
 
-    return await ctx.db.insert("comments", {
-      topicId: args.topicId,
-      content: args.content,
-      authorId: user._id,
-      authorName: user.name || "Anonymous",
-      likes: 0,
-      createdAt: now,
-      updatedAt: now,
-    });
+  const commentId = await ctx.db.insert("comments", {
+    topicId: args.topicId,
+    content: args.content,
+    authorId: user._id,
+    authorName: user.name || "Anonymous",
+    likes: 0,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  await ctx.scheduler.runAfter(0, "users:addUserPoints", {
+    userId: user._id,
+    points: 2,
+  });
+
+  return commentId;
   },
 });
 
