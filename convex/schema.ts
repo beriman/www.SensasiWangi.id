@@ -9,6 +9,9 @@ export default defineSchema({
     tokenIdentifier: v.string(),
     contributionPoints: v.number(),
     badges: v.array(v.string()),
+    createdAt: v.number(),
+    reviewCount: v.number(),
+    helpfulCount: v.number(),
   }).index("by_token", ["tokenIdentifier"]),
 
   categories: defineTable({
