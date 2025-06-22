@@ -274,6 +274,8 @@ export default defineSchema({
     phone: v.optional(v.string()),
     whatsapp: v.optional(v.string()),
     instagram: v.optional(v.string()),
+    twitter: v.optional(v.string()),
+    website: v.optional(v.string()),
     avatar: v.optional(v.string()),
     isVerified: v.boolean(),
     rating: v.number(),
