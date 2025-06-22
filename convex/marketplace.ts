@@ -7,7 +7,7 @@ export const getProducts = query({
   args: {
     paginationOpts: v.object({
       numItems: v.number(),
-      cursor: v.optional(v.union(v.string(), v.null())),
+      cursor: v.union(v.string(), v.null()),
     }),
     category: v.optional(v.string()),
     condition: v.optional(v.string()),
@@ -18,7 +18,7 @@ export const getProducts = query({
     location: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let query = ctx.db
+    let query: any = ctx.db
       .query("products")
       .withIndex("by_status", (q) => q.eq("status", "active"));
 
@@ -505,7 +505,7 @@ export const getSambatProducts = query({
   args: {
     paginationOpts: v.object({
       numItems: v.number(),
-      cursor: v.optional(v.union(v.string(), v.null())),
+      cursor: v.union(v.string(), v.null()),
     }),
     category: v.optional(v.string()),
     sortBy: v.optional(v.string()),
@@ -514,7 +514,7 @@ export const getSambatProducts = query({
     status: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let query = ctx.db.query("sambatProducts");
+    let query: any = ctx.db.query("sambatProducts");
 
     // Sorting
     if (args.sortBy === "price_low") {
@@ -935,7 +935,7 @@ export const getIndonesianBrands = query({
   args: {
     paginationOpts: v.object({
       numItems: v.number(),
-      cursor: v.optional(v.union(v.string(), v.null())),
+      cursor: v.union(v.string(), v.null()),
     }),
     category: v.optional(v.string()),
     sortBy: v.optional(v.string()),
@@ -943,7 +943,7 @@ export const getIndonesianBrands = query({
     city: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let query = ctx.db
+    let query: any = ctx.db
       .query("brands")
       .withIndex("by_country", (q) => q.eq("country", "Indonesia"))
       .filter((q) => q.eq(q.field("isActive"), true));
@@ -1011,7 +1011,7 @@ export const getIndonesianPerfumers = query({
   args: {
     paginationOpts: v.object({
       numItems: v.number(),
-      cursor: v.optional(v.union(v.string(), v.null())),
+      cursor: v.union(v.string(), v.null()),
     }),
     experience: v.optional(v.string()),
     specialty: v.optional(v.string()),
@@ -1020,7 +1020,7 @@ export const getIndonesianPerfumers = query({
     city: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let query = ctx.db
+    let query: any = ctx.db
       .query("perfumers")
       .withIndex("by_nationality", (q) => q.eq("nationality", "Indonesia"))
       .filter((q) => q.eq(q.field("isActive"), true));
@@ -1099,7 +1099,7 @@ export const getIndonesianFragrances = query({
   args: {
     paginationOpts: v.object({
       numItems: v.number(),
-      cursor: v.optional(v.union(v.string(), v.null())),
+      cursor: v.union(v.string(), v.null()),
     }),
     category: v.optional(v.string()),
     concentration: v.optional(v.string()),
@@ -1110,7 +1110,7 @@ export const getIndonesianFragrances = query({
     searchQuery: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let query = ctx.db.query("fragrances");
+    let query: any = ctx.db.query("fragrances");
 
     // Filter by brand first if specified
     if (args.brandId) {
@@ -1502,14 +1502,14 @@ export const getSuggestions = query({
   args: {
     paginationOpts: v.object({
       numItems: v.number(),
-      cursor: v.optional(v.union(v.string(), v.null())),
+      cursor: v.union(v.string(), v.null()),
     }),
     type: v.optional(v.string()),
     status: v.optional(v.string()),
     priority: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let query = ctx.db
+    let query: any = ctx.db
       .query("suggestions")
       .withIndex("by_created_at")
       .order("desc");

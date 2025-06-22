@@ -685,7 +685,7 @@ export default function Forum() {
                                   Video
                                 </Badge>
                               )}
-                              {topic.replies === 0 && (
+                              {(topic as any).replies === 0 && (
                                 <Badge
                                   variant="outline"
                                   className="text-xs text-blue-600 border-blue-200"

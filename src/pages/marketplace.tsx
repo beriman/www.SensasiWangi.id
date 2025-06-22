@@ -558,7 +558,7 @@ export default function Marketplace() {
   const [showSambatProducts, setShowSambatProducts] = useState(false);
 
   const products = useQuery(api.marketplace.getProducts, {
-    paginationOpts: { numItems: 20 },
+    paginationOpts: { numItems: 20, cursor: null },
     category: selectedCategory || undefined,
     condition: selectedCondition || undefined,
     minPrice: minPrice ? parseInt(minPrice) : undefined,
@@ -569,7 +569,7 @@ export default function Marketplace() {
   });
 
   const sambatProducts = useQuery(api.marketplace.getSambatProducts, {
-    paginationOpts: { numItems: 20 },
+    paginationOpts: { numItems: 20, cursor: null },
     category: selectedCategory || undefined,
     sortBy,
     searchQuery: searchQuery || undefined,

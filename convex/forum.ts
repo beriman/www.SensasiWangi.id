@@ -15,7 +15,7 @@ export const getTopics = query({
     searchQuery: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let query = ctx.db.query("topics");
+    let query: any = ctx.db.query("topics");
 
     // Filter berdasarkan kategori
     if (args.category) {
@@ -167,9 +167,13 @@ export const createTopic = mutation({
     });
 
     // Update category count setelah topic dibuat
-    await ctx.scheduler.runAfter(0, "forum:updateCategoryCount", {
-      categoryName: args.category,
-    });
+    await ctx.scheduler.runAfter(
+      0,
+      "forum:updateCategoryCount" as any,
+      {
+        categoryName: args.category,
+      },
+    );
 
     return topicId;
   },
