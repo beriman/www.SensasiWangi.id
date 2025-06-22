@@ -188,6 +188,35 @@ export const getCommentsByAuthor = query({
   },
 });
 
+// Query untuk mendapatkan komentar terbaru beserta info topik
+export const getRecentCommentsWithTopic = query({
+  args: { authorId: v.id("users"), limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 5;
+    const comments = await ctx.db
+      .query("comments")
+      .withIndex("by_author", (q) => q.eq("authorId", args.authorId))
+      .order("desc")
+      .collect();
+
+    const recent = comments.slice(0, limit);
+
+    const withTopic = await Promise.all(
+      recent.map(async (comment) => {
+        const topic = await ctx.db.get(comment.topicId);
+        return {
+          ...comment,
+          topicTitle: topic?.title,
+          topicLikes: topic?.likes ?? 0,
+          topicViews: topic?.views ?? 0,
+        };
+      }),
+    );
+
+    return withTopic;
+  },
+});
+
 // Mutation untuk membuat topik baru
 export const createTopic = mutation({
   args: {
