@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as forum from "../forum.js";
 import type * as marketplace from "../marketplace.js";
+import type * as notifications from "../notifications.js";
 import type * as users from "../users.js";
 
 /**
@@ -28,6 +29,7 @@ import type * as users from "../users.js";
 declare const fullApi: ApiFromModules<{
   forum: typeof forum;
   marketplace: typeof marketplace;
+  notifications: typeof notifications;
   users: typeof users;
 }>;
 export declare const api: FilterApi<
