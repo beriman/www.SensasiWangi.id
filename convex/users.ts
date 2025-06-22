@@ -51,14 +51,35 @@ export const createOrUpdateUser = mutation({
           email: identity.email,
         });
       }
-      // Initialize points/badges if missing
-      if (existingUser.contributionPoints === undefined || existingUser.badges === undefined) {
-        await ctx.db.patch(existingUser._id, {
-          contributionPoints: existingUser.contributionPoints ?? 0,
-          badges: existingUser.badges ?? [],
-        });
+      // Initialize fields if missing
+      const patch: any = {};
+      if (existingUser.contributionPoints === undefined) {
+        patch.contributionPoints = 0;
       }
-      return existingUser;
+      if (existingUser.badges === undefined) {
+        patch.badges = [];
+      }
+      if (existingUser.createdAt === undefined) {
+        patch.createdAt = Date.now();
+      }
+      if (existingUser.reviewCount === undefined) {
+        patch.reviewCount = 0;
+      }
+      if (existingUser.helpfulCount === undefined) {
+        patch.helpfulCount = 0;
+      }
+      if (Object.keys(patch).length > 0) {
+        await ctx.db.patch(existingUser._id, patch);
+      }
+
+      // Check membership achievement
+      const badges = new Set(existingUser.badges ?? []);
+      const days = Math.floor((Date.now() - (existingUser.createdAt ?? Date.now())) / 86400000);
+      if (days >= 365) {
+        badges.add("Member setia");
+      }
+      await ctx.db.patch(existingUser._id, { badges: Array.from(badges) });
+      return await ctx.db.get(existingUser._id);
     }
 
     // Create new user
@@ -68,6 +89,9 @@ export const createOrUpdateUser = mutation({
       tokenIdentifier: identity.subject,
       contributionPoints: 0,
       badges: [],
+      createdAt: Date.now(),
+      reviewCount: 0,
+      helpfulCount: 0,
     });
 
     return await ctx.db.get(userId);

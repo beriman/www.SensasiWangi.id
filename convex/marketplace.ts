@@ -566,6 +566,16 @@ export const createReview = mutation({
       type: "seller",
       createdAt: now,
     });
+
+    const newReviewCount = (user.reviewCount ?? 0) + 1;
+    const badges = new Set(user.badges ?? []);
+    if (newReviewCount >= 5) {
+      badges.add("Terbanyak mengulas parfum");
+    }
+    await ctx.db.patch(user._id, {
+      reviewCount: newReviewCount,
+      badges: Array.from(badges),
+    });
   },
 });
 
@@ -1145,6 +1155,50 @@ export const toggleFragranceLike = mutation({
       });
       return true;
     }
+  },
+});
+
+// Mutation untuk menambah suara bermanfaat pada review
+export const voteReviewHelpful = mutation({
+  args: { reviewId: v.id("fragranceReviews") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Anda harus login untuk menandai bermanfaat");
+    }
+
+    const voter = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+
+    if (!voter) {
+      throw new Error("User tidak ditemukan");
+    }
+
+    const review = await ctx.db.get(args.reviewId);
+    if (!review) {
+      throw new Error("Review tidak ditemukan");
+    }
+
+    await ctx.db.patch(args.reviewId, {
+      helpfulVotes: review.helpfulVotes + 1,
+    });
+
+    const author = await ctx.db.get(review.userId);
+    if (author) {
+      const newHelpful = (author.helpfulCount ?? 0) + 1;
+      const badges = new Set(author.badges ?? []);
+      if (newHelpful >= 10) {
+        badges.add("Paling sering membantu");
+      }
+      await ctx.db.patch(author._id, {
+        helpfulCount: newHelpful,
+        badges: Array.from(badges),
+      });
+    }
+
+    return true;
   },
 });
 
