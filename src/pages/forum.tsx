@@ -63,6 +63,7 @@ interface Topic {
   authorName: string;
   views: number;
   likes: number;
+  score: number;
   isHot: boolean;
   isPinned: boolean;
   hasVideo: boolean;
@@ -81,6 +82,7 @@ interface Comment {
   authorId: Id<"users">;
   authorName: string;
   likes: number;
+  score: number;
   createdAt: number;
   updatedAt: number;
 }
@@ -114,6 +116,7 @@ export default function Forum() {
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [isTopicDetailOpen, setIsTopicDetailOpen] = useState(false);
   const [newCommentContent, setNewCommentContent] = useState("");
+  const [commentList, setCommentList] = useState<Comment[]>([]);
   const { toast } = useToast();
 
   // Convex queries and mutations
@@ -140,10 +143,12 @@ export default function Forum() {
   const allTags = useQuery(api.forum.getAllTags);
   const createTopicMutation = useMutation(api.forum.createTopic);
   const toggleLikeMutation = useMutation(api.forum.toggleTopicLike);
+  const toggleTopicVoteMutation = useMutation(api.forum.toggleTopicVote);
   const toggleBookmarkMutation = useMutation(api.bookmarks.toggleBookmark);
   const togglePinMutation = useMutation(api.forum.togglePinTopic);
   const incrementViewsMutation = useMutation(api.forum.incrementTopicViews);
   const createCommentMutation = useMutation(api.forum.createComment);
+  const toggleCommentVoteMutation = useMutation(api.forum.toggleCommentVote);
   const initializeCategoriesMutation = useMutation(
     api.forum.initializeCategories,
   );
@@ -155,6 +160,12 @@ export default function Forum() {
     api.forum.getCommentsByTopic,
     selectedTopic ? { topicId: selectedTopic._id } : "skip",
   );
+
+  useEffect(() => {
+    if (selectedTopicComments) {
+      setCommentList(selectedTopicComments as Comment[]);
+    }
+  }, [selectedTopicComments]);
 
   const currentUser = useQuery(
     api.users.getUserByToken,
@@ -278,6 +289,25 @@ export default function Forum() {
     }
   };
 
+  const handleVoteTopic = async (topicId: Id<"topics">, value: 1 | -1) => {
+    if (!user) {
+      toast({
+        title: "Login diperlukan",
+        description: "Anda harus login untuk vote!",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      const newScore = await toggleTopicVoteMutation({ topicId, value });
+      if (selectedTopic && selectedTopic._id === topicId) {
+        setSelectedTopic({ ...selectedTopic, score: newScore });
+      }
+    } catch (error) {
+      console.error("Error toggling vote:", error);
+    }
+  };
+
   const handleBookmarkTopic = async (topicId: Id<"topics">) => {
     if (!user) {
       toast({
@@ -379,6 +409,28 @@ export default function Forum() {
         description: "Gagal menambahkan komentar. Silakan coba lagi.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleVoteComment = async (
+    commentId: Id<"comments">,
+    value: 1 | -1,
+  ) => {
+    if (!user) {
+      toast({
+        title: "Login diperlukan",
+        description: "Anda harus login untuk vote!",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      const newScore = await toggleCommentVoteMutation({ commentId, value });
+      setCommentList((prev) =>
+        prev.map((c) => (c._id === commentId ? { ...c, score: newScore } : c)),
+      );
+    } catch (error) {
+      console.error("Error toggling comment vote:", error);
     }
   };
 
@@ -890,6 +942,24 @@ export default function Forum() {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                    handleVoteTopic(topic._id, 1);
+                                  }}
+                                  className="flex items-center gap-1 hover:text-green-600"
+                                >
+                                  Upvote {topic.score}
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleVoteTopic(topic._id, -1);
+                                  }}
+                                  className="flex items-center gap-1 hover:text-red-600"
+                                >
+                                  Downvote
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     if (navigator.share) {
                                       navigator.share({
                                         title: topic.title,
@@ -1011,6 +1081,24 @@ export default function Forum() {
                               >
                                 <Heart className="h-4 w-4" />
                                 <span>{topic.likes}</span>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleVoteTopic(topic._id, 1);
+                                }}
+                                className="flex items-center gap-1 hover:text-green-600"
+                              >
+                                Upvote {topic.score}
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleVoteTopic(topic._id, -1);
+                                }}
+                                className="flex items-center gap-1 hover:text-red-600"
+                              >
+                                Downvote
                               </button>
                               <button
                                 onClick={(e) => {
@@ -1159,6 +1247,18 @@ export default function Forum() {
                             <span>{selectedTopic.likes} Suka</span>
                           </button>
                           <button
+                            onClick={() => handleVoteTopic(selectedTopic._id, 1)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-[#718096]"
+                          >
+                            Upvote {selectedTopic.score}
+                          </button>
+                          <button
+                            onClick={() => handleVoteTopic(selectedTopic._id, -1)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-[#718096]"
+                          >
+                            Downvote
+                          </button>
+                          <button
                             onClick={() =>
                               handleBookmarkTopic(selectedTopic._id)
                             }
@@ -1195,9 +1295,7 @@ export default function Forum() {
 
                           <div className="flex items-center gap-2 text-[#718096]">
                             <MessageCircle className="h-5 w-5" />
-                            <span>
-                              {selectedTopicComments?.length || 0} Balasan
-                            </span>
+                            <span>{commentList.length} Balasan</span>
                           </div>
                           {currentUser &&
                             selectedTopic.authorId === currentUser._id && (
@@ -1216,18 +1314,17 @@ export default function Forum() {
                         {/* Comments Section Placeholder */}
                         <div className="space-y-4">
                           <h3 className="text-lg font-semibold text-[#2d3748]">
-                            Balasan ({selectedTopicComments?.length || 0})
+                            Balasan ({commentList.length})
                           </h3>
 
-                          {!selectedTopicComments ||
-                          selectedTopicComments.length === 0 ? (
+                          {commentList.length === 0 ? (
                             <div className="text-center py-8 text-[#718096]">
                               <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
                               <p>Belum ada balasan. Jadilah yang pertama!</p>
                             </div>
                           ) : (
                             <div className="space-y-4">
-                              {selectedTopicComments.map((comment) => (
+                              {commentList.map((comment) => (
                                 <div
                                   key={comment._id}
                                   className="neumorphic-card-inset p-4"
@@ -1250,6 +1347,21 @@ export default function Forum() {
                                       <p className="text-[#2d3748]">
                                         {comment.content}
                                       </p>
+                                      <div className="flex items-center gap-2 text-xs mt-2">
+                                        <button
+                                          onClick={() => handleVoteComment(comment._id, 1)}
+                                          className="hover:text-green-600"
+                                        >
+                                          Upvote
+                                        </button>
+                                        <span>{comment.score}</span>
+                                        <button
+                                          onClick={() => handleVoteComment(comment._id, -1)}
+                                          className="hover:text-red-600"
+                                        >
+                                          Downvote
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>

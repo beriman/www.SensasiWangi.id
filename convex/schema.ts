@@ -37,6 +37,7 @@ export default defineSchema({
     authorName: v.string(),
     views: v.number(),
     likes: v.number(),
+    score: v.number(),
     isHot: v.boolean(),
     isPinned: v.boolean(),
     hasVideo: v.boolean(),
@@ -59,6 +60,7 @@ export default defineSchema({
     authorId: v.id("users"),
     authorName: v.string(),
     likes: v.number(),
+    score: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -78,6 +80,26 @@ export default defineSchema({
   commentLikes: defineTable({
     commentId: v.id("comments"),
     userId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_comment", ["commentId"])
+    .index("by_user", ["userId"])
+    .index("by_comment_user", ["commentId", "userId"]),
+
+  topicVotes: defineTable({
+    topicId: v.id("topics"),
+    userId: v.id("users"),
+    value: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_topic", ["topicId"])
+    .index("by_user", ["userId"])
+    .index("by_topic_user", ["topicId", "userId"]),
+
+  commentVotes: defineTable({
+    commentId: v.id("comments"),
+    userId: v.id("users"),
+    value: v.number(),
     createdAt: v.number(),
   })
     .index("by_comment", ["commentId"])
