@@ -22,20 +22,28 @@ export const getTopics = query({
   handler: async (ctx, args) => {
     let query: any = ctx.db.query("topics");
 
-    // Filter berdasarkan kategori
-    if (args.category) {
-      query = query.withIndex("by_category", (q) =>
-        q.eq("category", args.category),
-      );
-    }
-
-    // Sorting
-    if (args.sortBy === "popular") {
-      query = query.withIndex("by_likes").order("desc");
-    } else if (args.sortBy === "views") {
-      query = query.withIndex("by_views").order("desc");
+    if (args.searchQuery) {
+      query = query.withSearchIndex("search_title", (q) => {
+        let search = q.search("title", args.searchQuery!);
+        if (args.category) search = search.eq("category", args.category);
+        return search;
+      });
     } else {
-      query = query.withIndex("by_created_at").order("desc");
+      // Filter berdasarkan kategori
+      if (args.category) {
+        query = query.withIndex("by_category", (q) =>
+          q.eq("category", args.category),
+        );
+      }
+
+      // Sorting hanya jika tidak melakukan search
+      if (args.sortBy === "popular") {
+        query = query.withIndex("by_likes").order("desc");
+      } else if (args.sortBy === "views") {
+        query = query.withIndex("by_views").order("desc");
+      } else {
+        query = query.withIndex("by_created_at").order("desc");
+      }
     }
 
     // Remove the id field from paginationOpts before passing to paginate
@@ -44,19 +52,7 @@ export const getTopics = query({
 
     let filteredPage = topics.page;
 
-    // Filter berdasarkan search query jika ada
-    if (args.searchQuery) {
-      filteredPage = filteredPage.filter(
-        (topic) =>
-          topic.title.toLowerCase().includes(args.searchQuery!.toLowerCase()) ||
-          topic.content
-            .toLowerCase()
-            .includes(args.searchQuery!.toLowerCase()) ||
-          topic.authorName
-            .toLowerCase()
-            .includes(args.searchQuery!.toLowerCase()),
-      );
-    }
+
 
     // Filter berdasarkan tag jika ada
     if (args.tag) {

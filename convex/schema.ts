@@ -51,7 +51,8 @@ export default defineSchema({
     .index("by_category", ["category"])
     .index("by_created_at", ["createdAt"])
     .index("by_likes", ["likes"])
-    .index("by_views", ["views"]),
+    .index("by_views", ["views"])
+    .searchIndex("search_title", { searchField: "title", filterFields: ["category"] }),
 
   comments: defineTable({
     topicId: v.id("topics"),
