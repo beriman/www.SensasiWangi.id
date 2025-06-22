@@ -134,6 +134,12 @@ export function Navbar() {
                     Polling
                   </Link>
                   <Link
+                    to="/faq"
+                    className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
+                  >
+                    FAQ
+                  </Link>
+                  <Link
                     to="/profile"
                     className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
                   >
@@ -178,6 +184,7 @@ export function Navbar() {
                       <Link to="/marketplace" className="neumorphic-button-sm w-full text-left">Marketplace</Link>
                       <Link to="/kursus" className="neumorphic-button-sm w-full text-left">Kursus</Link>
                       <Link to="/polling" className="neumorphic-button-sm w-full text-left">Polling</Link>
+                      <Link to="/faq" className="neumorphic-button-sm w-full text-left">FAQ</Link>
                       <Link to="/profile" className="neumorphic-button-sm w-full text-left">Profil</Link>
                       <UserButton
                         afterSignOutUrl="/"
@@ -209,6 +216,7 @@ export function Navbar() {
                     <SheetContent side="left" className="pt-10 flex flex-col space-y-4 neumorphic-bg">
                       <Link to="/login" className="neumorphic-button-sm w-full text-left">Masuk</Link>
                       <Link to="/signup" className="neumorphic-button-sm w-full text-left">Daftar</Link>
+                      <Link to="/faq" className="neumorphic-button-sm w-full text-left">FAQ</Link>
                     </SheetContent>
                   </Sheet>
                 </div>
