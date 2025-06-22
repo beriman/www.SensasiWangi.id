@@ -18,6 +18,7 @@ import Polling from "./pages/polling";
 import FAQ from "./pages/faq";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
+import OrderReviewPage from "./pages/order-review";
 import { Toaster } from "@/components/ui/toaster";
 import NotificationListener from "@/components/notification-listener";
 
@@ -46,6 +47,7 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/polling" element={<Polling />} />
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/order/:orderId/review" element={<OrderReviewPage />} />
         </Routes>
         {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
         <NotificationListener />

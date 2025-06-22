@@ -173,6 +173,38 @@ export const getOrdersByUser = query({
   },
 });
 
+// Query untuk mendapatkan order berdasarkan ID
+export const getOrderById = query({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.orderId);
+  },
+});
+
+// Query untuk mendapatkan review berdasarkan produk
+export const getReviewsByProduct = query({
+  args: { productId: v.id("products") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("reviews")
+      .withIndex("by_product", (q) => q.eq("productId", args.productId))
+      .order("desc")
+      .collect();
+  },
+});
+
+// Query untuk mendapatkan review berdasarkan target user
+export const getReviewsByTargetUser = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("reviews")
+      .withIndex("by_target_user", (q) => q.eq("targetUserId", args.userId))
+      .order("desc")
+      .collect();
+  },
+});
+
 // Mutation untuk membuat produk baru
 export const createProduct = mutation({
   args: {
@@ -470,6 +502,66 @@ export const updatePaymentStatus = mutation({
         updatedAt: Date.now(),
       });
     }
+  },
+});
+
+// Mutation untuk membuat review
+export const createReview = mutation({
+  args: {
+    orderId: v.id("orders"),
+    rating: v.number(),
+    comment: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Anda harus login untuk memberi ulasan");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+
+    if (!user) {
+      throw new Error("User tidak ditemukan");
+    }
+
+    const order = await ctx.db.get(args.orderId);
+    if (!order) {
+      throw new Error("Order tidak ditemukan");
+    }
+
+    if (order.buyerId !== user._id) {
+      throw new Error("Anda bukan pembeli pesanan ini");
+    }
+
+    if (order.orderStatus !== "delivered") {
+      throw new Error("Pesanan belum selesai");
+    }
+
+    const existing = await ctx.db
+      .query("reviews")
+      .withIndex("by_order", (q) => q.eq("orderId", args.orderId))
+      .unique();
+
+    if (existing) {
+      throw new Error("Ulasan sudah dibuat");
+    }
+
+    const now = Date.now();
+    await ctx.db.insert("reviews", {
+      orderId: args.orderId,
+      productId: order.productId,
+      reviewerId: user._id,
+      reviewerName: user.name || "Anonymous",
+      targetUserId: order.sellerId,
+      targetUserName: order.sellerName,
+      rating: args.rating,
+      comment: args.comment,
+      type: "seller",
+      createdAt: now,
+    });
   },
 });
 

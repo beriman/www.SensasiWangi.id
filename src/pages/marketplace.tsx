@@ -90,6 +90,14 @@ function ProductCard({
     api.marketplace.hasUserLikedProduct,
     user ? { productId: product._id, userId: user.id as any } : "skip",
   );
+  const reviews = useQuery(api.marketplace.getReviewsByProduct, {
+    productId: product._id,
+  });
+  const averageRating =
+    reviews && reviews.length > 0
+      ? reviews.reduce((sum: number, r: any) => sum + r.rating, 0) /
+        reviews.length
+      : 0;
 
   const handleCardClick = () => {
     incrementViews({ productId: product._id });
@@ -156,6 +164,19 @@ function ProductCard({
                   {product.title}
                 </h3>
                 <p className="text-sm text-[#718096]">{product.brand}</p>
+                {reviews && reviews.length > 0 && (
+                  <div className="flex items-center gap-1 text-xs">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <Star
+                        key={n}
+                        className={`h-3 w-3 ${
+                          averageRating >= n ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+                        }`}
+                      />
+                    ))}
+                    <span>{averageRating.toFixed(1)}</span>
+                  </div>
+                )}
               </div>
               <button
                 onClick={handleLike}
@@ -251,6 +272,19 @@ function ProductCard({
             {product.title}
           </h3>
           <p className="text-sm text-[#718096] line-clamp-1">{product.brand}</p>
+          {reviews && reviews.length > 0 && (
+            <div className="flex items-center gap-1 text-xs">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <Star
+                  key={n}
+                  className={`h-3 w-3 ${
+                    averageRating >= n ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+                  }`}
+                />
+              ))}
+              <span>{averageRating.toFixed(1)}</span>
+            </div>
+          )}
 
           <div className="flex items-center justify-between">
             <div className="space-y-1">
