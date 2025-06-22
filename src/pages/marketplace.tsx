@@ -45,6 +45,7 @@ import {
   Zap,
   Grid,
   List,
+  Bookmark,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -85,10 +86,15 @@ function ProductCard({
   const { user } = useUser();
   const navigate = useNavigate();
   const toggleLike = useMutation(api.marketplace.toggleProductLike);
+  const toggleBookmark = useMutation(api.bookmarks.toggleBookmark);
   const incrementViews = useMutation(api.marketplace.incrementProductViews);
   const hasLiked = useQuery(
     api.marketplace.hasUserLikedProduct,
     user ? { productId: product._id, userId: user.id as any } : "skip",
+  );
+  const bookmarks = useQuery(
+    api.bookmarks.getBookmarksByUser,
+    user ? { userId: user.id as any, type: "product" } : "skip",
   );
   const reviews = useQuery(api.marketplace.getReviewsByProduct, {
     productId: product._id,
@@ -108,6 +114,13 @@ function ProductCard({
     e.stopPropagation();
     if (user) {
       toggleLike({ productId: product._id });
+    }
+  };
+
+  const handleBookmark = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (user) {
+      toggleBookmark({ itemId: product._id, type: "product" });
     }
   };
 
@@ -188,6 +201,16 @@ function ProductCard({
                   className={`h-4 w-4 ${hasLiked ? "fill-current" : ""}`}
                 />
               </button>
+              <button
+                onClick={handleBookmark}
+                className={`p-2 rounded-full neumorphic-button-sm transition-colors ${
+                  bookmarks?.some((b: any) => b.data._id === product._id)
+                    ? "text-yellow-500"
+                    : "text-gray-400"
+                }`}
+              >
+                <Bookmark className="h-4 w-4" />
+              </button>
             </div>
 
             <div className="flex items-center justify-between">
@@ -258,6 +281,16 @@ function ProductCard({
           }`}
         >
           <Heart className={`h-4 w-4 ${hasLiked ? "fill-current" : ""}`} />
+        </button>
+        <button
+          onClick={handleBookmark}
+          className={`absolute top-3 right-12 p-2 rounded-full neumorphic-button-sm transition-colors ${
+            bookmarks?.some((b: any) => b.data._id === product._id)
+              ? "text-yellow-500"
+              : "text-gray-400"
+          }`}
+        >
+          <Bookmark className="h-4 w-4" />
         </button>
         <Badge
           className={`absolute top-3 left-3 ${getConditionColor(product.condition)}`}
@@ -337,6 +370,7 @@ function SambatProductCard({ product }: { product: any }) {
   const { user } = useUser();
   const navigate = useNavigate();
   const toggleLike = useMutation(api.marketplace.toggleSambatProductLike);
+  const toggleBookmark = useMutation(api.bookmarks.toggleBookmark);
   const incrementViews = useMutation(
     api.marketplace.incrementSambatProductViews,
   );
@@ -348,6 +382,10 @@ function SambatProductCard({ product }: { product: any }) {
     api.marketplace.hasUserEnrolledSambat,
     user ? { sambatProductId: product._id, userId: user.id as any } : "skip",
   );
+  const bookmarks = useQuery(
+    api.bookmarks.getBookmarksByUser,
+    user ? { userId: user.id as any, type: "product" } : "skip",
+  );
 
   const handleCardClick = () => {
     incrementViews({ sambatProductId: product._id });
@@ -358,6 +396,13 @@ function SambatProductCard({ product }: { product: any }) {
     e.stopPropagation();
     if (user) {
       toggleLike({ sambatProductId: product._id });
+    }
+  };
+
+  const handleBookmark = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (user) {
+      toggleBookmark({ itemId: product._id, type: "product" });
     }
   };
 
@@ -409,6 +454,16 @@ function SambatProductCard({ product }: { product: any }) {
           }`}
         >
           <Heart className={`h-4 w-4 ${hasLiked ? "fill-current" : ""}`} />
+        </button>
+        <button
+          onClick={handleBookmark}
+          className={`absolute top-3 right-12 p-2 rounded-full neumorphic-button-sm transition-colors ${
+            bookmarks?.some((b: any) => b.data._id === product._id)
+              ? "text-yellow-500"
+              : "text-gray-400"
+          }`}
+        >
+          <Bookmark className="h-4 w-4" />
         </button>
         <Badge className="absolute top-3 left-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white">
           SAMBAT

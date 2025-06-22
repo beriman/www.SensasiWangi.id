@@ -42,6 +42,7 @@ import {
   Send,
   Share,
   BarChart2,
+  Bookmark,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { usePaginatedQuery, useMutation, useQuery } from "convex/react";
@@ -136,6 +137,7 @@ export default function Forum() {
   const allTags = useQuery(api.forum.getAllTags);
   const createTopicMutation = useMutation(api.forum.createTopic);
   const toggleLikeMutation = useMutation(api.forum.toggleTopicLike);
+  const toggleBookmarkMutation = useMutation(api.bookmarks.toggleBookmark);
   const togglePinMutation = useMutation(api.forum.togglePinTopic);
   const incrementViewsMutation = useMutation(api.forum.incrementTopicViews);
   const createCommentMutation = useMutation(api.forum.createComment);
@@ -154,6 +156,11 @@ export default function Forum() {
   const currentUser = useQuery(
     api.users.getUserByToken,
     user ? { tokenIdentifier: user.id } : "skip",
+  );
+
+  const userBookmarks = useQuery(
+    api.bookmarks.getBookmarksByUser,
+    currentUser ? { userId: currentUser._id, type: "topic" } : "skip",
   );
 
   const userLikedTopics = useQuery(
@@ -263,6 +270,31 @@ export default function Forum() {
       toast({
         title: "Error",
         description: "Gagal melakukan like. Silakan coba lagi.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleBookmarkTopic = async (topicId: Id<"topics">) => {
+    if (!user) {
+      toast({
+        title: "Login diperlukan",
+        description: "Anda harus login untuk bookmark!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const bookmarked = await toggleBookmarkMutation({ itemId: topicId, type: "topic" });
+      toast({
+        title: bookmarked ? "Ditambahkan ke koleksi" : "Dihapus dari koleksi",
+      });
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+      toast({
+        title: "Error",
+        description: "Gagal mengubah bookmark.",
         variant: "destructive",
       });
     }
@@ -951,6 +983,19 @@ export default function Forum() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
+                                handleBookmarkTopic(topic._id);
+                              }}
+                              className={`flex items-center gap-1 hover:text-yellow-500 transition-colors ${
+                                userBookmarks?.some((b: any) => b.data._id === topic._id)
+                                  ? "text-yellow-500"
+                                  : ""
+                              }`}
+                            >
+                              <Bookmark className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 if (navigator.share) {
                                   navigator.share({
                                     title: topic.title,
@@ -1072,6 +1117,17 @@ export default function Forum() {
                               className={`h-5 w-5 ${userLikedTopics ? "fill-current" : ""}`}
                             />
                             <span>{selectedTopic.likes} Suka</span>
+                          </button>
+                          <button
+                            onClick={() => handleBookmarkTopic(selectedTopic._id)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-[#718096] ${
+                              userBookmarks?.some((b: any) => b.data._id === selectedTopic._id)
+                                ? "text-yellow-500"
+                                : ""
+                            }`}
+                          >
+                            <Bookmark className="h-5 w-5" />
+                            <span>Koleksi</span>
                           </button>
                           <button
                             onClick={() => {

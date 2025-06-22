@@ -5,6 +5,7 @@ import Dashboard from "./pages/dashboard";
 import Home from "./pages/home";
 import Forum from "./pages/forum";
 import Profile from "./pages/profile";
+import Collections from "./pages/collections";
 import Marketplace from "./pages/marketplace";
 import MarketplaceSell from "./pages/marketplace-sell";
 import MarketplaceSambat from "./pages/marketplace-sambat";
@@ -33,6 +34,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forum" element={<Forum />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/collections" element={<Collections />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/marketplace/sell" element={<MarketplaceSell />} />
           <Route path="/marketplace/sambat" element={<MarketplaceSambat />} />
