@@ -19,6 +19,9 @@ import {
   Star,
   Settings,
   Edit3,
+  Instagram,
+  Twitter,
+  Globe,
 } from "lucide-react";
 import ProtectedRoute from "@/components/wrappers/ProtectedRoute";
 
@@ -263,6 +266,54 @@ function ProfileContent() {
                           value={userProfile.profile.bio}
                         />
                       )}
+                      {userProfile?.profile?.instagram && (
+                        <InfoItem
+                          icon={<Instagram className="h-4 w-4" />}
+                          label="Instagram"
+                          value={
+                            <a
+                              href={userProfile.profile.instagram}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              {userProfile.profile.instagram}
+                            </a>
+                          }
+                        />
+                      )}
+                      {userProfile?.profile?.twitter && (
+                        <InfoItem
+                          icon={<Twitter className="h-4 w-4" />}
+                          label="Twitter"
+                          value={
+                            <a
+                              href={userProfile.profile.twitter}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              {userProfile.profile.twitter}
+                            </a>
+                          }
+                        />
+                      )}
+                      {userProfile?.profile?.website && (
+                        <InfoItem
+                          icon={<Globe className="h-4 w-4" />}
+                          label="Website"
+                          value={
+                            <a
+                              href={userProfile.profile.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              {userProfile.profile.website}
+                            </a>
+                          }
+                        />
+                      )}
                     </div>
                     <div className="space-y-4">
                       <InfoItem
@@ -431,14 +482,14 @@ function InfoItem({
 }: {
   icon: React.ReactNode;
   label: string;
-  value: string | number | null | undefined;
+  value: React.ReactNode;
 }) {
   return (
     <div className="flex items-center gap-3">
       <div className="text-[#667eea] flex-shrink-0">{icon}</div>
       <div className="flex-1">
         <div className="text-sm text-[#86868B]">{label}</div>
-        <div className="text-sm font-medium text-[#1D1D1F]">{value || "—"}</div>
+        <div className="text-sm font-medium text-[#1D1D1F]">{value ?? "—"}</div>
       </div>
     </div>
   );
