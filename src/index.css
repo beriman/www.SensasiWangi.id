@@ -244,3 +244,42 @@
     scroll-behavior: smooth;
   }
 }
+
+/* Dark mode overrides for neumorphic components */
+.dark .neumorphic-bg {
+  background: #1e1e20;
+}
+
+.dark .neumorphic-card,
+.dark .neumorphic-card-large,
+.dark .neumorphic-card-inset,
+.dark .neumorphic-button,
+.dark .neumorphic-button-sm,
+.dark .neumorphic-input,
+.dark .neumorphic-container,
+.dark .neumorphic-toast {
+  background: #27272a;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow:
+    4px 4px 8px rgba(0, 0, 0, 0.6),
+    -4px -4px 8px rgba(255, 255, 255, 0.05);
+}
+
+.dark .neumorphic-card:hover,
+.dark .neumorphic-card-large:hover,
+.dark .neumorphic-button:hover,
+.dark .neumorphic-button-sm:hover {
+  box-shadow:
+    6px 6px 12px rgba(0, 0, 0, 0.65),
+    -6px -6px 12px rgba(255, 255, 255, 0.06);
+}
+
+.dark .neumorphic-card-inset,
+.dark .neumorphic-button:active,
+.dark .neumorphic-button-sm:active,
+.dark .neumorphic-input:focus {
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.6),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.05);
+  outline: none;
+}
