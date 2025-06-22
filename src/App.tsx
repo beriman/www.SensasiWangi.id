@@ -15,6 +15,7 @@ import Database from "./pages/database";
 import Privacy from "./pages/privacy";
 import Terms from "./pages/terms";
 import { Toaster } from "@/components/ui/toaster";
+import NotificationListener from "@/components/notification-listener";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
           <Route path="/terms" element={<Terms />} />
         </Routes>
         {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
+        <NotificationListener />
         <Toaster />
       </>
     </Suspense>
