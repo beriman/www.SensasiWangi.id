@@ -319,6 +319,7 @@ export default defineSchema({
     foundedYear: v.optional(v.number()),
     category: v.string(), // "Local", "Artisan", "Commercial", "Niche"
     isActive: v.boolean(),
+    verificationStatus: v.string(), // "unverified", "pending", "approved", "rejected"
     totalProducts: v.number(),
     rating: v.number(),
     totalReviews: v.number(),
@@ -356,6 +357,7 @@ export default defineSchema({
       }),
     ),
     isActive: v.boolean(),
+    verificationStatus: v.string(),
     totalCreations: v.number(),
     rating: v.number(),
     totalReviews: v.number(),
@@ -390,6 +392,7 @@ export default defineSchema({
     price: v.optional(v.number()),
     sizes: v.array(v.string()), // ["30ml", "50ml", "100ml"]
     isDiscontinued: v.boolean(),
+    verificationStatus: v.string(),
     rating: v.number(),
     totalReviews: v.number(),
     totalLikes: v.number(),

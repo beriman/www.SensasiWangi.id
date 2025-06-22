@@ -26,6 +26,8 @@ import {
   Globe,
 } from "lucide-react";
 import { useState } from "react";
+import { useUser } from "@clerk/clerk-react";
+import { useToast } from "@/components/ui/use-toast";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useTranslation } from "react-i18next";
@@ -81,6 +83,39 @@ export default function Database() {
   const initializeSampleData = useMutation(
     api.marketplace.initializeSampleData,
   );
+  const requestVerification = useMutation(
+    api.marketplace.submitVerificationRequest,
+  );
+  const createSuggestion = useMutation(api.marketplace.createSuggestion);
+  const { user } = useUser();
+  const { toast } = useToast();
+
+  const handleVerify = async (type: string, id: string) => {
+    try {
+      await requestVerification({ itemType: type, itemId: id });
+      toast({ title: "Permintaan terkirim" });
+    } catch (_) {
+      toast({ title: "Error", variant: "destructive" });
+    }
+  };
+
+  const handleProposeEdit = async (type: string, item: any) => {
+    const message = prompt("Detail perubahan yang diusulkan?");
+    if (!message) return;
+    try {
+      await createSuggestion({
+        name: user?.fullName || "Anonymous",
+        email:
+          (user?.primaryEmailAddress as any)?.emailAddress || "unknown@user",
+        type: "suggestion",
+        subject: `Edit proposal for ${type} ${item.name}`,
+        message,
+      });
+      toast({ title: "Usulan dikirim" });
+    } catch (_) {
+      toast({ title: "Gagal", variant: "destructive" });
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
@@ -283,6 +318,41 @@ export default function Database() {
                               </div>
                             )}
                           </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge
+                              className={
+                                brand.verificationStatus === "approved"
+                                  ? "bg-green-100 text-green-800"
+                                  : brand.verificationStatus === "pending"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : brand.verificationStatus === "rejected"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }
+                            >
+                              {brand.verificationStatus}
+                            </Badge>
+                            {user && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="neumorphic-button-sm h-7 px-2 text-xs"
+                                onClick={() => handleProposeEdit("brand", brand)}
+                              >
+                                Edit
+                              </Button>
+                            )}
+                            {user && brand.verificationStatus === "unverified" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="neumorphic-button-sm h-7 px-2 text-xs"
+                                onClick={() => handleVerify("brand", brand._id)}
+                              >
+                                Verify
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0">
@@ -406,6 +476,41 @@ export default function Database() {
                               {perfumer.experience}
                             </Badge>
                           </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge
+                              className={
+                                perfumer.verificationStatus === "approved"
+                                  ? "bg-green-100 text-green-800"
+                                  : perfumer.verificationStatus === "pending"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : perfumer.verificationStatus === "rejected"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }
+                            >
+                              {perfumer.verificationStatus}
+                            </Badge>
+                            {user && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="neumorphic-button-sm h-7 px-2 text-xs"
+                                onClick={() => handleProposeEdit("perfumer", perfumer)}
+                              >
+                                Edit
+                              </Button>
+                            )}
+                            {user && perfumer.verificationStatus === "unverified" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="neumorphic-button-sm h-7 px-2 text-xs"
+                                onClick={() => handleVerify("perfumer", perfumer._id)}
+                              >
+                                Verify
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0">
@@ -511,7 +616,42 @@ export default function Database() {
                               </CardDescription>
                             )}
                           </div>
-                          <Heart className="h-5 w-5 text-[#718096] hover:text-red-500 cursor-pointer transition-colors" />
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge
+                              className={
+                                fragrance.verificationStatus === "approved"
+                                  ? "bg-green-100 text-green-800"
+                                  : fragrance.verificationStatus === "pending"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : fragrance.verificationStatus === "rejected"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }
+                            >
+                              {fragrance.verificationStatus}
+                            </Badge>
+                            {user && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="neumorphic-button-sm h-7 px-2 text-xs"
+                                onClick={() => handleProposeEdit("fragrance", fragrance)}
+                              >
+                                Edit
+                              </Button>
+                            )}
+                            {user && fragrance.verificationStatus === "unverified" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="neumorphic-button-sm h-7 px-2 text-xs"
+                                onClick={() => handleVerify("fragrance", fragrance._id)}
+                              >
+                                Verify
+                              </Button>
+                            )}
+                            <Heart className="h-5 w-5 text-[#718096] hover:text-red-500 cursor-pointer transition-colors" />
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0">
