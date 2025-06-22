@@ -1,0 +1,64 @@
+{
+  "home": {
+    "hero": {
+      "heading": "Perfume Enthusiast Forum",
+      "tagline": "A neumorphic community connecting perfume lovers and creators with gamified interactions and sleek design inspired by balanced stones.",
+      "buttonStart": "Get Started"
+    },
+    "features": {
+      "community": {
+        "title": "Community Hub",
+        "desc": "Connect with fellow perfume enthusiasts and creators in our vibrant community"
+      },
+      "gamified": {
+        "title": "Gamified Experience",
+        "desc": "Earn badges, level up, and unlock rewards for your contributions and expertise"
+      },
+      "noteExplorer": {
+        "title": "Note Explorer",
+        "desc": "Discover and explore scent families with our interactive perfume note visualization"
+      },
+      "expertDiscussions": {
+        "title": "Expert Discussions",
+        "desc": "Share reviews, formulas, and insights with moderated quality discussions"
+      }
+    },
+    "navCards": {
+      "forum": {
+        "title": "Forum",
+        "desc": "Join discussions, share reviews, and connect with fellow fragrance enthusiasts"
+      },
+      "marketplace": {
+        "title": "Marketplace",
+        "desc": "Buy and sell rare fragrances, discover exclusive collections"
+      },
+      "kursus": {
+        "title": "Courses",
+        "desc": "Learn perfumery techniques from master perfumers and industry experts"
+      },
+      "database": {
+        "title": "Database",
+        "desc": "Explore a full perfume database with notes and compositions"
+      }
+    }
+  },
+  "database": {
+    "title": "Indonesian Perfume Database",
+    "subtitle": "Explore a comprehensive collection of Indonesian brands, perfumes and perfumers with detailed information and community reviews",
+    "initData": "Initialize Sample Data",
+    "brand": "brand",
+    "perfumer": "perfumer",
+    "fragrance": "fragrance",
+    "searchPlaceholder": "Search {{item}}...",
+    "categories": {
+      "brand": "Brand Categories",
+      "perfumer": "Experience Levels",
+      "fragrance": "Fragrance Categories"
+    },
+    "noneFound": "No {{item}} found",
+    "changeSearch": "Try adjusting your search terms or category filter",
+    "allBrands": "All Indonesian Brands",
+    "allPerfumers": "All Indonesian Perfumers",
+    "allFragrances": "All Indonesian Fragrances"
+  }
+}

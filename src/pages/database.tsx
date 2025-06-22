@@ -28,6 +28,7 @@ import {
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useTranslation } from "react-i18next";
 
 const FRAGRANCE_CATEGORIES = [
   { name: "Citrus", color: "bg-yellow-100 text-yellow-800" },
@@ -56,6 +57,7 @@ export default function Database() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("brands");
+  const { t } = useTranslation();
 
   // Queries
   const databaseStats = useQuery(api.marketplace.getDatabaseStats);
@@ -93,11 +95,10 @@ export default function Database() {
               </div>
             </div>
             <h1 className="text-5xl font-bold text-[#2d3748] mb-6">
-              Database Parfum Indonesia
+              {t('database.title')}
             </h1>
             <p className="text-xl text-[#718096] max-w-2xl mx-auto">
-              Jelajahi koleksi lengkap brand, parfum, dan perfumer Indonesia
-              dengan informasi detail dan ulasan dari komunitas
+              {t('database.subtitle')}
             </p>
 
             {/* Stats */}
@@ -108,21 +109,21 @@ export default function Database() {
                   <div className="text-2xl font-bold text-[#2d3748]">
                     {databaseStats.totalBrands}
                   </div>
-                  <div className="text-sm text-[#718096]">Brand</div>
+                  <div className="text-sm text-[#718096]">{t('database.brand')}</div>
                 </div>
                 <div className="neumorphic-card p-6 text-center">
                   <User className="h-8 w-8 text-[#667eea] mx-auto mb-2" />
                   <div className="text-2xl font-bold text-[#2d3748]">
                     {databaseStats.totalPerfumers}
                   </div>
-                  <div className="text-sm text-[#718096]">Perfumer</div>
+                  <div className="text-sm text-[#718096]">{t('database.perfumer')}</div>
                 </div>
                 <div className="neumorphic-card p-6 text-center">
                   <Sparkles className="h-8 w-8 text-[#667eea] mx-auto mb-2" />
                   <div className="text-2xl font-bold text-[#2d3748]">
                     {databaseStats.totalFragrances}
                   </div>
-                  <div className="text-sm text-[#718096]">Parfum</div>
+                  <div className="text-sm text-[#718096]">{t('database.fragrance')}</div>
                 </div>
                 <div className="neumorphic-card p-6 text-center">
                   <Star className="h-8 w-8 text-[#667eea] mx-auto mb-2" />
@@ -143,7 +144,7 @@ export default function Database() {
                     onClick={() => initializeSampleData()}
                     className="neumorphic-button h-12 px-8 text-[#2d3748] bg-transparent font-semibold border-0 shadow-none"
                   >
-                    Inisialisasi Data Sample
+                    {t('database.initData')}
                   </Button>
                 </div>
               )}
@@ -161,21 +162,21 @@ export default function Database() {
                 className="data-[state=active]:neumorphic-button-pressed"
               >
                 <Building2 className="h-4 w-4 mr-2" />
-                Brand
+                {t('database.brand')}
               </TabsTrigger>
               <TabsTrigger
                 value="perfumers"
                 className="data-[state=active]:neumorphic-button-pressed"
               >
                 <User className="h-4 w-4 mr-2" />
-                Perfumer
+                {t('database.perfumer')}
               </TabsTrigger>
               <TabsTrigger
                 value="fragrances"
                 className="data-[state=active]:neumorphic-button-pressed"
               >
                 <Sparkles className="h-4 w-4 mr-2" />
-                Parfum
+                {t('database.fragrance')}
               </TabsTrigger>
             </TabsList>
 
@@ -185,7 +186,7 @@ export default function Database() {
                 <div className="flex-1 relative">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#718096]" />
                   <Input
-                    placeholder={`Cari ${activeTab === "brands" ? "brand" : activeTab === "perfumers" ? "perfumer" : "parfum"}...`}
+                    placeholder={t('database.searchPlaceholder', { item: t(`database.${activeTab}`) })}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-12 h-14 text-lg neumorphic-input"
@@ -202,10 +203,10 @@ export default function Database() {
             <div className="mb-12">
               <h2 className="text-2xl font-bold text-[#2d3748] mb-6">
                 {activeTab === "brands"
-                  ? "Kategori Brand"
+                  ? t('database.categories.brand')
                   : activeTab === "perfumers"
-                    ? "Level Pengalaman"
-                    : "Kategori Parfum"}
+                    ? t('database.categories.perfumer')
+                    : t('database.categories.fragrance')}
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {(activeTab === "brands"
@@ -244,8 +245,8 @@ export default function Database() {
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-[#2d3748]">
                     {selectedCategory
-                      ? `Brand ${selectedCategory}`
-                      : "Semua Brand Indonesia"}
+                      ? `${t('database.brand')} ${selectedCategory}`
+                      : t('database.allBrands')}
                   </h2>
                   <span className="text-[#718096]">
                     {brands?.page?.length || 0} brand ditemukan
@@ -356,8 +357,8 @@ export default function Database() {
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-[#2d3748]">
                     {selectedCategory
-                      ? `Perfumer ${selectedCategory}`
-                      : "Semua Perfumer Indonesia"}
+                      ? `${t('database.perfumer')} ${selectedCategory}`
+                      : t('database.allPerfumers')}
                   </h2>
                   <span className="text-[#718096]">
                     {perfumers?.page?.length || 0} perfumer ditemukan
@@ -471,8 +472,8 @@ export default function Database() {
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-[#2d3748]">
                     {selectedCategory
-                      ? `Parfum ${selectedCategory}`
-                      : "Semua Parfum Indonesia"}
+                      ? `${t('database.fragrance')} ${selectedCategory}`
+                      : t('database.allFragrances')}
                   </h2>
                   <span className="text-[#718096]">
                     {fragrances?.page?.length || 0} parfum ditemukan
@@ -596,16 +597,10 @@ export default function Database() {
               <div className="neumorphic-card p-12 max-w-md mx-auto">
                 <Palette className="h-16 w-16 text-[#718096] mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-[#2d3748] mb-2">
-                  Tidak ada{" "}
-                  {activeTab === "brands"
-                    ? "brand"
-                    : activeTab === "perfumers"
-                      ? "perfumer"
-                      : "parfum"}{" "}
-                  ditemukan
+                  {t('database.noneFound', { item: t(`database.${activeTab}`) })}
                 </h3>
                 <p className="text-[#718096]">
-                  Coba ubah kata kunci pencarian atau filter kategori
+                  {t('database.changeSearch')}
                 </p>
               </div>
             </div>

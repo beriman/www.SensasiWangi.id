@@ -1,0 +1,64 @@
+{
+  "home": {
+    "hero": {
+      "heading": "Parfum Enthusiast Forum",
+      "tagline": "Komunitas neumorfik yang menghubungkan pencinta parfum dan kreator dengan interaksi bergamifikasi dan desain elegan terinspirasi batu seimbang.",
+      "buttonStart": "Mulai Sekarang"
+    },
+    "features": {
+      "community": {
+        "title": "Community Hub",
+        "desc": "Terhubung dengan sesama penggemar dan kreator parfum di komunitas kami"
+      },
+      "gamified": {
+        "title": "Gamified Experience",
+        "desc": "Dapatkan lencana, naik level, dan buka hadiah atas kontribusi dan keahlian Anda"
+      },
+      "noteExplorer": {
+        "title": "Note Explorer",
+        "desc": "Jelajahi keluarga aroma lewat visualisasi catatan parfum interaktif"
+      },
+      "expertDiscussions": {
+        "title": "Expert Discussions",
+        "desc": "Bagikan ulasan, formula, dan wawasan dengan diskusi berkualitas termoderasi"
+      }
+    },
+    "navCards": {
+      "forum": {
+        "title": "Forum",
+        "desc": "Bergabung dalam diskusi, bagikan ulasan, dan terhubung dengan pencinta parfum lainnya"
+      },
+      "marketplace": {
+        "title": "Marketplace",
+        "desc": "Beli dan jual parfum langka, temukan koleksi eksklusif"
+      },
+      "kursus": {
+        "title": "Kursus",
+        "desc": "Pelajari teknik pembuatan parfum dari para ahli"
+      },
+      "database": {
+        "title": "Database",
+        "desc": "Jelajahi database parfum lengkap dengan catatan dan komposisi"
+      }
+    }
+  },
+  "database": {
+    "title": "Database Parfum Indonesia",
+    "subtitle": "Jelajahi koleksi lengkap brand, parfum, dan perfumer Indonesia dengan informasi detail dan ulasan dari komunitas",
+    "initData": "Inisialisasi Data Sample",
+    "brand": "brand",
+    "perfumer": "perfumer",
+    "fragrance": "parfum",
+    "searchPlaceholder": "Cari {{item}}...",
+    "categories": {
+      "brand": "Kategori Brand",
+      "perfumer": "Level Pengalaman",
+      "fragrance": "Kategori Parfum"
+    },
+    "noneFound": "Tidak ada {{item}} ditemukan",
+    "changeSearch": "Coba ubah kata kunci pencarian atau filter kategori",
+    "allBrands": "Semua Brand Indonesia",
+    "allPerfumers": "Semua Perfumer Indonesia",
+    "allFragrances": "Semua Parfum Indonesia"
+  }
+}
