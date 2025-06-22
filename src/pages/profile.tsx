@@ -52,6 +52,15 @@ function ProfileContent() {
     api.marketplace.getUserProfile,
     userData ? { userId: userData._id } : "skip",
   );
+  const userReviews = useQuery(
+    api.marketplace.getReviewsByTargetUser,
+    userData ? { userId: userData._id } : "skip",
+  );
+  const averageRating =
+    userReviews && userReviews.length > 0
+      ? userReviews.reduce((sum: number, r: any) => sum + r.rating, 0) /
+        userReviews.length
+      : 0;
 
   const formatDate = (timestamp: number | Date | undefined) => {
     if (!timestamp) return "—";
@@ -204,6 +213,15 @@ function ProfileContent() {
                     </div>
                     <span className="text-sm font-semibold text-[#1D1D1F]">
                       {totalViews}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Star className="h-4 w-4 text-[#667eea]" />
+                      <span className="text-sm text-[#86868B]">Rating</span>
+                    </div>
+                    <span className="text-sm font-semibold text-[#1D1D1F]">
+                      {averageRating.toFixed(1)}
                     </span>
                   </div>
                 </div>
