@@ -11,6 +11,7 @@ import MarketplaceSell from "./pages/marketplace-sell";
 import MyShop from "./pages/my-shop";
 import MarketplaceSambat from "./pages/marketplace-sambat";
 import MarketplaceSambatCreate from "./pages/marketplace-sambat-create";
+import MarketplaceSambatDetail from "./pages/marketplace-sambat-detail";
 import MarketplaceProduct from "./pages/marketplace-product";
 import Admin from "./pages/admin";
 import Kursus from "./pages/kursus";
@@ -47,6 +48,10 @@ function App() {
           <Route path="/marketplace/sell" element={<MarketplaceSell />} />
           <Route path="/marketplace/my-shop" element={<MyShop />} />
           <Route path="/marketplace/sambat" element={<MarketplaceSambat />} />
+          <Route
+            path="/marketplace/sambat/:id"
+            element={<MarketplaceSambatDetail />}
+          />
           <Route
             path="/marketplace/sambat/create"
             element={<MarketplaceSambatCreate />}

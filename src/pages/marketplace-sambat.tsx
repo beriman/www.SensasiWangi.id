@@ -85,7 +85,7 @@ function SambatProductCard({ product }: { product: any }) {
 
   const handleCardClick = () => {
     incrementViews({ sambatProductId: product._id });
-    // Navigate to detail page (will be created later)
+    navigate(`/marketplace/sambat/${product._id}`);
   };
 
   const handleLike = (e: React.MouseEvent) => {
