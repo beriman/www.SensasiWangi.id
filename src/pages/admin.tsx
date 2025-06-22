@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import {
@@ -27,6 +29,7 @@ import {
   TrendingUp,
   Shield,
   Settings,
+  Package,
   Eye,
   CheckCircle,
   XCircle,
@@ -42,6 +45,10 @@ export default function Admin() {
     pendingReports: 12,
     activeDiscussions: 89,
   };
+
+  const pendingOrders = useQuery(api.marketplace.getPendingOrders);
+  const verifyPayment = useMutation(api.marketplace.verifyOrderPayment);
+  const updateStatus = useMutation(api.marketplace.updateOrderStatus);
 
   const recentReports = [
     {
@@ -117,6 +124,13 @@ export default function Admin() {
             >
               <BarChart3 className="w-4 h-4 mr-2" />
               Ringkasan
+            </TabsTrigger>
+            <TabsTrigger
+              value="orders"
+              className="neumorphic-button-sm data-[state=active]:bg-white data-[state=active]:shadow-inner text-[#1D1D1F]"
+            >
+              <Package className="w-4 h-4 mr-2" />
+              Pesanan
             </TabsTrigger>
             <TabsTrigger
               value="moderation"
@@ -295,6 +309,81 @@ export default function Admin() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="orders" className="space-y-6">
+            <Card className="neumorphic-card border-0">
+              <CardHeader>
+                <CardTitle className="text-[#1D1D1F]">
+                  Order Pending
+                </CardTitle>
+                <CardDescription className="text-[#86868B]">
+                  Verifikasi pembayaran dan proses pengiriman
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[#1D1D1F]">Produk</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Pembeli</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Total</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingOrders?.map((order) => (
+                      <TableRow key={order._id}>
+                        <TableCell className="text-[#1D1D1F]">
+                          {order.productTitle}
+                        </TableCell>
+                        <TableCell className="text-[#86868B]">
+                          {order.buyerName}
+                        </TableCell>
+                        <TableCell className="text-[#86868B]">
+                          {order.totalAmount.toLocaleString("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                            minimumFractionDigits: 0,
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            {order.orderStatus === "pending" && (
+                              <Button
+                                size="sm"
+                                className="neumorphic-button-sm h-8 px-3 text-xs text-green-600"
+                                onClick={() => verifyPayment({ orderId: order._id })}
+                              >
+                                Verifikasi
+                              </Button>
+                            )}
+                            {order.orderStatus === "confirmed" && (
+                              <Button
+                                size="sm"
+                                className="neumorphic-button-sm h-8 px-3 text-xs"
+                                onClick={() => {
+                                  const resi = prompt("Nomor Resi:");
+                                  if (resi) {
+                                    updateStatus({
+                                      orderId: order._id,
+                                      status: "shipped",
+                                      trackingNumber: resi,
+                                    });
+                                  }
+                                }}
+                              >
+                                Kirim
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="moderation" className="space-y-6">

@@ -509,6 +509,68 @@ export const updatePaymentStatus = mutation({
   },
 });
 
+// Query untuk mendapatkan order yang belum dikirim
+export const getPendingOrders = query({
+  handler: async (ctx) => {
+    const pending = await ctx.db
+      .query("orders")
+      .withIndex("by_order_status", (q) => q.eq("orderStatus", "pending"))
+      .order("desc")
+      .collect();
+
+    const confirmed = await ctx.db
+      .query("orders")
+      .withIndex("by_order_status", (q) => q.eq("orderStatus", "confirmed"))
+      .order("desc")
+      .collect();
+
+    return [...pending, ...confirmed];
+  },
+});
+
+// Mutation untuk verifikasi pembayaran order
+export const verifyOrderPayment = mutation({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) {
+      throw new Error("Order tidak ditemukan");
+    }
+
+    await ctx.db.patch(args.orderId, {
+      paymentStatus: "paid",
+      orderStatus: "confirmed",
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Mutation untuk update status order (pengiriman atau selesai)
+export const updateOrderStatus = mutation({
+  args: {
+    orderId: v.id("orders"),
+    status: v.string(),
+    trackingNumber: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) {
+      throw new Error("Order tidak ditemukan");
+    }
+
+    const patch: Record<string, any> = {
+      orderStatus: args.status,
+      updatedAt: Date.now(),
+    };
+
+    if (args.trackingNumber) {
+      patch.trackingNumber = args.trackingNumber;
+    }
+
+    await ctx.db.patch(args.orderId, patch);
+  },
+});
+
 // Mutation untuk membuat review
 export const createReview = mutation({
   args: {
