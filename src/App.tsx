@@ -14,6 +14,7 @@ import Kursus from "./pages/kursus";
 import Database from "./pages/database";
 import Privacy from "./pages/privacy";
 import Terms from "./pages/terms";
+import Polling from "./pages/polling";
 import { Toaster } from "@/components/ui/toaster";
 import NotificationListener from "@/components/notification-listener";
 
@@ -38,6 +39,7 @@ function App() {
           <Route path="/database" element={<Database />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/polling" element={<Polling />} />
         </Routes>
         {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
         <NotificationListener />
