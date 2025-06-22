@@ -39,6 +39,7 @@ import { Id } from "../../convex/_generated/dataModel";
 import { useUser } from "@clerk/clerk-react";
 
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Topic {
   _id: Id<"topics">;
@@ -95,6 +96,7 @@ export default function Forum() {
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [isTopicDetailOpen, setIsTopicDetailOpen] = useState(false);
   const [newCommentContent, setNewCommentContent] = useState("");
+  const { toast } = useToast();
 
   // Convex queries and mutations
   const topicsResult = usePaginatedQuery(
@@ -143,12 +145,20 @@ export default function Forum() {
 
   const handleCreateTopic = async () => {
     if (!newTopicTitle.trim() || !newTopicContent.trim()) {
-      alert("Judul dan konten tidak boleh kosong!");
+      toast({
+        title: "Error",
+        description: "Judul dan konten tidak boleh kosong!",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!user) {
-      alert("Anda harus login untuk membuat topik!");
+      toast({
+        title: "Login diperlukan",
+        description: "Anda harus login untuk membuat topik!",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -168,7 +178,9 @@ export default function Forum() {
       setEmbeddedVideos([]);
       setIsNewTopicOpen(false);
 
-      alert("Topik berhasil dibuat!");
+      toast({
+        title: "Topik berhasil dibuat!",
+      });
 
       // Update category counts setelah membuat topik baru
       setTimeout(() => {
@@ -176,21 +188,36 @@ export default function Forum() {
       }, 1000);
     } catch (error) {
       console.error("Error creating topic:", error);
-      alert("Gagal membuat topik. Silakan coba lagi.");
+      toast({
+        title: "Error",
+        description: "Gagal membuat topik. Silakan coba lagi.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleLikeTopic = async (topicId: Id<"topics">) => {
     if (!user) {
-      alert("Anda harus login untuk like topik!");
+      toast({
+        title: "Login diperlukan",
+        description: "Anda harus login untuk like topik!",
+        variant: "destructive",
+      });
       return;
     }
 
     try {
-      await toggleLikeMutation({ topicId });
+      const liked = await toggleLikeMutation({ topicId });
+      toast({
+        title: liked ? "Topik disukai" : "Batal menyukai topik",
+      });
     } catch (error) {
       console.error("Error toggling like:", error);
-      alert("Gagal melakukan like. Silakan coba lagi.");
+      toast({
+        title: "Error",
+        description: "Gagal melakukan like. Silakan coba lagi.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -208,12 +235,20 @@ export default function Forum() {
 
   const handleCreateComment = async () => {
     if (!newCommentContent.trim()) {
-      alert("Komentar tidak boleh kosong!");
+      toast({
+        title: "Error",
+        description: "Komentar tidak boleh kosong!",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!user || !selectedTopic) {
-      alert("Anda harus login untuk berkomentar!");
+      toast({
+        title: "Login diperlukan",
+        description: "Anda harus login untuk berkomentar!",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -224,10 +259,16 @@ export default function Forum() {
       });
 
       setNewCommentContent("");
-      alert("Komentar berhasil ditambahkan!");
+      toast({
+        title: "Komentar berhasil ditambahkan!",
+      });
     } catch (error) {
       console.error("Error creating comment:", error);
-      alert("Gagal menambahkan komentar. Silakan coba lagi.");
+      toast({
+        title: "Error",
+        description: "Gagal menambahkan komentar. Silakan coba lagi.",
+        variant: "destructive",
+      });
     }
   };
 
