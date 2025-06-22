@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { Route, Routes, useRoutes } from "react-router-dom";
+import { Route, Routes, useRoutes, Navigate } from "react-router-dom";
 import routes from "tempo-routes";
 import Dashboard from "./pages/dashboard";
 import Home from "./pages/home";
@@ -32,6 +32,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forum" element={<Forum />} />
+          <Route path="/Forum" element={<Navigate to="/forum" replace />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/marketplace/sell" element={<MarketplaceSell />} />
