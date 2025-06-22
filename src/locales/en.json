@@ -1,0 +1,43 @@
+{
+  "home": {
+    "heroTitle": "Parfum Enthusiast Forum",
+    "heroSubtitle": "A neumorphic community connecting perfume lovers and creators with gamified interactions and sleek design inspired by balanced stones.",
+    "getStarted": "Get Started",
+    "startNow": "Start Now",
+    "forum": "Forum",
+    "marketplace": "Marketplace",
+    "kursus": "Courses",
+    "database": "Database"
+  },
+  "database": {
+    "headerTitle": "Indonesian Perfume Database",
+    "headerSubtitle": "Explore a comprehensive collection of Indonesian brands, perfumes, and perfumers with detailed information and community reviews",
+    "categoryBrand": "Brand Category",
+    "categoryExperience": "Experience Level",
+    "categoryFragrance": "Fragrance Category",
+    "searchPlaceholderBrand": "Search brand...",
+    "searchPlaceholderPerfumer": "Search perfumer...",
+    "searchPlaceholderFragrance": "Search fragrance...",
+    "initSampleData": "Initialize Sample Data",
+    "brandFound": "{{count}} brand found",
+    "perfumerFound": "{{count}} perfumer found",
+    "fragranceFound": "{{count}} fragrance found",
+    "noBrand": "No brand found",
+    "noPerfumer": "No perfumer found",
+    "noFragrance": "No fragrance found",
+    "changeKeywords": "Try changing the search keywords or category filter",
+    "allBrands": "All Indonesian Brands",
+    "allPerfumers": "All Indonesian Perfumers",
+    "allFragrances": "All Indonesian Fragrances"
+  },
+  "navbar": {
+    "dashboard": "Dashboard",
+    "forum": "Forum",
+    "marketplace": "Marketplace",
+    "kursus": "Courses",
+    "polling": "Polling",
+    "faq": "FAQ",
+    "profile": "Profile",
+    "login": "Login"
+  }
+}

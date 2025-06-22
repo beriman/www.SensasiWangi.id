@@ -14,6 +14,7 @@ import {
   Award,
 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const FEATURES = [
   {
@@ -66,6 +67,7 @@ const TESTIMONIALS = [
 function App() {
   const { user, isLoaded: isUserLoaded } = useUser();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
@@ -92,12 +94,10 @@ function App() {
             </div>
 
             <h1 className="text-7xl font-bold text-[#2d3748] tracking-tight max-w-[900px] leading-[1.05] bg-gradient-to-br from-[#2d3748] to-[#4a5568] bg-clip-text text-transparent">
-              Parfum Enthusiast Forum
+              {t('home.heroTitle')}
             </h1>
             <p className="text-2xl text-[#718096] max-w-[700px] leading-relaxed font-light">
-              A neumorphic community connecting perfume lovers and creators with
-              gamified interactions and sleek design inspired by balanced
-              stones.
+              {t('home.heroSubtitle')}
             </p>
 
             <div className="flex gap-4 pt-8">
@@ -111,14 +111,14 @@ function App() {
                       className="neumorphic-button h-14 px-10 text-lg text-[#2d3748] bg-transparent font-semibold border-0 shadow-none transition-all"
                     >
                       <ArrowRight className="mr-2 h-5 w-5" />
-                      Dashboard
+                      {t('navbar.dashboard')}
                     </Button>
                   </Authenticated>
                   <Unauthenticated>
                     <Link to="/login">
                       <Button className="neumorphic-button h-14 px-10 text-lg text-[#2d3748] bg-transparent font-semibold border-0 shadow-none transition-all">
                         <ArrowRight className="mr-2 h-5 w-5" />
-                        Mulai Sekarang
+                        {t('home.startNow')}
                       </Button>
                     </Link>
                   </Unauthenticated>
@@ -136,7 +136,7 @@ function App() {
                 <MessageCircle className="h-12 w-12" />
               </div>
               <h3 className="text-2xl font-bold text-[#2d3748] mb-6 group-hover:text-[#667eea] transition-colors">
-                Forum
+                {t('home.forum')}
               </h3>
               <p className="text-lg text-[#718096] leading-relaxed">
                 Join discussions, share reviews, and connect with fellow
@@ -152,7 +152,7 @@ function App() {
                 <Trophy className="h-12 w-12" />
               </div>
               <h3 className="text-2xl font-bold text-[#2d3748] mb-6 group-hover:text-[#667eea] transition-colors">
-                Marketplace
+                {t('home.marketplace')}
               </h3>
               <p className="text-lg text-[#718096] leading-relaxed">
                 Buy and sell rare fragrances, discover exclusive collections
@@ -167,7 +167,7 @@ function App() {
                 <Award className="h-12 w-12" />
               </div>
               <h3 className="text-2xl font-bold text-[#2d3748] mb-6 group-hover:text-[#667eea] transition-colors">
-                Kursus
+                {t('home.kursus')}
               </h3>
               <p className="text-lg text-[#718096] leading-relaxed">
                 Learn perfumery techniques from master perfumers and industry
@@ -183,7 +183,7 @@ function App() {
                 <Palette className="h-12 w-12" />
               </div>
               <h3 className="text-2xl font-bold text-[#2d3748] mb-6 group-hover:text-[#667eea] transition-colors">
-                Database
+                {t('home.database')}
               </h3>
               <p className="text-lg text-[#718096] leading-relaxed">
                 Jelajahi database parfum lengkap dengan catatan dan komposisi

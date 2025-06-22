@@ -1,0 +1,43 @@
+{
+  "home": {
+    "heroTitle": "Parfum Enthusiast Forum",
+    "heroSubtitle": "Komunitas neumorfik yang menghubungkan pecinta parfum dan kreator dengan interaksi gamified dan desain menawan terinspirasi dari batu seimbang.",
+    "getStarted": "Mulai",
+    "startNow": "Mulai Sekarang",
+    "forum": "Forum",
+    "marketplace": "Marketplace",
+    "kursus": "Kursus",
+    "database": "Database"
+  },
+  "database": {
+    "headerTitle": "Database Parfum Indonesia",
+    "headerSubtitle": "Jelajahi koleksi lengkap brand, parfum, dan perfumer Indonesia dengan informasi detail dan ulasan dari komunitas",
+    "categoryBrand": "Kategori Brand",
+    "categoryExperience": "Level Pengalaman",
+    "categoryFragrance": "Kategori Parfum",
+    "searchPlaceholderBrand": "Cari brand...",
+    "searchPlaceholderPerfumer": "Cari perfumer...",
+    "searchPlaceholderFragrance": "Cari parfum...",
+    "initSampleData": "Inisialisasi Data Sample",
+    "brandFound": "{{count}} brand ditemukan",
+    "perfumerFound": "{{count}} perfumer ditemukan",
+    "fragranceFound": "{{count}} parfum ditemukan",
+    "noBrand": "Tidak ada brand ditemukan",
+    "noPerfumer": "Tidak ada perfumer ditemukan",
+    "noFragrance": "Tidak ada parfum ditemukan",
+    "changeKeywords": "Coba ubah kata kunci pencarian atau filter kategori",
+    "allBrands": "Semua Brand Indonesia",
+    "allPerfumers": "Semua Perfumer Indonesia",
+    "allFragrances": "Semua Parfum Indonesia"
+  },
+  "navbar": {
+    "dashboard": "Dashboard",
+    "forum": "Forum",
+    "marketplace": "Marketplace",
+    "kursus": "Kursus",
+    "polling": "Polling",
+    "faq": "FAQ",
+    "profile": "Profil",
+    "login": "Masuk"
+  }
+}

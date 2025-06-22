@@ -7,6 +7,7 @@ import { BrowserRouter } from "react-router-dom";
 import { TempoDevtools } from "tempo-devtools";
 import App from "./App.tsx";
 import "./index.css";
+import "./i18n";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 

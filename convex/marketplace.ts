@@ -995,6 +995,7 @@ export const getIndonesianBrands = query({
         (brand) =>
           brand.name.toLowerCase().includes(searchLower) ||
           brand.description.toLowerCase().includes(searchLower) ||
+          brand.description_en?.toLowerCase().includes(searchLower) ||
           brand.tags.some((tag) => tag.toLowerCase().includes(searchLower)),
       );
     }
@@ -1078,6 +1079,7 @@ export const getIndonesianPerfumers = query({
         (perfumer) =>
           perfumer.name.toLowerCase().includes(searchLower) ||
           perfumer.bio.toLowerCase().includes(searchLower) ||
+          perfumer.bio_en?.toLowerCase().includes(searchLower) ||
           perfumer.specialties.some((specialty) =>
             specialty.toLowerCase().includes(searchLower),
           ) ||
@@ -1170,6 +1172,7 @@ export const getIndonesianFragrances = query({
         (fragrance) =>
           fragrance.name.toLowerCase().includes(searchLower) ||
           fragrance.description.toLowerCase().includes(searchLower) ||
+          fragrance.description_en?.toLowerCase().includes(searchLower) ||
           fragrance.brandName.toLowerCase().includes(searchLower) ||
           fragrance.perfumerName?.toLowerCase().includes(searchLower) ||
           fragrance.topNotes.some((note) =>
@@ -1242,6 +1245,7 @@ export const initializeSampleData = mutation({
       {
         name: "Wardah",
         description: "Brand kosmetik dan parfum halal terkemuka di Indonesia",
+        description_en: "Leading halal cosmetics and perfume brand in Indonesia",
         logo: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=200&q=80",
         website: "https://wardahbeauty.com",
         country: "Indonesia",
@@ -1260,6 +1264,7 @@ export const initializeSampleData = mutation({
         name: "Mustika Ratu",
         description:
           "Brand kecantikan tradisional Indonesia dengan warisan budaya",
+        description_en: "Traditional Indonesian beauty brand with cultural heritage",
         logo: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=200&q=80",
         website: "https://www.mustika-ratu.co.id",
         country: "Indonesia",
@@ -1277,6 +1282,7 @@ export const initializeSampleData = mutation({
       {
         name: "Kahf",
         description: "Brand grooming halal untuk pria modern Indonesia",
+        description_en: "Halal grooming brand for modern Indonesian men",
         logo: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=200&q=80",
         website: "https://kahf.co.id",
         country: "Indonesia",
@@ -1294,6 +1300,7 @@ export const initializeSampleData = mutation({
       {
         name: "Sensatia Botanicals",
         description: "Brand natural skincare dan parfum artisan dari Bali",
+        description_en: "Natural skincare and artisan perfume brand from Bali",
         logo: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&q=80",
         website: "https://sensatiabotanicals.com",
         country: "Indonesia",
@@ -1315,6 +1322,7 @@ export const initializeSampleData = mutation({
       {
         name: "Andi Suherman",
         bio: "Perfumer berpengalaman dengan spesialisasi aroma oriental dan woody. Telah menciptakan lebih dari 50 formula parfum untuk berbagai brand lokal.",
+        bio_en: "Experienced perfumer specializing in oriental and woody scents. Created over 50 perfume formulas for various local brands.",
         photo:
           "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80",
         nationality: "Indonesia",
@@ -1342,6 +1350,7 @@ export const initializeSampleData = mutation({
       {
         name: "Sari Dewi Kusuma",
         bio: "Perfumer muda berbakat yang fokus pada aroma floral dan fresh. Lulusan terbaik dari program perfumery di Singapura.",
+        bio_en: "Talented young perfumer focused on floral and fresh aromas. Top graduate from a perfumery program in Singapore.",
         photo:
           "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&q=80",
         nationality: "Indonesia",
@@ -1388,6 +1397,7 @@ export const initializeSampleData = mutation({
         perfumerName: "Andi Suherman",
         description:
           "Parfum musk yang elegan dengan sentuhan oriental yang memikat",
+        description_en: "Elegant musk perfume with a captivating oriental touch",
         images: [
           "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&q=80",
         ],
@@ -1421,6 +1431,7 @@ export const initializeSampleData = mutation({
         perfumerName: "Sari Dewi Kusuma",
         description:
           "Parfum floral tradisional dengan aroma bunga-bunga nusantara",
+        description_en: "Traditional floral perfume featuring Indonesian blossoms",
         images: [
           "https://images.unsplash.com/photo-1588405748880-12d1d2a59d32?w=400&q=80",
         ],
@@ -1454,6 +1465,7 @@ export const initializeSampleData = mutation({
         perfumerName: "Andi Suherman",
         description:
           "Parfum oud modern untuk pria dengan karakter maskulin yang kuat",
+        description_en: "Modern oud fragrance for men with a strong masculine character",
         images: [
           "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&q=80",
         ],

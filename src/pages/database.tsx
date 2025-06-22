@@ -28,6 +28,7 @@ import {
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useTranslation } from "react-i18next";
 
 const FRAGRANCE_CATEGORIES = [
   { name: "Citrus", color: "bg-yellow-100 text-yellow-800" },
@@ -56,6 +57,7 @@ export default function Database() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("brands");
+  const { t, i18n } = useTranslation();
 
   // Queries
   const databaseStats = useQuery(api.marketplace.getDatabaseStats);
@@ -93,11 +95,10 @@ export default function Database() {
               </div>
             </div>
             <h1 className="text-5xl font-bold text-[#2d3748] mb-6">
-              Database Parfum Indonesia
+              {t('database.headerTitle')}
             </h1>
             <p className="text-xl text-[#718096] max-w-2xl mx-auto">
-              Jelajahi koleksi lengkap brand, parfum, dan perfumer Indonesia
-              dengan informasi detail dan ulasan dari komunitas
+              {t('database.headerSubtitle')}
             </p>
 
             {/* Stats */}
@@ -143,7 +144,7 @@ export default function Database() {
                     onClick={() => initializeSampleData()}
                     className="neumorphic-button h-12 px-8 text-[#2d3748] bg-transparent font-semibold border-0 shadow-none"
                   >
-                    Inisialisasi Data Sample
+                    {t('database.initSampleData')}
                   </Button>
                 </div>
               )}
@@ -185,7 +186,13 @@ export default function Database() {
                 <div className="flex-1 relative">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#718096]" />
                   <Input
-                    placeholder={`Cari ${activeTab === "brands" ? "brand" : activeTab === "perfumers" ? "perfumer" : "parfum"}...`}
+                    placeholder={
+                      activeTab === "brands"
+                        ? t('database.searchPlaceholderBrand')
+                        : activeTab === "perfumers"
+                        ? t('database.searchPlaceholderPerfumer')
+                        : t('database.searchPlaceholderFragrance')
+                    }
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-12 h-14 text-lg neumorphic-input"
@@ -202,10 +209,10 @@ export default function Database() {
             <div className="mb-12">
               <h2 className="text-2xl font-bold text-[#2d3748] mb-6">
                 {activeTab === "brands"
-                  ? "Kategori Brand"
+                  ? t('database.categoryBrand')
                   : activeTab === "perfumers"
-                    ? "Level Pengalaman"
-                    : "Kategori Parfum"}
+                    ? t('database.categoryExperience')
+                    : t('database.categoryFragrance')}
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {(activeTab === "brands"
@@ -245,10 +252,10 @@ export default function Database() {
                   <h2 className="text-2xl font-bold text-[#2d3748]">
                     {selectedCategory
                       ? `Brand ${selectedCategory}`
-                      : "Semua Brand Indonesia"}
+                      : t('database.allBrands')}
                   </h2>
                   <span className="text-[#718096]">
-                    {brands?.page?.length || 0} brand ditemukan
+                    {t('database.brandFound', { count: brands?.page?.length || 0 })}
                   </span>
                 </div>
 
@@ -265,7 +272,7 @@ export default function Database() {
                               {brand.name}
                             </CardTitle>
                             <CardDescription className="text-[#718096] text-sm mb-3">
-                              {brand.description}
+                              {i18n.language === 'en' && brand.description_en ? brand.description_en : brand.description}
                             </CardDescription>
                             <div className="flex items-center gap-2 mb-2">
                               <MapPin className="h-4 w-4 text-[#718096]" />
@@ -357,10 +364,10 @@ export default function Database() {
                   <h2 className="text-2xl font-bold text-[#2d3748]">
                     {selectedCategory
                       ? `Perfumer ${selectedCategory}`
-                      : "Semua Perfumer Indonesia"}
+                      : t('database.allPerfumers')}
                   </h2>
                   <span className="text-[#718096]">
-                    {perfumers?.page?.length || 0} perfumer ditemukan
+                    {t('database.perfumerFound', { count: perfumers?.page?.length || 0 })}
                   </span>
                 </div>
 
@@ -409,7 +416,7 @@ export default function Database() {
                       </CardHeader>
                       <CardContent className="pt-0">
                         <p className="text-sm text-[#718096] mb-4 line-clamp-3">
-                          {perfumer.bio}
+                          {i18n.language === 'en' && perfumer.bio_en ? perfumer.bio_en : perfumer.bio}
                         </p>
 
                         <div className="flex items-center gap-2 mb-4">
@@ -472,10 +479,10 @@ export default function Database() {
                   <h2 className="text-2xl font-bold text-[#2d3748]">
                     {selectedCategory
                       ? `Parfum ${selectedCategory}`
-                      : "Semua Parfum Indonesia"}
+                      : t('database.allFragrances')}
                   </h2>
                   <span className="text-[#718096]">
-                    {fragrances?.page?.length || 0} parfum ditemukan
+                    {t('database.fragranceFound', { count: fragrances?.page?.length || 0 })}
                   </span>
                 </div>
 
@@ -596,16 +603,14 @@ export default function Database() {
               <div className="neumorphic-card p-12 max-w-md mx-auto">
                 <Palette className="h-16 w-16 text-[#718096] mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-[#2d3748] mb-2">
-                  Tidak ada{" "}
                   {activeTab === "brands"
-                    ? "brand"
+                    ? t('database.noBrand')
                     : activeTab === "perfumers"
-                      ? "perfumer"
-                      : "parfum"}{" "}
-                  ditemukan
+                      ? t('database.noPerfumer')
+                      : t('database.noFragrance')}
                 </h3>
                 <p className="text-[#718096]">
-                  Coba ubah kata kunci pencarian atau filter kategori
+                  {t('database.changeKeywords')}
                 </p>
               </div>
             </div>

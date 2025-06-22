@@ -302,6 +302,7 @@ export default defineSchema({
   brands: defineTable({
     name: v.string(),
     description: v.string(),
+    description_en: v.optional(v.string()),
     logo: v.optional(v.string()),
     website: v.optional(v.string()),
     country: v.string(), // "Indonesia"
@@ -325,6 +326,7 @@ export default defineSchema({
   perfumers: defineTable({
     name: v.string(),
     bio: v.string(),
+    bio_en: v.optional(v.string()),
     photo: v.optional(v.string()),
     nationality: v.string(), // "Indonesia"
     city: v.optional(v.string()),
@@ -361,6 +363,7 @@ export default defineSchema({
     perfumerId: v.optional(v.id("perfumers")),
     perfumerName: v.optional(v.string()),
     description: v.string(),
+    description_en: v.optional(v.string()),
     images: v.array(v.string()),
     category: v.string(), // "Citrus", "Floral", "Woody", "Oriental", "Fresh", "Gourmand"
     concentration: v.string(), // "EDT", "EDP", "Parfum", "Cologne"
