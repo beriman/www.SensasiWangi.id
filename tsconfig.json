@@ -20,6 +20,6 @@
     }
   },
   "include": ["src", "src/pages/dashboard.tsx", "src/pages/success.tsx"],
-  "exclude": ["src/tempobook"],
+  "exclude": ["src/tempobook", "src/stories"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

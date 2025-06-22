@@ -20,6 +20,7 @@ import {
   Settings,
   Edit3,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import ProtectedRoute from "@/components/wrappers/ProtectedRoute";
 
 export default function Profile() {
@@ -177,6 +178,14 @@ function ProfileContent() {
                     <Settings className="h-4 w-4 mr-2" />
                     Pengaturan
                   </Button>
+                  <Link to="/collections">
+                    <Button
+                      variant="outline"
+                      className="neumorphic-button-sm w-full mt-2 bg-transparent text-[#718096] border-0 shadow-none hover:scale-105 active:scale-95 transition-all"
+                    >
+                      Koleksi Saya
+                    </Button>
+                  </Link>
                 </div>
               </div>
 
