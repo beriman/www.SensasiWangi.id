@@ -13,6 +13,7 @@ export const getTopics = query({
     category: v.optional(v.string()),
     sortBy: v.optional(v.string()),
     searchQuery: v.optional(v.string()),
+    tag: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     let query: any = ctx.db.query("topics");
@@ -37,9 +38,11 @@ export const getTopics = query({
     const { id, ...paginationOpts } = args.paginationOpts;
     const topics = await query.paginate(paginationOpts);
 
+    let filteredPage = topics.page;
+
     // Filter berdasarkan search query jika ada
     if (args.searchQuery) {
-      const filteredTopics = topics.page.filter(
+      filteredPage = filteredPage.filter(
         (topic) =>
           topic.title.toLowerCase().includes(args.searchQuery!.toLowerCase()) ||
           topic.content
@@ -49,13 +52,19 @@ export const getTopics = query({
             .toLowerCase()
             .includes(args.searchQuery!.toLowerCase()),
       );
-      return {
-        ...topics,
-        page: filteredTopics,
-      };
     }
 
-    return topics;
+    // Filter berdasarkan tag jika ada
+    if (args.tag) {
+      filteredPage = filteredPage.filter((topic) =>
+        topic.tags.includes(args.tag!),
+      );
+    }
+
+    return {
+      ...topics,
+      page: filteredPage,
+    };
   },
 });
 
@@ -353,6 +362,21 @@ export const getCategories = query({
     );
 
     return categoriesWithRealCount;
+  },
+});
+
+// Query untuk mendapatkan semua tag unik
+export const getAllTags = query({
+  handler: async (ctx) => {
+    const topics = await ctx.db.query("topics").collect();
+    const tagSet = new Set<string>();
+    for (const topic of topics) {
+      for (const tag of topic.tags) {
+        const trimmed = tag.trim();
+        if (trimmed) tagSet.add(trimmed);
+      }
+    }
+    return Array.from(tagSet);
   },
 });
 
