@@ -6,6 +6,7 @@ import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import RoleProtectedRoute from "@/components/wrappers/RoleProtectedRoute";
 import {
   Select,
   SelectContent,
@@ -63,6 +64,14 @@ const SHIPPING_METHODS = [
 ];
 
 export default function MarketplaceSell() {
+  return (
+    <RoleProtectedRoute roles={["seller", "admin"]}>
+      <MarketplaceSellContent />
+    </RoleProtectedRoute>
+  );
+}
+
+function MarketplaceSellContent() {
   const { user } = useUser();
   const navigate = useNavigate();
   const createProduct = useMutation(api.marketplace.createProduct);

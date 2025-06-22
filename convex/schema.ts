@@ -7,6 +7,7 @@ export default defineSchema({
     email: v.optional(v.string()),
     image: v.optional(v.string()),
     tokenIdentifier: v.string(),
+    role: v.string(),
     contributionPoints: v.number(),
     badges: v.array(v.string()),
     createdAt: v.number(),

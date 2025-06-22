@@ -22,9 +22,11 @@ import Polling from "./pages/polling";
 import FAQ from "./pages/faq";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
+import ResetPassword from "./pages/reset-password";
 import OrderReviewPage from "./pages/order-review";
 import OrderDetail from "./pages/order-detail";
 import MarketplaceCheckout from "./pages/marketplace-checkout";
+import Settings from "./pages/settings";
 import { Toaster } from "@/components/ui/toaster";
 import NotificationListener from "@/components/notification-listener";
 
@@ -37,9 +39,11 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/forum" element={<Forum />} />
           <Route path="/Forum" element={<Navigate to="/forum" replace />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/collections" element={<Collections />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route

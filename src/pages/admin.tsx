@@ -31,8 +31,17 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
+import RoleProtectedRoute from "@/components/wrappers/RoleProtectedRoute";
 
 export default function Admin() {
+  return (
+    <RoleProtectedRoute roles={["admin"]}>
+      <AdminContent />
+    </RoleProtectedRoute>
+  );
+}
+
+function AdminContent() {
   const [activeTab, setActiveTab] = useState("overview");
 
   // Mock data untuk demonstrasi
