@@ -117,8 +117,7 @@ function EnrollDialog({ product }: { product: any }) {
     }).format(price);
   };
 
-  const totalPrice =
-    portionsRequested * product.pricePerPortion + shippingCost;
+  const totalPrice = portionsRequested * product.pricePerPortion + shippingCost;
   const maxPortions = Math.min(
     5,
     product.maxParticipants - product.currentParticipants,
@@ -171,7 +170,8 @@ function EnrollDialog({ product }: { product: any }) {
                 </h4>
                 <p className="text-sm text-[#718096]">{product.brand}</p>
                 <p className="text-sm text-[#667eea] font-medium">
-                  {formatPrice(product.pricePerPortion)} per {product.portionSize}
+                  {formatPrice(product.pricePerPortion)} per{" "}
+                  {product.portionSize}
                 </p>
               </div>
             </div>
@@ -190,25 +190,32 @@ function EnrollDialog({ product }: { product: any }) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="neumorphic-card border-0">
-                {Array.from({ length: maxPortions }, (_, i) => i + 1).map((num) => (
-                  <SelectItem key={num} value={num.toString()}>
-                    {num} porsi - {formatPrice(num * product.pricePerPortion)}
-                  </SelectItem>
-                ))}
+                {Array.from({ length: maxPortions }, (_, i) => i + 1).map(
+                  (num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num} porsi - {formatPrice(num * product.pricePerPortion)}
+                    </SelectItem>
+                  ),
+                )}
               </SelectContent>
             </Select>
           </div>
 
           {/* Shipping Address */}
           <div className="space-y-4">
-            <Label className="text-[#2d3748] font-medium">Alamat Pengiriman</Label>
+            <Label className="text-[#2d3748] font-medium">
+              Alamat Pengiriman
+            </Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label className="text-sm text-[#718096]">Nama Lengkap</Label>
                 <Input
                   value={shippingAddress.name}
                   onChange={(e) =>
-                    setShippingAddress((prev) => ({ ...prev, name: e.target.value }))
+                    setShippingAddress((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
                   }
                   className="neumorphic-input border-0 mt-1"
                   placeholder="Nama penerima"
@@ -219,7 +226,10 @@ function EnrollDialog({ product }: { product: any }) {
                 <Input
                   value={shippingAddress.phone}
                   onChange={(e) =>
-                    setShippingAddress((prev) => ({ ...prev, phone: e.target.value }))
+                    setShippingAddress((prev) => ({
+                      ...prev,
+                      phone: e.target.value,
+                    }))
                   }
                   className="neumorphic-input border-0 mt-1"
                   placeholder="08xxxxxxxxxx"
@@ -231,7 +241,10 @@ function EnrollDialog({ product }: { product: any }) {
               <Textarea
                 value={shippingAddress.address}
                 onChange={(e) =>
-                  setShippingAddress((prev) => ({ ...prev, address: e.target.value }))
+                  setShippingAddress((prev) => ({
+                    ...prev,
+                    address: e.target.value,
+                  }))
                 }
                 className="neumorphic-input border-0 mt-1"
                 placeholder="Jalan, RT/RW, Kelurahan"
@@ -243,7 +256,10 @@ function EnrollDialog({ product }: { product: any }) {
                 <Input
                   value={shippingAddress.city}
                   onChange={(e) =>
-                    setShippingAddress((prev) => ({ ...prev, city: e.target.value }))
+                    setShippingAddress((prev) => ({
+                      ...prev,
+                      city: e.target.value,
+                    }))
                   }
                   className="neumorphic-input border-0 mt-1"
                   placeholder="Kota"
@@ -337,7 +353,9 @@ function EnrollDialog({ product }: { product: any }) {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Subtotal ({portionsRequested} porsi)</span>
-                <span>{formatPrice(portionsRequested * product.pricePerPortion)}</span>
+                <span>
+                  {formatPrice(portionsRequested * product.pricePerPortion)}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Ongkir</span>
@@ -397,7 +415,9 @@ export default function MarketplaceSambatDetail() {
     const timeLeft = deadline - now;
     if (timeLeft <= 0) return "Berakhir";
     const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const hours = Math.floor(
+      (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+    );
     if (days > 0) return `${days} hari lagi`;
     return `${hours} jam lagi`;
   };
@@ -416,7 +436,9 @@ export default function MarketplaceSambatDetail() {
             className="w-full rounded-3xl object-cover"
           />
           <div className="space-y-4">
-            <h1 className="text-3xl font-bold text-[#2d3748]">{product.title}</h1>
+            <h1 className="text-3xl font-bold text-[#2d3748]">
+              {product.title}
+            </h1>
             <p className="text-[#718096]">{product.brand}</p>
             <div className="space-y-2">
               <Progress value={progressPercentage} className="h-2" />
@@ -434,7 +456,9 @@ export default function MarketplaceSambatDetail() {
 
         <div>
           <h2 className="text-xl font-semibold mb-2">Deskripsi</h2>
-          <p className="text-[#2d3748] whitespace-pre-line">{product.description}</p>
+          <p className="text-[#2d3748] whitespace-pre-line">
+            {product.description}
+          </p>
         </div>
 
         <div>
@@ -458,4 +482,3 @@ export default function MarketplaceSambatDetail() {
     </div>
   );
 }
-
