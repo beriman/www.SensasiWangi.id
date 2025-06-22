@@ -15,6 +15,8 @@ import Database from "./pages/database";
 import Privacy from "./pages/privacy";
 import Terms from "./pages/terms";
 import Polling from "./pages/polling";
+import Login from "./pages/login";
+import Signup from "./pages/signup";
 import { Toaster } from "@/components/ui/toaster";
 import NotificationListener from "@/components/notification-listener";
 
@@ -25,6 +27,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/forum" element={<Forum />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/marketplace" element={<Marketplace />} />

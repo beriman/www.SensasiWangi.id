@@ -26,6 +26,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <ClerkProvider
       publishableKey={PUBLISHABLE_KEY}
       afterSignOutUrl="/"
+      signInUrl="/login"
+      signUpUrl="/signup"
       appearance={{
         baseTheme: undefined,
         variables: {

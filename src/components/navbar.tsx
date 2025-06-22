@@ -1,4 +1,4 @@
-import { SignInButton, UserButton, useUser } from "@clerk/clerk-react";
+import { UserButton, useUser } from "@clerk/clerk-react";
 import {
   Authenticated,
   Unauthenticated,
@@ -166,15 +166,11 @@ export function Navbar() {
                 </div>
               </Authenticated>
               <Unauthenticated>
-                <SignInButton
-                  mode="modal"
-                  signUpFallbackRedirectUrl="/dashboard"
-                  fallbackRedirectUrl="/dashboard"
-                >
+                <Link to="/login">
                   <Button className="neumorphic-button h-10 px-6 text-sm text-[#2d3748] bg-transparent font-semibold border-0 shadow-none transition-all hover:scale-105 active:scale-95">
                     Masuk
                   </Button>
-                </SignInButton>
+                </Link>
               </Unauthenticated>
             </div>
           ) : (
