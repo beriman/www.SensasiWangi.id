@@ -422,4 +422,16 @@ export default defineSchema({
     .index("by_fragrance", ["fragranceId"])
     .index("by_user", ["userId"])
     .index("by_fragrance_user", ["fragranceId", "userId"]),
+
+  notifications: defineTable({
+    userId: v.id("users"),
+    type: v.string(),
+    message: v.string(),
+    url: v.optional(v.string()),
+    read: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_read", ["read"])
+    .index("by_created_at", ["createdAt"]),
 });

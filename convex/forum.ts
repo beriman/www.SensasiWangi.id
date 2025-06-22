@@ -273,7 +273,7 @@ export const createComment = mutation({
 
     const now = Date.now();
 
-    return await ctx.db.insert("comments", {
+    const commentId = await ctx.db.insert("comments", {
       topicId: args.topicId,
       content: args.content,
       authorId: user._id,
@@ -282,6 +282,20 @@ export const createComment = mutation({
       createdAt: now,
       updatedAt: now,
     });
+
+    const topic = await ctx.db.get(args.topicId);
+    if (topic && topic.authorId !== user._id) {
+      await ctx.db.insert("notifications", {
+        userId: topic.authorId,
+        type: "comment",
+        message: `${user.name || "Anonymous"} mengomentari topik Anda \"${topic.title}\"`,
+        url: `/forum?topic=${topic._id}`,
+        read: false,
+        createdAt: now,
+      });
+    }
+
+    return commentId;
   },
 });
 
