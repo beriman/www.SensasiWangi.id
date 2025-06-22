@@ -109,10 +109,16 @@ export default function Forum() {
     { initialNumItems: 10 },
   );
 
+  const pinnedTopics = useQuery(
+    api.forum.getPinnedTopics,
+    selectedCategory ? { category: selectedCategory } : {}
+  );
+
   const forumStats = useQuery(api.forum.getForumStats);
   const categories = useQuery(api.forum.getCategories);
   const createTopicMutation = useMutation(api.forum.createTopic);
   const toggleLikeMutation = useMutation(api.forum.toggleTopicLike);
+  const togglePinMutation = useMutation(api.forum.togglePinTopic);
   const incrementViewsMutation = useMutation(api.forum.incrementTopicViews);
   const createCommentMutation = useMutation(api.forum.createComment);
   const initializeCategoriesMutation = useMutation(
@@ -221,6 +227,31 @@ export default function Forum() {
     }
   };
 
+  const handleTogglePin = async (topicId: Id<"topics">) => {
+    if (!user) {
+      toast({
+        title: "Login diperlukan",
+        description: "Anda harus login untuk pin topik!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const pinned = await togglePinMutation({ topicId });
+      toast({
+        title: pinned ? "Topik dipin" : "Pin dilepas",
+      });
+    } catch (error) {
+      console.error("Error toggling pin:", error);
+      toast({
+        title: "Error",
+        description: "Gagal mengubah pin. Coba lagi.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleTopicClick = async (topic: Topic) => {
     // Increment view count
     try {
@@ -294,6 +325,7 @@ export default function Forum() {
   };
 
   const topics = topicsResult?.results || [];
+  const unpinnedTopics = topics.filter((t) => !t.isPinned);
   const hasMore = topicsResult?.status === "CanLoadMore";
   const isLoading = topicsResult?.status === "LoadingFirstPage";
 
@@ -622,7 +654,7 @@ export default function Forum() {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#667eea] mx-auto mb-4"></div>
                     <p className="text-[#718096]">Memuat topik...</p>
                   </div>
-                ) : topics.length === 0 ? (
+                ) : unpinnedTopics.length === 0 && (!pinnedTopics || pinnedTopics.length === 0) ? (
                   <div className="neumorphic-card p-12 text-center">
                     <MessageCircle className="h-12 w-12 text-[#718096] mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-[#2d3748] mb-2">
@@ -642,7 +674,86 @@ export default function Forum() {
                     </Button>
                   </div>
                 ) : (
-                  topics.map((topic) => (
+                  <>
+                    {pinnedTopics &&
+                      pinnedTopics.map((topic) => (
+                        <Card
+                          key={topic._id}
+                          className="neumorphic-card transition-all duration-300 cursor-pointer border-0 shadow-none hover:scale-[1.02]"
+                          onClick={() => handleTopicClick(topic)}
+                        >
+                          <CardHeader className="pb-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                  <Badge variant={topic.isHot ? "destructive" : "secondary"} className="text-xs">
+                                    {topic.category}
+                                  </Badge>
+                                  {topic.isPinned && (
+                                    <Badge variant="outline" className="text-xs text-green-600 border-green-200">
+                                      📌 Pinned
+                                    </Badge>
+                                  )}
+                                  {topic.isHot && (
+                                    <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">
+                                      🔥 Hot
+                                    </Badge>
+                                  )}
+                                  {topic.hasVideo && (
+                                    <Badge variant="outline" className="text-xs text-purple-600 border-purple-200 flex items-center gap-1">
+                                      <Video className="h-3 w-3" />
+                                      Video
+                                    </Badge>
+                                  )}
+                                  {(topic as any).replies === 0 && (
+                                    <Badge variant="outline" className="text-xs text-blue-600 border-blue-200">
+                                      Belum Dijawab
+                                    </Badge>
+                                  )}
+                                </div>
+                                <CardTitle className="text-lg font-semibold text-[#2d3748] hover:text-[#667eea] transition-colors">
+                                  {topic.title}
+                                </CardTitle>
+                                <CardDescription className="text-sm text-[#718096] mt-1">
+                                  oleh {topic.authorName} • {formatDateString(topic.createdAt)}
+                                </CardDescription>
+                                <p className="text-sm text-[#718096] mt-2 line-clamp-2">
+                                  {topic.content.substring(0, 150)}...
+                                </p>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            <div className="flex items-center justify-between text-sm text-[#718096]">
+                              <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1">
+                                  <MessageCircle className="h-4 w-4" />
+                                  <span>{selectedTopicComments?.length || 0} balasan</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-4 w-4" />
+                                  <span>{topic.views} dilihat</span>
+                                </div>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleLikeTopic(topic._id);
+                                  }}
+                                  className="flex items-center gap-1 hover:text-red-500 transition-colors"
+                                >
+                                  <Heart className="h-4 w-4" />
+                                  <span>{topic.likes}</span>
+                                </button>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                <span>{formatDate(topic.updatedAt)}</span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    {unpinnedTopics.map((topic) => (
                     <Card
                       key={topic._id}
                       className="neumorphic-card transition-all duration-300 cursor-pointer border-0 shadow-none hover:scale-[1.02]"
@@ -738,7 +849,8 @@ export default function Forum() {
                         </div>
                       </CardContent>
                     </Card>
-                  ))
+                  ))}
+                  </>
                 )}
               </div>
 
@@ -822,6 +934,16 @@ export default function Forum() {
                               {selectedTopicComments?.length || 0} Balasan
                             </span>
                           </div>
+                          {currentUser &&
+                            selectedTopic.authorId === currentUser._id && (
+                              <Button
+                                onClick={() => handleTogglePin(selectedTopic._id)}
+                                variant="outline"
+                                className="neumorphic-button-sm"
+                              >
+                                {selectedTopic.isPinned ? "Unpin" : "Pin"}
+                              </Button>
+                            )}
                         </div>
 
                         {/* Comments Section Placeholder */}

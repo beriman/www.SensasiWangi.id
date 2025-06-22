@@ -2,6 +2,10 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
+// Threshold untuk menandai topik sebagai "hot"
+const HOT_LIKES_THRESHOLD = 10;
+const HOT_VIEWS_THRESHOLD = 100;
+
 // Query untuk mendapatkan semua topik dengan pagination
 export const getTopics = query({
   args: {
@@ -56,6 +60,61 @@ export const getTopics = query({
     }
 
     return topics;
+  },
+});
+
+// Mutation untuk pin/unpin topik
+export const togglePinTopic = mutation({
+  args: { topicId: v.id("topics") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Anda harus login");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+
+    if (!user) {
+      throw new Error("User tidak ditemukan");
+    }
+
+    const topic = await ctx.db.get(args.topicId);
+    if (!topic) {
+      throw new Error("Topik tidak ditemukan");
+    }
+
+    if (topic.authorId !== user._id) {
+      throw new Error("Bukan pemilik topik");
+    }
+
+    await ctx.db.patch(args.topicId, {
+      isPinned: !topic.isPinned,
+      updatedAt: Date.now(),
+    });
+
+    return !topic.isPinned;
+  },
+});
+
+// Query untuk mendapatkan semua topik yang dipin
+export const getPinnedTopics = query({
+  args: { category: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    let q = ctx.db.query("topics");
+
+    if (args.category) {
+      q = q.withIndex("by_category", (qq) => qq.eq("category", args.category));
+    } else {
+      q = q.withIndex("by_created_at");
+    }
+
+    return await q
+      .filter((qq) => qq.eq(qq.field("isPinned"), true))
+      .order("desc")
+      .collect();
   },
 });
 
@@ -210,14 +269,11 @@ export const toggleTopicLike = mutation({
       throw new Error("Topik tidak ditemukan");
     }
 
+    let newLikes = topic.likes;
     if (existingLike) {
       // Unlike - hapus like dan kurangi counter
       await ctx.db.delete(existingLike._id);
-      await ctx.db.patch(args.topicId, {
-        likes: Math.max(0, topic.likes - 1),
-        updatedAt: Date.now(),
-      });
-      return false;
+      newLikes = Math.max(0, topic.likes - 1);
     } else {
       // Like - tambah like dan tambah counter
       await ctx.db.insert("topicLikes", {
@@ -225,12 +281,19 @@ export const toggleTopicLike = mutation({
         userId: user._id,
         createdAt: Date.now(),
       });
-      await ctx.db.patch(args.topicId, {
-        likes: topic.likes + 1,
-        updatedAt: Date.now(),
-      });
-      return true;
+      newLikes = topic.likes + 1;
     }
+
+    await ctx.db.patch(args.topicId, {
+      likes: newLikes,
+      isHot:
+        newLikes >= HOT_LIKES_THRESHOLD ||
+        topic.views >= HOT_VIEWS_THRESHOLD ||
+        topic.isHot,
+      updatedAt: Date.now(),
+    });
+
+    return !existingLike;
   },
 });
 
@@ -243,8 +306,13 @@ export const incrementTopicViews = mutation({
       throw new Error("Topik tidak ditemukan");
     }
 
+    const newViews = topic.views + 1;
     await ctx.db.patch(args.topicId, {
-      views: topic.views + 1,
+      views: newViews,
+      isHot:
+        newViews >= HOT_VIEWS_THRESHOLD ||
+        topic.likes >= HOT_LIKES_THRESHOLD ||
+        topic.isHot,
       updatedAt: Date.now(),
     });
   },
