@@ -40,6 +40,7 @@ import {
   AlertCircle,
   CheckCircle,
   Timer,
+  Share,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -92,6 +93,18 @@ function SambatProductCard({ product }: { product: any }) {
     e.stopPropagation();
     if (user) {
       toggleLike({ sambatProductId: product._id });
+    }
+  };
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/marketplace/sambat/${product._id}`;
+    const shareData = { title: product.title, url };
+    if (navigator.share) {
+      navigator.share(shareData);
+    } else {
+      navigator.clipboard.writeText(url);
+      alert("Link disalin");
     }
   };
 
@@ -151,6 +164,12 @@ function SambatProductCard({ product }: { product: any }) {
           }`}
         >
           <Heart className={`h-4 w-4 ${hasLiked ? "fill-current" : ""}`} />
+        </button>
+        <button
+          onClick={handleShare}
+          className="absolute top-3 right-12 p-2 rounded-full neumorphic-button-sm text-gray-400"
+        >
+          <Share className="h-4 w-4" />
         </button>
 
         {/* Status Badge */}
