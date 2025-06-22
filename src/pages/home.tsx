@@ -1,7 +1,7 @@
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
-import { SignInButton, useUser } from "@clerk/clerk-react";
+import { useUser } from "@clerk/clerk-react";
 import { Authenticated, Unauthenticated } from "convex/react";
 import {
   ArrowRight,
@@ -13,7 +13,7 @@ import {
   TrendingUp,
   Award,
 } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router-dom";
 
 const FEATURES = [
   {
@@ -115,16 +115,12 @@ function App() {
                     </Button>
                   </Authenticated>
                   <Unauthenticated>
-                    <SignInButton
-                      mode="modal"
-                      signUpFallbackRedirectUrl="/dashboard"
-                      fallbackRedirectUrl="/dashboard"
-                    >
+                    <Link to="/login">
                       <Button className="neumorphic-button h-14 px-10 text-lg text-[#2d3748] bg-transparent font-semibold border-0 shadow-none transition-all">
                         <ArrowRight className="mr-2 h-5 w-5" />
                         Mulai Sekarang
                       </Button>
-                    </SignInButton>
+                    </Link>
                   </Unauthenticated>
                 </>
               )}
