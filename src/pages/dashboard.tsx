@@ -5,7 +5,16 @@ import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { UserStats } from "@/components/UserStats";
-import { ArrowRight, User, Database, Clock, Shield } from "lucide-react";
+import {
+  ArrowRight,
+  User,
+  Database,
+  Clock,
+  Shield,
+  Package,
+  ShoppingCart,
+  DollarSign,
+} from "lucide-react";
 
 export default function Dashboard() {
   const { user } = useUser();
@@ -23,6 +32,8 @@ export default function Dashboard() {
     api.forum.getCommentsByAuthor,
     userData ? { authorId: userData._id } : "skip",
   );
+
+  const marketplaceStats = useQuery(api.marketplace.getMarketplaceStats);
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
@@ -52,12 +63,53 @@ export default function Dashboard() {
               commentsCount={userComments?.length || 0}
               joinDate={new Date(user?.createdAt || "").toLocaleDateString()}
               badges={userData?.badges || []}
-              weeklyGoal={100}
-              weeklyProgress={(userData?.contributionPoints || 0) % 100}
-            />
-          </div>
+          weeklyGoal={100}
+          weeklyProgress={(userData?.contributionPoints || 0) % 100}
+        />
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {marketplaceStats && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-[#1D1D1F] mb-4">
+            Marketplace Stats
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="neumorphic-card p-4 text-center">
+              <Package className="h-6 w-6 text-[#667eea] mx-auto mb-2" />
+              <div className="text-xl font-bold text-[#667eea]">
+                {marketplaceStats.activeProducts}
+              </div>
+              <div className="text-sm text-[#718096]">Produk Aktif</div>
+            </div>
+            <div className="neumorphic-card p-4 text-center">
+              <ShoppingCart className="h-6 w-6 text-[#667eea] mx-auto mb-2" />
+              <div className="text-xl font-bold text-[#667eea]">
+                {marketplaceStats.soldProducts}
+              </div>
+              <div className="text-sm text-[#718096]">Terjual</div>
+            </div>
+            <div className="neumorphic-card p-4 text-center">
+              <ArrowRight className="h-6 w-6 text-[#667eea] mx-auto mb-2" />
+              <div className="text-xl font-bold text-[#667eea]">
+                {marketplaceStats.totalOrders}
+              </div>
+              <div className="text-sm text-[#718096]">Total Order</div>
+            </div>
+            <div className="neumorphic-card p-4 text-center">
+              <DollarSign className="h-6 w-6 text-[#667eea] mx-auto mb-2" />
+              <div className="text-xl font-bold text-[#667eea]">
+                {new Intl.NumberFormat("id-ID", {
+                  notation: "compact",
+                  maximumFractionDigits: 1,
+                }).format(marketplaceStats.totalValue)}
+              </div>
+              <div className="text-sm text-[#718096]">Total Nilai</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Clerk User Data */}
             <DataCard
               title="Informasi Pengguna Clerk"
