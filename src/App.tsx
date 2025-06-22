@@ -20,6 +20,7 @@ import FAQ from "./pages/faq";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import OrderReviewPage from "./pages/order-review";
+import OrderDetail from "./pages/order-detail";
 import { Toaster } from "@/components/ui/toaster";
 import NotificationListener from "@/components/notification-listener";
 
@@ -51,6 +52,10 @@ function App() {
           <Route path="/polling" element={<Polling />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/order/:orderId/review" element={<OrderReviewPage />} />
+          <Route
+            path="/marketplace/order/:orderId"
+            element={<OrderDetail />}
+          />
         </Routes>
         {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
         <NotificationListener />
