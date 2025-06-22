@@ -14,3 +14,21 @@ This template provides a complete foundation for building a SaaS application wit
 ## Documentation
 
 For detailed setup instructions and configuration guides, visit our [comprehensive documentation](https://tempolabsinc.mintlify.app/ViteClerkConvexStripe).
+## Public API
+
+This repository exposes a small REST server that proxies Convex queries so third parties can pull data programmatically.
+
+Run the server with:
+
+```bash
+node api-server.js
+```
+
+Ensure the `CONVEX_URL` environment variable points to your Convex deployment.
+
+Available endpoints:
+
+- `GET /api/brands` – Indonesian brands
+- `GET /api/perfumers` – Indonesian perfumers
+- `GET /api/fragrances` – Indonesian fragrances
+- `GET /api/stats` – Overall database statistics
