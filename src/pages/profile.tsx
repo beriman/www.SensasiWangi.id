@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -46,6 +47,12 @@ function ProfileContent() {
   const userComments = useQuery(
     api.forum.getCommentsByAuthor,
     userData ? { authorId: userData._id } : "skip",
+  );
+
+  // Komentar terbaru dengan info topik
+  const recentComments = useQuery(
+    api.forum.getRecentCommentsWithTopic,
+    userData ? { authorId: userData._id, limit: 5 } : "skip",
   );
 
   const userProfile = useQuery(
@@ -361,6 +368,49 @@ function ProfileContent() {
                           </Button>
                         </div>
                       )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Recent Comments */}
+              <Card className="neumorphic-card border-0 shadow-none">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-[#1D1D1F]">
+                    <MessageCircle className="h-5 w-5 text-[#667eea]" />
+                    Komentar Terbaru
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {!recentComments || recentComments.length === 0 ? (
+                    <div className="text-center py-8">
+                      <MessageCircle className="h-12 w-12 text-[#86868B] mx-auto mb-4 opacity-50" />
+                      <p className="text-[#86868B]">Anda belum menulis komentar</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {recentComments.map((comment) => (
+                        <div key={comment._id} className="neumorphic-card-inset p-4">
+                          <h4 className="font-semibold text-[#1D1D1F] mb-1">
+                            <Link to={`/forum?topic=${comment.topicId}`} className="hover:underline">
+                              {comment.topicTitle || "Topik"}
+                            </Link>
+                          </h4>
+                          <p className="text-sm text-[#4a5568] mb-2 line-clamp-2">
+                            {comment.content}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-[#86868B]">
+                            <span className="flex items-center gap-1">
+                              <Heart className="h-3 w-3" />
+                              {comment.topicLikes}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Eye className="h-3 w-3" />
+                              {comment.topicViews}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </CardContent>
