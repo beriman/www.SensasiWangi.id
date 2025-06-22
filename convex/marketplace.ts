@@ -1300,7 +1300,8 @@ export const getIndonesianBrands = query({
     let query: any = ctx.db
       .query("brands")
       .withIndex("by_country", (q) => q.eq("country", "Indonesia"))
-      .filter((q) => q.eq(q.field("isActive"), true));
+      .filter((q) => q.eq(q.field("isActive"), true))
+      .filter((q) => q.eq(q.field("verificationStatus"), "approved"));
 
     // Sorting
     if (args.sortBy === "rating") {
@@ -1309,35 +1310,40 @@ export const getIndonesianBrands = query({
         .withIndex("by_rating")
         .order("desc")
         .filter((q) => q.eq(q.field("country"), "Indonesia"))
-        .filter((q) => q.eq(q.field("isActive"), true));
+        .filter((q) => q.eq(q.field("isActive"), true))
+        .filter((q) => q.eq(q.field("verificationStatus"), "approved"));
     } else if (args.sortBy === "popular") {
       query = ctx.db
         .query("brands")
         .withIndex("by_views")
         .order("desc")
         .filter((q) => q.eq(q.field("country"), "Indonesia"))
-        .filter((q) => q.eq(q.field("isActive"), true));
+        .filter((q) => q.eq(q.field("isActive"), true))
+        .filter((q) => q.eq(q.field("verificationStatus"), "approved"));
     } else if (args.sortBy === "liked") {
       query = ctx.db
         .query("brands")
         .withIndex("by_likes")
         .order("desc")
         .filter((q) => q.eq(q.field("country"), "Indonesia"))
-        .filter((q) => q.eq(q.field("isActive"), true));
+        .filter((q) => q.eq(q.field("isActive"), true))
+        .filter((q) => q.eq(q.field("verificationStatus"), "approved"));
     } else if (args.sortBy === "name") {
       query = ctx.db
         .query("brands")
         .withIndex("by_created_at")
         .order("asc")
         .filter((q) => q.eq(q.field("country"), "Indonesia"))
-        .filter((q) => q.eq(q.field("isActive"), true));
+        .filter((q) => q.eq(q.field("isActive"), true))
+        .filter((q) => q.eq(q.field("verificationStatus"), "approved"));
     } else {
       query = ctx.db
         .query("brands")
         .withIndex("by_created_at")
         .order("desc")
         .filter((q) => q.eq(q.field("country"), "Indonesia"))
-        .filter((q) => q.eq(q.field("isActive"), true));
+        .filter((q) => q.eq(q.field("isActive"), true))
+        .filter((q) => q.eq(q.field("verificationStatus"), "approved"));
     }
 
     const brands = await query.paginate(args.paginationOpts);
@@ -1391,7 +1397,8 @@ export const getIndonesianPerfumers = query({
     let query: any = ctx.db
       .query("perfumers")
       .withIndex("by_nationality", (q) => q.eq("nationality", "Indonesia"))
-      .filter((q) => q.eq(q.field("isActive"), true));
+      .filter((q) => q.eq(q.field("isActive"), true))
+      .filter((q) => q.eq(q.field("verificationStatus"), "approved"));
 
     // Sorting
     if (args.sortBy === "rating") {
@@ -1400,21 +1407,24 @@ export const getIndonesianPerfumers = query({
         .withIndex("by_rating")
         .order("desc")
         .filter((q) => q.eq(q.field("nationality"), "Indonesia"))
-        .filter((q) => q.eq(q.field("isActive"), true));
+        .filter((q) => q.eq(q.field("isActive"), true))
+        .filter((q) => q.eq(q.field("verificationStatus"), "approved"));
     } else if (args.sortBy === "experience") {
       query = ctx.db
         .query("perfumers")
         .withIndex("by_experience")
         .order("desc")
         .filter((q) => q.eq(q.field("nationality"), "Indonesia"))
-        .filter((q) => q.eq(q.field("isActive"), true));
+        .filter((q) => q.eq(q.field("isActive"), true))
+        .filter((q) => q.eq(q.field("verificationStatus"), "approved"));
     } else {
       query = ctx.db
         .query("perfumers")
         .withIndex("by_created_at")
         .order("desc")
         .filter((q) => q.eq(q.field("nationality"), "Indonesia"))
-        .filter((q) => q.eq(q.field("isActive"), true));
+        .filter((q) => q.eq(q.field("isActive"), true))
+        .filter((q) => q.eq(q.field("verificationStatus"), "approved"));
     }
 
     const perfumers = await query.paginate(args.paginationOpts);
@@ -1478,7 +1488,9 @@ export const getIndonesianFragrances = query({
     searchQuery: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let query: any = ctx.db.query("fragrances");
+    let query: any = ctx.db
+      .query("fragrances")
+      .filter((q) => q.eq(q.field("verificationStatus"), "approved"));
 
     // Filter by brand first if specified
     if (args.brandId) {
@@ -1506,6 +1518,7 @@ export const getIndonesianFragrances = query({
     const indonesianBrands = await ctx.db
       .query("brands")
       .withIndex("by_country", (q) => q.eq("country", "Indonesia"))
+      .filter((q) => q.eq(q.field("verificationStatus"), "approved"))
       .collect();
     const indonesianBrandIds = new Set(indonesianBrands.map((b) => b._id));
 
@@ -1567,16 +1580,21 @@ export const getDatabaseStats = query({
       .query("brands")
       .withIndex("by_country", (q) => q.eq("country", "Indonesia"))
       .filter((q) => q.eq(q.field("isActive"), true))
+      .filter((q) => q.eq(q.field("verificationStatus"), "approved"))
       .collect();
 
     const indonesianPerfumers = await ctx.db
       .query("perfumers")
       .withIndex("by_nationality", (q) => q.eq("nationality", "Indonesia"))
       .filter((q) => q.eq(q.field("isActive"), true))
+      .filter((q) => q.eq(q.field("verificationStatus"), "approved"))
       .collect();
 
     const indonesianBrandIds = new Set(indonesianBrands.map((b) => b._id));
-    const allFragrances = await ctx.db.query("fragrances").collect();
+    const allFragrances = await ctx.db
+      .query("fragrances")
+      .filter((q) => q.eq(q.field("verificationStatus"), "approved"))
+      .collect();
     const indonesianFragrances = allFragrances.filter((f) =>
       indonesianBrandIds.has(f.brandId),
     );
@@ -1868,6 +1886,44 @@ export const initializeSampleData = mutation({
       perfumers: samplePerfumers.length,
       fragrances: sampleFragrances.length,
     };
+  },
+});
+
+// ===== VERIFICATION =====
+
+export const submitVerificationRequest = mutation({
+  args: { itemType: v.string(), itemId: v.string() },
+  handler: async (ctx, args) => {
+    const table =
+      args.itemType === "brand"
+        ? "brands"
+        : args.itemType === "perfumer"
+        ? "perfumers"
+        : args.itemType === "fragrance"
+        ? "fragrances"
+        : null;
+    if (!table) throw new Error("Invalid item type");
+    await ctx.db.patch(args.itemId as any, {
+      verificationStatus: "pending",
+    });
+  },
+});
+
+export const moderateVerificationRequest = mutation({
+  args: { itemType: v.string(), itemId: v.string(), approve: v.boolean() },
+  handler: async (ctx, args) => {
+    const table =
+      args.itemType === "brand"
+        ? "brands"
+        : args.itemType === "perfumer"
+        ? "perfumers"
+        : args.itemType === "fragrance"
+        ? "fragrances"
+        : null;
+    if (!table) throw new Error("Invalid item type");
+    await ctx.db.patch(args.itemId as any, {
+      verificationStatus: args.approve ? "approved" : "rejected",
+    });
   },
 });
 

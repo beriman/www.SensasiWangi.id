@@ -28,7 +28,10 @@ Ensure the `CONVEX_URL` environment variable points to your Convex deployment.
 
 Available endpoints:
 
-- `GET /api/brands` – Indonesian brands
-- `GET /api/perfumers` – Indonesian perfumers
-- `GET /api/fragrances` – Indonesian fragrances
+- `GET /api/brands` – Indonesian brands (only verified)
+- `GET /api/perfumers` – Indonesian perfumers (only verified)
+- `GET /api/fragrances` – Indonesian fragrances (only verified)
 - `GET /api/stats` – Overall database statistics
+
+Use the optional `verified=true` query parameter to explicitly fetch verified
+records for marketplace or course integrations.
