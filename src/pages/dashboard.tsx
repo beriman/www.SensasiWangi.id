@@ -14,6 +14,16 @@ export default function Dashboard() {
     user?.id ? { tokenIdentifier: user.id } : "skip",
   );
 
+  const userTopics = useQuery(
+    api.forum.getTopicsByAuthor,
+    userData ? { authorId: userData._id } : "skip",
+  );
+
+  const userComments = useQuery(
+    api.forum.getCommentsByAuthor,
+    userData ? { authorId: userData._id } : "skip",
+  );
+
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
       <Navbar />
@@ -33,19 +43,17 @@ export default function Dashboard() {
           {/* User Stats Section */}
           <div className="mb-12">
             <UserStats
-              level={5}
-              contributionPoints={1250}
-              postsCount={8}
-              likesReceived={42}
-              commentsCount={15}
+              level={Math.floor((userData?.contributionPoints || 0) / 100) + 1}
+              contributionPoints={userData?.contributionPoints || 0}
+              postsCount={userTopics?.length || 0}
+              likesReceived={
+                userTopics?.reduce((sum, t) => sum + t.likes, 0) || 0
+              }
+              commentsCount={userComments?.length || 0}
               joinDate={new Date(user?.createdAt || "").toLocaleDateString()}
-              badges={[
-                "Reviewer Terpercaya",
-                "Kontributor Aktif",
-                "Parfum Enthusiast",
-              ]}
+              badges={userData?.badges || []}
               weeklyGoal={100}
-              weeklyProgress={75}
+              weeklyProgress={(userData?.contributionPoints || 0) % 100}
             />
           </div>
 

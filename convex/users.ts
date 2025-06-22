@@ -51,6 +51,13 @@ export const createOrUpdateUser = mutation({
           email: identity.email,
         });
       }
+      // Initialize points/badges if missing
+      if (existingUser.contributionPoints === undefined || existingUser.badges === undefined) {
+        await ctx.db.patch(existingUser._id, {
+          contributionPoints: existingUser.contributionPoints ?? 0,
+          badges: existingUser.badges ?? [],
+        });
+      }
       return existingUser;
     }
 
@@ -59,6 +66,8 @@ export const createOrUpdateUser = mutation({
       name: identity.name,
       email: identity.email,
       tokenIdentifier: identity.subject,
+      contributionPoints: 0,
+      badges: [],
     });
 
     return await ctx.db.get(userId);

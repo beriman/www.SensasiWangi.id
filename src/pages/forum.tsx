@@ -40,7 +40,10 @@ import {
   Video,
   Image,
   Send,
+  Share,
+  BarChart2,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { usePaginatedQuery, useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
@@ -243,6 +246,18 @@ export default function Forum() {
       toast({
         title: liked ? "Topik disukai" : "Batal menyukai topik",
       });
+
+      // Perbarui state topik jika sedang dibuka
+      if (selectedTopic && selectedTopic._id === topicId) {
+        const newLikes = liked
+          ? selectedTopic.likes + 1
+          : Math.max(0, selectedTopic.likes - 1);
+        setSelectedTopic({
+          ...selectedTopic,
+          likes: newLikes,
+          isHot: newLikes >= 10 || selectedTopic.isHot,
+        });
+      }
     } catch (error) {
       console.error("Error toggling like:", error);
       toast({
@@ -553,8 +568,8 @@ export default function Forum() {
                           <Plus className="h-4 w-4 mr-2" />
                           Topik Baru
                         </Button>
-                      </DialogTrigger>
-                      <DialogContent className="neumorphic-card border-0 shadow-none max-w-2xl max-h-[90vh] overflow-y-auto fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+                    </DialogTrigger>
+                    <DialogContent className="neumorphic-card border-0 shadow-none max-w-2xl max-h-[90vh] overflow-y-auto fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
                         <DialogHeader>
                           <DialogTitle className="text-[#2d3748]">
                             Buat Topik Baru
@@ -664,6 +679,13 @@ export default function Forum() {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
+                    <Link
+                      to="/polling"
+                      className="neumorphic-button bg-transparent text-[#2d3748] font-semibold hover:text-[#667eea] border-0 shadow-none"
+                    >
+                      <BarChart2 className="h-4 w-4 mr-2" />
+                      Buat Polling
+                    </Link>
                     <div className="flex items-center gap-2 text-sm text-[#718096]">
                       <TrendingUp className="h-4 w-4" />
                       <span>Diskusi trending</span>
@@ -801,6 +823,25 @@ export default function Forum() {
                                   <Heart className="h-4 w-4" />
                                   <span>{topic.likes}</span>
                                 </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (navigator.share) {
+                                      navigator.share({
+                                        title: topic.title,
+                                        url: `${window.location.origin}/forum?topic=${topic._id}`,
+                                      });
+                                    } else {
+                                      navigator.clipboard.writeText(
+                                        `${window.location.origin}/forum?topic=${topic._id}`,
+                                      );
+                                      toast({ title: "Link disalin" });
+                                    }
+                                  }}
+                                  className="flex items-center gap-1 hover:text-blue-500 transition-colors"
+                                >
+                                  <Share className="h-4 w-4" />
+                                </button>
                               </div>
                               <div className="flex items-center gap-1">
                                 <Clock className="h-4 w-4" />
@@ -907,6 +948,25 @@ export default function Forum() {
                               <Heart className="h-4 w-4" />
                               <span>{topic.likes}</span>
                             </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (navigator.share) {
+                                  navigator.share({
+                                    title: topic.title,
+                                    url: `${window.location.origin}/forum?topic=${topic._id}`,
+                                  });
+                                } else {
+                                  navigator.clipboard.writeText(
+                                    `${window.location.origin}/forum?topic=${topic._id}`,
+                                  );
+                                  toast({ title: "Link disalin" });
+                                }
+                              }}
+                              className="flex items-center gap-1 hover:text-blue-500 transition-colors"
+                            >
+                              <Share className="h-4 w-4" />
+                            </button>
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
@@ -1012,6 +1072,25 @@ export default function Forum() {
                               className={`h-5 w-5 ${userLikedTopics ? "fill-current" : ""}`}
                             />
                             <span>{selectedTopic.likes} Suka</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (navigator.share) {
+                                navigator.share({
+                                  title: selectedTopic.title,
+                                  url: `${window.location.origin}/forum?topic=${selectedTopic._id}`,
+                                });
+                              } else {
+                                navigator.clipboard.writeText(
+                                  `${window.location.origin}/forum?topic=${selectedTopic._id}`,
+                                );
+                                toast({ title: "Link disalin" });
+                              }
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-[#718096]"
+                          >
+                            <Share className="h-5 w-5" />
+                            <span>Bagikan</span>
                           </button>
 
                           <div className="flex items-center gap-2 text-[#718096]">

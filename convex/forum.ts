@@ -237,6 +237,20 @@ export const createTopic = mutation({
       updatedAt: now,
     });
 
+    // Tambah poin kontribusi pada user
+    const newPoints = (user.contributionPoints ?? 0) + 10;
+    const newBadges = user.badges ? [...user.badges] : [];
+    if (newPoints >= 100 && !newBadges.includes("Kontributor Aktif")) {
+      newBadges.push("Kontributor Aktif");
+    }
+    if (newPoints >= 500 && !newBadges.includes("Master Diskusi")) {
+      newBadges.push("Master Diskusi");
+    }
+    await ctx.db.patch(user._id, {
+      contributionPoints: newPoints,
+      badges: newBadges,
+    });
+
     // Update category count setelah topic dibuat
     await ctx.scheduler.runAfter(
       0,
@@ -361,6 +375,20 @@ export const createComment = mutation({
       likes: 0,
       createdAt: now,
       updatedAt: now,
+    });
+
+    // Tambah poin kontribusi pada user
+    const newPoints = (user.contributionPoints ?? 0) + 2;
+    const newBadges = user.badges ? [...user.badges] : [];
+    if (newPoints >= 100 && !newBadges.includes("Kontributor Aktif")) {
+      newBadges.push("Kontributor Aktif");
+    }
+    if (newPoints >= 500 && !newBadges.includes("Master Diskusi")) {
+      newBadges.push("Master Diskusi");
+    }
+    await ctx.db.patch(user._id, {
+      contributionPoints: newPoints,
+      badges: newBadges,
     });
 
     const topic = await ctx.db.get(args.topicId);
