@@ -70,7 +70,7 @@ function ProfileContent() {
     userData ? { userId: userData._id } : "skip",
   );
 
-  const updateBio = useMutation(api.users.updateUserBio);
+  const updateProfile = useMutation(api.users.updateUserProfile);
   const [editing, setEditing] = useState(false);
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
@@ -101,7 +101,7 @@ function ProfileContent() {
 
   const handleBioBlur = async () => {
     if (!userData) return;
-    await updateBio({ bio });
+    await updateProfile({ bio });
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

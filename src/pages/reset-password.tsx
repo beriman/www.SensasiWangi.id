@@ -7,7 +7,7 @@ export default function ResetPassword() {
     <div className="min-h-screen flex flex-col neumorphic-bg">
       <Navbar />
       <main className="flex-grow flex items-center justify-center">
-        <SignIn path="/reset-password" routing="path" initialState="forgotPassword" />
+        <SignIn path="/reset-password" routing="path" />
       </main>
       <Footer />
     </div>
