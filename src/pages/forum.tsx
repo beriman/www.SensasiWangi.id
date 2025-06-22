@@ -12,6 +12,13 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -89,10 +96,12 @@ export default function Forum() {
   );
   const [embeddedVideos, setEmbeddedVideos] = useState<VideoData[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "popular" | "unanswered">(
     "newest",
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const [newTopicTags, setNewTopicTags] = useState("");
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [isTopicDetailOpen, setIsTopicDetailOpen] = useState(false);
   const [newCommentContent, setNewCommentContent] = useState("");
@@ -105,12 +114,14 @@ export default function Forum() {
       category: selectedCategory || undefined,
       sortBy: sortBy,
       searchQuery: searchQuery || undefined,
+      tag: selectedTag || undefined,
     },
     { initialNumItems: 10 },
   );
 
   const forumStats = useQuery(api.forum.getForumStats);
   const categories = useQuery(api.forum.getCategories);
+  const allTags = useQuery(api.forum.getAllTags);
   const createTopicMutation = useMutation(api.forum.createTopic);
   const toggleLikeMutation = useMutation(api.forum.toggleTopicLike);
   const incrementViewsMutation = useMutation(api.forum.incrementTopicViews);
@@ -167,7 +178,10 @@ export default function Forum() {
         title: newTopicTitle,
         content: newTopicContent,
         category: newTopicCategory,
-        tags: [],
+        tags: newTopicTags
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t.length > 0),
         hasVideo: embeddedVideos.length > 0,
         videoUrls: embeddedVideos.map((v) => v.url),
       });
@@ -175,6 +189,7 @@ export default function Forum() {
       // Reset form
       setNewTopicTitle("");
       setNewTopicContent("");
+      setNewTopicTags("");
       setEmbeddedVideos([]);
       setIsNewTopicOpen(false);
 
@@ -451,6 +466,24 @@ export default function Forum() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="neumorphic-input border-0 flex-1"
                     />
+                    <Select
+                      value={selectedTag || ""}
+                      onValueChange={(val) =>
+                        setSelectedTag(val === "" ? null : val)
+                      }
+                    >
+                      <SelectTrigger className="neumorphic-input border-0 w-full sm:w-48">
+                        <SelectValue placeholder="Filter Tag" />
+                      </SelectTrigger>
+                      <SelectContent className="neumorphic-card border-0">
+                        <SelectItem value="">Semua Tag</SelectItem>
+                        {allTags?.map((tag) => (
+                          <SelectItem key={tag} value={tag}>
+                            {tag}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     {selectedCategory && (
                       <Button
                         onClick={() => setSelectedCategory(null)}
@@ -539,13 +572,25 @@ export default function Forum() {
                             <label className="text-sm font-medium text-[#2d3748]">
                               Konten
                             </label>
-                            <Textarea
+                          <Textarea
                               placeholder="Tulis konten topik Anda di sini... Bagikan pengalaman, ajukan pertanyaan, atau mulai diskusi menarik!"
                               value={newTopicContent}
                               onChange={(e) =>
                                 setNewTopicContent(e.target.value)
                               }
                               className="neumorphic-input border-0 min-h-[120px] resize-none"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-[#2d3748]">
+                              Tags (pisahkan dengan koma)
+                            </label>
+                            <Input
+                              placeholder="contoh: fruity, sweet"
+                              value={newTopicTags}
+                              onChange={(e) => setNewTopicTags(e.target.value)}
+                              className="neumorphic-input border-0"
                             />
                           </div>
 
