@@ -129,7 +129,9 @@ export const createTopic = mutation({
     category: v.string(),
     tags: v.array(v.string()),
     hasVideo: v.boolean(),
+    hasImages: v.boolean(),
     videoUrls: v.optional(v.array(v.string())),
+    imageUrls: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -160,8 +162,10 @@ export const createTopic = mutation({
       isHot: false,
       isPinned: false,
       hasVideo: args.hasVideo,
+      hasImages: args.hasImages,
       tags: args.tags,
       videoUrls: args.videoUrls,
+      imageUrls: args.imageUrls,
       createdAt: now,
       updatedAt: now,
     });

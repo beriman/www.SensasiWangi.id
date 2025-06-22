@@ -21,6 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import VideoEmbed, { VideoData } from "@/components/video-embed";
+import ImageEmbed from "@/components/image-embed";
 import {
   MessageCircle,
   Users,
@@ -53,8 +54,10 @@ interface Topic {
   isHot: boolean;
   isPinned: boolean;
   hasVideo: boolean;
+  hasImages: boolean;
   tags: string[];
   videoUrls?: string[];
+  imageUrls?: string[];
   createdAt: number;
   updatedAt: number;
 }
@@ -88,6 +91,7 @@ export default function Forum() {
     "Diskusi Umum Parfum",
   );
   const [embeddedVideos, setEmbeddedVideos] = useState<VideoData[]>([]);
+  const [embeddedImages, setEmbeddedImages] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "popular" | "unanswered">(
     "newest",
@@ -143,6 +147,10 @@ export default function Forum() {
     setEmbeddedVideos((prev) => [...prev, videoData]);
   };
 
+  const handleImageAdd = (url: string) => {
+    setEmbeddedImages((prev) => [...prev, url]);
+  };
+
   const handleCreateTopic = async () => {
     if (!newTopicTitle.trim() || !newTopicContent.trim()) {
       toast({
@@ -169,13 +177,16 @@ export default function Forum() {
         category: newTopicCategory,
         tags: [],
         hasVideo: embeddedVideos.length > 0,
+        hasImages: embeddedImages.length > 0,
         videoUrls: embeddedVideos.map((v) => v.url),
-      });
+        imageUrls: embeddedImages,
+      } as any);
 
       // Reset form
       setNewTopicTitle("");
       setNewTopicContent("");
       setEmbeddedVideos([]);
+      setEmbeddedImages([]);
       setIsNewTopicOpen(false);
 
       toast({
@@ -555,6 +566,7 @@ export default function Forum() {
                               <span>Media</span>
                             </div>
                             <VideoEmbed onVideoAdd={handleVideoAdd} />
+                            <ImageEmbed onImageAdd={handleImageAdd} />
                           </div>
                         </div>
                         <DialogFooter className="flex gap-2">
@@ -685,6 +697,15 @@ export default function Forum() {
                                   Video
                                 </Badge>
                               )}
+                              {(topic as any).hasImages && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs text-teal-600 border-teal-200 flex items-center gap-1"
+                                >
+                                  <Image className="h-3 w-3" />
+                                  Gambar
+                                </Badge>
+                              )}
                               {(topic as any).replies === 0 && (
                                 <Badge
                                   variant="outline"
@@ -799,6 +820,26 @@ export default function Forum() {
                           <p className="text-[#2d3748] leading-relaxed">
                             {selectedTopic.content}
                           </p>
+                          {selectedTopic.imageUrls && selectedTopic.imageUrls.length > 0 && (
+                            <div className="grid grid-cols-2 gap-4 mt-4">
+                              {selectedTopic.imageUrls.map((url, idx) => (
+                                <img key={idx} src={url} className="w-full rounded-lg" />
+                              ))}
+                            </div>
+                          )}
+                          {selectedTopic.videoUrls && selectedTopic.videoUrls.length > 0 && (
+                            <div className="space-y-4 mt-4">
+                              {selectedTopic.videoUrls.map((v, idx) => (
+                                <iframe
+                                  key={idx}
+                                  src={v}
+                                  className="w-full aspect-video rounded-lg"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                />
+                              ))}
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex items-center gap-4 pt-4 border-t border-[#e2e8f0]">
