@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as bookmarks from "../bookmarks.js";
+import type * as courses from "../courses.js";
 import type * as forum from "../forum.js";
 import type * as marketplace from "../marketplace.js";
 import type * as notifications from "../notifications.js";
@@ -29,6 +30,7 @@ import type * as users from "../users.js";
  */
 declare const fullApi: ApiFromModules<{
   bookmarks: typeof bookmarks;
+  courses: typeof courses;
   forum: typeof forum;
   marketplace: typeof marketplace;
   notifications: typeof notifications;
