@@ -75,8 +75,10 @@ export default function MarketplaceSell() {
     description: "",
     price: "",
     originalPrice: "",
+    size: "",
     location: "",
     shippingMethods: [] as string[],
+    tags: [] as string[],
     isNegotiable: false,
     images: [] as string[],
   });
@@ -168,7 +170,9 @@ export default function MarketplaceSell() {
           ? parseInt(formData.originalPrice)
           : undefined,
         location: formData.location.trim(),
-        shippingMethods: formData.shippingMethods,
+        size: formData.size,
+        shippingOptions: formData.shippingMethods,
+        tags: formData.tags,
         isNegotiable: formData.isNegotiable,
         images: formData.images,
       });

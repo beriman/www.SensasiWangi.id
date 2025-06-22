@@ -48,9 +48,10 @@ function ProfileContent() {
     userData ? { authorId: userData._id } : "skip",
   );
 
-  const formatDate = (timestamp: number | undefined) => {
+  const formatDate = (timestamp: number | Date | undefined) => {
     if (!timestamp) return "—";
-    return new Date(timestamp).toLocaleDateString("id-ID", {
+    const date = typeof timestamp === "number" ? new Date(timestamp) : timestamp;
+    return date.toLocaleDateString("id-ID", {
       year: "numeric",
       month: "long",
       day: "numeric",
