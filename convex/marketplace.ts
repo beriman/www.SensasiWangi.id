@@ -518,6 +518,98 @@ export const updatePaymentStatus = mutation({
   },
 });
 
+// Query untuk mendapatkan semua order yang belum selesai
+export const getPendingOrders = query({
+  handler: async (ctx) => {
+    const orders = await ctx.db.query("orders").collect();
+    return orders.filter(
+      (o) => o.orderStatus !== "delivered" && o.orderStatus !== "cancelled",
+    );
+  },
+});
+
+// Mutation untuk verifikasi pembayaran order
+export const verifyOrderPayment = mutation({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) {
+      throw new Error("Order tidak ditemukan");
+    }
+
+    await ctx.db.patch(args.orderId, {
+      paymentStatus: "paid",
+      orderStatus: "confirmed",
+      updatedAt: Date.now(),
+    });
+
+    const now = Date.now();
+    const message = `Pembayaran untuk order ${order.productTitle} telah diverifikasi`;
+    await ctx.db.insert("notifications", {
+      userId: order.buyerId,
+      type: "order",
+      message,
+      url: `/marketplace/order/${order._id}`,
+      read: false,
+      createdAt: now,
+    });
+    await ctx.db.insert("notifications", {
+      userId: order.sellerId,
+      type: "order",
+      message,
+      url: `/marketplace/order/${order._id}`,
+      read: false,
+      createdAt: now,
+    });
+  },
+});
+
+// Mutation untuk memperbarui status order
+export const updateOrderStatus = mutation({
+  args: {
+    orderId: v.id("orders"),
+    status: v.string(),
+    trackingNumber: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) {
+      throw new Error("Order tidak ditemukan");
+    }
+
+    await ctx.db.patch(args.orderId, {
+      orderStatus: args.status,
+      ...(args.trackingNumber ? { trackingNumber: args.trackingNumber } : {}),
+      updatedAt: Date.now(),
+    });
+
+    const now = Date.now();
+    const statusMessage =
+      args.status === "shipped"
+        ? `Pesanan ${order.productTitle} telah dikirim`
+        : args.status === "delivered"
+          ? `Pesanan ${order.productTitle} telah selesai`
+          : `Status pesanan ${order.productTitle} diperbarui menjadi ${args.status}`;
+
+    await ctx.db.insert("notifications", {
+      userId: order.buyerId,
+      type: "order",
+      message: statusMessage,
+      url: `/marketplace/order/${order._id}`,
+      read: false,
+      createdAt: now,
+    });
+    await ctx.db.insert("notifications", {
+      userId: order.sellerId,
+      type: "order",
+      message: statusMessage,
+      url: `/marketplace/order/${order._id}`,
+      read: false,
+      createdAt: now,
+    });
+  },
+});
+
 // Mutation untuk upload bukti pembayaran
 export const uploadPaymentProof = mutation({
   args: {
