@@ -144,6 +144,7 @@ export default function Forum() {
   const togglePinMutation = useMutation(api.forum.togglePinTopic);
   const incrementViewsMutation = useMutation(api.forum.incrementTopicViews);
   const createCommentMutation = useMutation(api.forum.createComment);
+  const toggleCommentLikeMutation = useMutation(api.forum.toggleCommentLike);
   const initializeCategoriesMutation = useMutation(
     api.forum.initializeCategories,
   );
@@ -377,6 +378,28 @@ export default function Forum() {
       toast({
         title: "Error",
         description: "Gagal menambahkan komentar. Silakan coba lagi.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLikeComment = async (commentId: Id<"comments">) => {
+    if (!user) {
+      toast({
+        title: "Login diperlukan",
+        description: "Anda harus login untuk like komentar!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await toggleCommentLikeMutation({ commentId });
+    } catch (error) {
+      console.error("Error toggling comment like:", error);
+      toast({
+        title: "Error",
+        description: "Gagal melakukan like. Silakan coba lagi.",
         variant: "destructive",
       });
     }
@@ -1250,6 +1273,15 @@ export default function Forum() {
                                       <p className="text-[#2d3748]">
                                         {comment.content}
                                       </p>
+                                      <div className="mt-2 flex items-center gap-2 text-sm text-[#718096]">
+                                        <button
+                                          onClick={() => handleLikeComment(comment._id)}
+                                          className="flex items-center gap-1 hover:text-red-500 transition-colors"
+                                        >
+                                          <Heart className="h-4 w-4" />
+                                          <span>{comment.likes}</span>
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>

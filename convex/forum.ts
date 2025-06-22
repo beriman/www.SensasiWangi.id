@@ -436,6 +436,58 @@ export const createComment = mutation({
   },
 });
 
+// Mutation untuk like/unlike komentar
+export const toggleCommentLike = mutation({
+  args: { commentId: v.id("comments") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Anda harus login untuk like komentar");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+
+    if (!user) {
+      throw new Error("User tidak ditemukan");
+    }
+
+    const existingLike = await ctx.db
+      .query("commentLikes")
+      .withIndex("by_comment_user", (q) =>
+        q.eq("commentId", args.commentId).eq("userId", user._id),
+      )
+      .unique();
+
+    const comment = await ctx.db.get(args.commentId);
+    if (!comment) {
+      throw new Error("Komentar tidak ditemukan");
+    }
+
+    if (existingLike) {
+      await ctx.db.delete(existingLike._id);
+      await ctx.db.patch(args.commentId, {
+        likes: Math.max(0, comment.likes - 1),
+        updatedAt: Date.now(),
+      });
+      return false;
+    } else {
+      await ctx.db.insert("commentLikes", {
+        commentId: args.commentId,
+        userId: user._id,
+        createdAt: Date.now(),
+      });
+      await ctx.db.patch(args.commentId, {
+        likes: comment.likes + 1,
+        updatedAt: Date.now(),
+      });
+      return true;
+    }
+  },
+});
+
 // Query untuk mendapatkan statistik forum
 export const getForumStats = query({
   handler: async (ctx) => {
