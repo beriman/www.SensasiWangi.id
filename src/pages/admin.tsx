@@ -31,40 +31,19 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Mock data untuk demonstrasi
-  const stats = {
-    totalUsers: 1247,
-    totalPosts: 3456,
-    pendingReports: 12,
-    activeDiscussions: 89,
-  };
+  const forumStats = useQuery(api.forum.getForumStats);
+  const reports = useQuery(api.forum.getReports);
+  const updateStatus = useMutation(api.forum.updateReportStatus);
 
   const recentReports = [
-    {
-      id: 1,
-      type: "Spam",
-      content: "Posting berulang tentang produk...",
-      reporter: "user123",
-      status: "pending",
-    },
-    {
-      id: 2,
-      type: "Konten Tidak Pantas",
-      content: "Komentar yang menyinggung...",
-      reporter: "user456",
-      status: "pending",
-    },
-    {
-      id: 3,
-      type: "Penipuan",
-      content: "Penjualan produk palsu...",
-      reporter: "user789",
-      status: "resolved",
-    },
+    ...(reports?.topics ?? []),
+    ...(reports?.comments ?? []),
   ];
 
   const recentUsers = [
@@ -159,7 +138,7 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-[#1D1D1F]">
-                    {stats.totalUsers.toLocaleString()}
+                    {forumStats?.totalMembers ?? 0}
                   </div>
                   <p className="text-xs text-[#86868B]">+12% dari bulan lalu</p>
                 </CardContent>
@@ -174,7 +153,7 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-[#1D1D1F]">
-                    {stats.totalPosts.toLocaleString()}
+                    {forumStats?.totalPosts ?? 0}
                   </div>
                   <p className="text-xs text-[#86868B]">+8% dari bulan lalu</p>
                 </CardContent>
@@ -189,7 +168,11 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-[#1D1D1F]">
-                    {stats.pendingReports}
+                    {(
+                      (reports?.topics.filter((r: any) => r.status === "pending")
+                        .length || 0) +
+                      (reports?.comments.filter((r: any) => r.status === "pending").length || 0)
+                    )}
                   </div>
                   <p className="text-xs text-[#86868B]">Perlu ditinjau</p>
                 </CardContent>
@@ -204,7 +187,7 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-[#1D1D1F]">
-                    {stats.activeDiscussions}
+                    {forumStats?.activeToday ?? 0}
                   </div>
                   <p className="text-xs text-[#86868B]">Sedang berlangsung</p>
                 </CardContent>
@@ -321,16 +304,16 @@ export default function Admin() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {recentReports.map((report) => (
-                      <TableRow key={report.id}>
+                    {recentReports.map((report: any) => (
+                      <TableRow key={report._id}>
                         <TableCell className="text-[#1D1D1F]">
-                          {report.type}
+                          {report.topicId ? "Topik" : "Komentar"}
                         </TableCell>
                         <TableCell className="text-[#86868B] max-w-xs truncate">
-                          {report.content}
+                          {report.reason}
                         </TableCell>
                         <TableCell className="text-[#86868B]">
-                          {report.reporter}
+                          {report.reporterId}
                         </TableCell>
                         <TableCell>
                           <Badge
@@ -363,6 +346,13 @@ export default function Admin() {
                               <>
                                 <Button
                                   size="sm"
+                                  onClick={() =>
+                                    updateStatus({
+                                      reportId: report._id,
+                                      type: report.topicId ? "topic" : "comment",
+                                      status: "resolved",
+                                    } as any)
+                                  }
                                   className="neumorphic-button-sm h-8 px-3 text-xs text-green-600"
                                 >
                                   <CheckCircle className="w-3 h-3 mr-1" />
@@ -370,6 +360,13 @@ export default function Admin() {
                                 </Button>
                                 <Button
                                   size="sm"
+                                  onClick={() =>
+                                    updateStatus({
+                                      reportId: report._id,
+                                      type: report.topicId ? "topic" : "comment",
+                                      status: "rejected",
+                                    } as any)
+                                  }
                                   className="neumorphic-button-sm h-8 px-3 text-xs text-red-600"
                                 >
                                   <XCircle className="w-3 h-3 mr-1" />

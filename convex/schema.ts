@@ -36,6 +36,7 @@ export default defineSchema({
     authorName: v.string(),
     views: v.number(),
     likes: v.number(),
+    downvotes: v.number(),
     isHot: v.boolean(),
     isPinned: v.boolean(),
     hasVideo: v.boolean(),
@@ -58,6 +59,7 @@ export default defineSchema({
     authorId: v.id("users"),
     authorName: v.string(),
     likes: v.number(),
+    downvotes: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -82,6 +84,48 @@ export default defineSchema({
     .index("by_comment", ["commentId"])
     .index("by_user", ["userId"])
     .index("by_comment_user", ["commentId", "userId"]),
+
+  topicDownvotes: defineTable({
+    topicId: v.id("topics"),
+    userId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_topic", ["topicId"])
+    .index("by_user", ["userId"])
+    .index("by_topic_user", ["topicId", "userId"]),
+
+  commentDownvotes: defineTable({
+    commentId: v.id("comments"),
+    userId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_comment", ["commentId"])
+    .index("by_user", ["userId"])
+    .index("by_comment_user", ["commentId", "userId"]),
+
+  topicReports: defineTable({
+    topicId: v.id("topics"),
+    reporterId: v.id("users"),
+    reason: v.string(),
+    status: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_topic", ["topicId"])
+    .index("by_status", ["status"])
+    .index("by_reporter", ["reporterId"]),
+
+  commentReports: defineTable({
+    commentId: v.id("comments"),
+    reporterId: v.id("users"),
+    reason: v.string(),
+    status: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_comment", ["commentId"])
+    .index("by_status", ["status"])
+    .index("by_reporter", ["reporterId"]),
 
   products: defineTable({
     title: v.string(),

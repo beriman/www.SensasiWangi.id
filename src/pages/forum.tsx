@@ -36,6 +36,8 @@ import {
   Clock,
   Star,
   Heart,
+  ThumbsUp,
+  ThumbsDown,
   Plus,
   Video,
   Image,
@@ -63,6 +65,7 @@ interface Topic {
   authorName: string;
   views: number;
   likes: number;
+  downvotes: number;
   isHot: boolean;
   isPinned: boolean;
   hasVideo: boolean;
@@ -81,6 +84,7 @@ interface Comment {
   authorId: Id<"users">;
   authorName: string;
   likes: number;
+  downvotes: number;
   createdAt: number;
   updatedAt: number;
 }
@@ -140,10 +144,17 @@ export default function Forum() {
   const allTags = useQuery(api.forum.getAllTags);
   const createTopicMutation = useMutation(api.forum.createTopic);
   const toggleLikeMutation = useMutation(api.forum.toggleTopicLike);
+  const toggleDownvoteMutation = useMutation(api.forum.toggleTopicDownvote);
   const toggleBookmarkMutation = useMutation(api.bookmarks.toggleBookmark);
   const togglePinMutation = useMutation(api.forum.togglePinTopic);
   const incrementViewsMutation = useMutation(api.forum.incrementTopicViews);
   const createCommentMutation = useMutation(api.forum.createComment);
+  const toggleCommentLikeMutation = useMutation(api.forum.toggleCommentLike);
+  const toggleCommentDownvoteMutation = useMutation(
+    api.forum.toggleCommentDownvote,
+  );
+  const reportTopicMutation = useMutation(api.forum.createTopicReport);
+  const reportCommentMutation = useMutation(api.forum.createCommentReport);
   const initializeCategoriesMutation = useMutation(
     api.forum.initializeCategories,
   );
@@ -168,6 +179,12 @@ export default function Forum() {
 
   const userLikedTopics = useQuery(
     api.forum.hasUserLikedTopic,
+    selectedTopic && currentUser
+      ? { topicId: selectedTopic._id, userId: currentUser._id }
+      : "skip",
+  );
+  const userDownvotedTopic = useQuery(
+    api.forum.hasUserDownvotedTopic,
     selectedTopic && currentUser
       ? { topicId: selectedTopic._id, userId: currentUser._id }
       : "skip",
@@ -273,6 +290,41 @@ export default function Forum() {
       toast({
         title: "Error",
         description: "Gagal melakukan like. Silakan coba lagi.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownvoteTopic = async (topicId: Id<"topics">) => {
+    if (!user) {
+      toast({
+        title: "Login diperlukan",
+        description: "Anda harus login untuk downvote!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const down = await toggleDownvoteMutation({ topicId });
+      toast({
+        title: down ? "Downvote ditambahkan" : "Downvote dibatalkan",
+      });
+
+      if (selectedTopic && selectedTopic._id === topicId) {
+        const newDown = down
+          ? selectedTopic.downvotes + 1
+          : Math.max(0, selectedTopic.downvotes - 1);
+        setSelectedTopic({
+          ...selectedTopic,
+          downvotes: newDown,
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling downvote:", error);
+      toast({
+        title: "Error",
+        description: "Gagal melakukan downvote.",
         variant: "destructive",
       });
     }
@@ -882,10 +934,20 @@ export default function Forum() {
                                     e.stopPropagation();
                                     handleLikeTopic(topic._id);
                                   }}
-                                  className="flex items-center gap-1 hover:text-red-500 transition-colors"
+                                  className="flex items-center gap-1 hover:text-green-600 transition-colors"
                                 >
-                                  <Heart className="h-4 w-4" />
+                                  <ThumbsUp className="h-4 w-4" />
                                   <span>{topic.likes}</span>
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDownvoteTopic(topic._id);
+                                  }}
+                                  className="flex items-center gap-1 hover:text-red-600 transition-colors"
+                                >
+                                  <ThumbsDown className="h-4 w-4" />
+                                  <span>{topic.downvotes}</span>
                                 </button>
                                 <button
                                   onClick={(e) => {
@@ -1007,10 +1069,20 @@ export default function Forum() {
                                   e.stopPropagation();
                                   handleLikeTopic(topic._id);
                                 }}
-                                className="flex items-center gap-1 hover:text-red-500 transition-colors"
+                                className="flex items-center gap-1 hover:text-green-600 transition-colors"
                               >
-                                <Heart className="h-4 w-4" />
+                                <ThumbsUp className="h-4 w-4" />
                                 <span>{topic.likes}</span>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDownvoteTopic(topic._id);
+                                }}
+                                className="flex items-center gap-1 hover:text-red-600 transition-colors"
+                              >
+                                <ThumbsDown className="h-4 w-4" />
+                                <span>{topic.downvotes}</span>
                               </button>
                               <button
                                 onClick={(e) => {
@@ -1149,14 +1221,21 @@ export default function Forum() {
                             onClick={() => handleLikeTopic(selectedTopic._id)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                               userLikedTopics
-                                ? "bg-red-50 text-red-600"
+                                ? "bg-green-50 text-green-600"
                                 : "hover:bg-gray-50 text-[#718096]"
                             }`}
                           >
-                            <Heart
+                            <ThumbsUp
                               className={`h-5 w-5 ${userLikedTopics ? "fill-current" : ""}`}
                             />
-                            <span>{selectedTopic.likes} Suka</span>
+                            <span>{selectedTopic.likes}</span>
+                          </button>
+                          <button
+                            onClick={() => handleDownvoteTopic(selectedTopic._id)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-[#718096]`}
+                          >
+                            <ThumbsDown className="h-5 w-5" />
+                            <span>{selectedTopic.downvotes}</span>
                           </button>
                           <button
                             onClick={() =>
@@ -1250,6 +1329,22 @@ export default function Forum() {
                                       <p className="text-[#2d3748]">
                                         {comment.content}
                                       </p>
+                                      <div className="flex items-center gap-3 mt-2 text-sm text-[#718096]">
+                                        <button
+                                          onClick={() => toggleCommentLikeMutation({ commentId: comment._id } as any)}
+                                          className="flex items-center gap-1 hover:text-green-600"
+                                        >
+                                          <ThumbsUp className="h-4 w-4" />
+                                          <span>{comment.likes}</span>
+                                        </button>
+                                        <button
+                                          onClick={() => toggleCommentDownvoteMutation({ commentId: comment._id } as any)}
+                                          className="flex items-center gap-1 hover:text-red-600"
+                                        >
+                                          <ThumbsDown className="h-4 w-4" />
+                                          <span>{comment.downvotes}</span>
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>

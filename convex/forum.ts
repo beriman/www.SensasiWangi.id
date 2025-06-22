@@ -160,6 +160,45 @@ export const hasUserLikedTopic = query({
   },
 });
 
+export const hasUserDownvotedTopic = query({
+  args: { topicId: v.id("topics"), userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const down = await ctx.db
+      .query("topicDownvotes")
+      .withIndex("by_topic_user", (q) =>
+        q.eq("topicId", args.topicId).eq("userId", args.userId)
+      )
+      .unique();
+    return !!down;
+  },
+});
+
+export const hasUserLikedComment = query({
+  args: { commentId: v.id("comments"), userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const like = await ctx.db
+      .query("commentLikes")
+      .withIndex("by_comment_user", (q) =>
+        q.eq("commentId", args.commentId).eq("userId", args.userId)
+      )
+      .unique();
+    return !!like;
+  },
+});
+
+export const hasUserDownvotedComment = query({
+  args: { commentId: v.id("comments"), userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const down = await ctx.db
+      .query("commentDownvotes")
+      .withIndex("by_comment_user", (q) =>
+        q.eq("commentId", args.commentId).eq("userId", args.userId)
+      )
+      .unique();
+    return !!down;
+  },
+});
+
 // Query untuk mendapatkan topik berdasarkan author
 export const getTopicsByAuthor = query({
   args: { authorId: v.id("users") },
@@ -255,6 +294,7 @@ export const createTopic = mutation({
       authorName: user.name || "Anonymous",
       views: 0,
       likes: 0,
+      downvotes: 0,
       isHot: false,
       isPinned: false,
       hasVideo: args.hasVideo,
@@ -329,6 +369,12 @@ export const toggleTopicLike = mutation({
       // Unlike - hapus like dan kurangi counter
       await ctx.db.delete(existingLike._id);
       newLikes = Math.max(0, topic.likes - 1);
+      const author = await ctx.db.get(topic.authorId as Id<"users">);
+      if (author) {
+        await ctx.db.patch(author._id, {
+          contributionPoints: (author.contributionPoints ?? 0) - 1,
+        });
+      }
     } else {
       // Like - tambah like dan tambah counter
       await ctx.db.insert("topicLikes", {
@@ -337,6 +383,12 @@ export const toggleTopicLike = mutation({
         createdAt: Date.now(),
       });
       newLikes = topic.likes + 1;
+      const author = await ctx.db.get(topic.authorId as Id<"users">);
+      if (author) {
+        await ctx.db.patch(author._id, {
+          contributionPoints: (author.contributionPoints ?? 0) + 1,
+        });
+      }
     }
 
     await ctx.db.patch(args.topicId, {
@@ -348,7 +400,82 @@ export const toggleTopicLike = mutation({
       updatedAt: Date.now(),
     });
 
-    return !existingLike;
+  return !existingLike;
+  },
+});
+
+export const toggleTopicDownvote = mutation({
+  args: { topicId: v.id("topics") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Anda harus login untuk downvote");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+
+    if (!user) {
+      throw new Error("User tidak ditemukan");
+    }
+
+    const existingDown = await ctx.db
+      .query("topicDownvotes")
+      .withIndex("by_topic_user", (q) =>
+        q.eq("topicId", args.topicId).eq("userId", user._id)
+      )
+      .unique();
+
+    const topic = await ctx.db.get(args.topicId);
+    if (!topic) throw new Error("Topik tidak ditemukan");
+
+    // remove like if exists
+    const existingLike = await ctx.db
+      .query("topicLikes")
+      .withIndex("by_topic_user", (q) =>
+        q.eq("topicId", args.topicId).eq("userId", user._id)
+      )
+      .unique();
+
+    let newDown = topic.downvotes;
+    let newLikes = topic.likes;
+    if (existingDown) {
+      await ctx.db.delete(existingDown._id);
+      newDown = Math.max(0, topic.downvotes - 1);
+      const author = await ctx.db.get(topic.authorId as Id<"users">);
+      if (author) {
+        await ctx.db.patch(author._id, {
+          contributionPoints: (author.contributionPoints ?? 0) + 1,
+        });
+      }
+    } else {
+      await ctx.db.insert("topicDownvotes", {
+        topicId: args.topicId,
+        userId: user._id,
+        createdAt: Date.now(),
+      });
+      newDown = topic.downvotes + 1;
+      const author = await ctx.db.get(topic.authorId as Id<"users">);
+      if (author) {
+        await ctx.db.patch(author._id, {
+          contributionPoints: (author.contributionPoints ?? 0) - 1,
+        });
+      }
+      if (existingLike) {
+        await ctx.db.delete(existingLike._id);
+        newLikes = Math.max(0, topic.likes - 1);
+      }
+    }
+
+    await ctx.db.patch(args.topicId, {
+      downvotes: newDown,
+      likes: newLikes,
+      updatedAt: Date.now(),
+    });
+
+    return !existingDown;
   },
 });
 
@@ -402,6 +529,7 @@ export const createComment = mutation({
       authorId: user._id,
       authorName: user.name || "Anonymous",
       likes: 0,
+      downvotes: 0,
       createdAt: now,
       updatedAt: now,
     });
@@ -433,6 +561,128 @@ export const createComment = mutation({
     }
 
     return commentId;
+  },
+});
+
+export const toggleCommentLike = mutation({
+  args: { commentId: v.id("comments") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Anda harus login untuk memberi vote");
+    }
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    const comment = await ctx.db.get(args.commentId);
+    if (!comment) throw new Error("Komentar tidak ditemukan");
+
+    const existing = await ctx.db
+      .query("commentLikes")
+      .withIndex("by_comment_user", (q) =>
+        q.eq("commentId", args.commentId).eq("userId", user._id)
+      )
+      .unique();
+
+    let newLikes = comment.likes;
+    if (existing) {
+      await ctx.db.delete(existing._id);
+      newLikes = Math.max(0, comment.likes - 1);
+      const author = await ctx.db.get(comment.authorId as Id<"users">);
+      if (author) {
+        await ctx.db.patch(author._id, {
+          contributionPoints: (author.contributionPoints ?? 0) - 1,
+        });
+      }
+    } else {
+      await ctx.db.insert("commentLikes", {
+        commentId: args.commentId,
+        userId: user._id,
+        createdAt: Date.now(),
+      });
+      newLikes = comment.likes + 1;
+      const author = await ctx.db.get(comment.authorId as Id<"users">);
+      if (author) {
+        await ctx.db.patch(author._id, {
+          contributionPoints: (author.contributionPoints ?? 0) + 1,
+        });
+      }
+    }
+
+    await ctx.db.patch(args.commentId, { likes: newLikes, updatedAt: Date.now() });
+    return !existing;
+  },
+});
+
+export const toggleCommentDownvote = mutation({
+  args: { commentId: v.id("comments") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login untuk downvote");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    const comment = await ctx.db.get(args.commentId);
+    if (!comment) throw new Error("Komentar tidak ditemukan");
+
+    const existing = await ctx.db
+      .query("commentDownvotes")
+      .withIndex("by_comment_user", (q) =>
+        q.eq("commentId", args.commentId).eq("userId", user._id)
+      )
+      .unique();
+
+    const existingLike = await ctx.db
+      .query("commentLikes")
+      .withIndex("by_comment_user", (q) =>
+        q.eq("commentId", args.commentId).eq("userId", user._id)
+      )
+      .unique();
+
+    let newDown = comment.downvotes;
+    let newLikes = comment.likes;
+    if (existing) {
+      await ctx.db.delete(existing._id);
+      newDown = Math.max(0, comment.downvotes - 1);
+      const author = await ctx.db.get(comment.authorId as Id<"users">);
+      if (author) {
+        await ctx.db.patch(author._id, {
+          contributionPoints: (author.contributionPoints ?? 0) + 1,
+        });
+      }
+    } else {
+      await ctx.db.insert("commentDownvotes", {
+        commentId: args.commentId,
+        userId: user._id,
+        createdAt: Date.now(),
+      });
+      newDown = comment.downvotes + 1;
+      const author = await ctx.db.get(comment.authorId as Id<"users">);
+      if (author) {
+        await ctx.db.patch(author._id, {
+          contributionPoints: (author.contributionPoints ?? 0) - 1,
+        });
+      }
+      if (existingLike) {
+        await ctx.db.delete(existingLike._id);
+        newLikes = Math.max(0, comment.likes - 1);
+      }
+    }
+
+    await ctx.db.patch(args.commentId, {
+      downvotes: newDown,
+      likes: newLikes,
+      updatedAt: Date.now(),
+    });
+
+    return !existing;
   },
 });
 
@@ -679,5 +929,99 @@ export const updateAllCategoryCounts = mutation({
     }
 
     return { message: "Semua category counts berhasil diupdate" };
+  },
+});
+
+export const createTopicReport = mutation({
+  args: { topicId: v.id("topics"), reason: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login untuk melapor");
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+    const now = Date.now();
+    const topic = await ctx.db.get(args.topicId);
+    if (topic) {
+      const author = await ctx.db.get(topic.authorId as Id<"users">);
+      if (author) {
+        await ctx.db.patch(author._id, {
+          contributionPoints: (author.contributionPoints ?? 0) - 2,
+        });
+      }
+    }
+    return await ctx.db.insert("topicReports", {
+      topicId: args.topicId,
+      reporterId: user._id,
+      reason: args.reason,
+      status: "pending",
+      createdAt: now,
+      updatedAt: now,
+    });
+  },
+});
+
+export const createCommentReport = mutation({
+  args: { commentId: v.id("comments"), reason: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login untuk melapor");
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+    const now = Date.now();
+    const comment = await ctx.db.get(args.commentId);
+    if (comment) {
+      const author = await ctx.db.get(comment.authorId as Id<"users">);
+      if (author) {
+        await ctx.db.patch(author._id, {
+          contributionPoints: (author.contributionPoints ?? 0) - 2,
+        });
+      }
+    }
+    return await ctx.db.insert("commentReports", {
+      commentId: args.commentId,
+      reporterId: user._id,
+      reason: args.reason,
+      status: "pending",
+      createdAt: now,
+      updatedAt: now,
+    });
+  },
+});
+
+export const getReports = query({
+  handler: async (ctx) => {
+    const topicReports = await ctx.db.query("topicReports").collect();
+    const commentReports = await ctx.db.query("commentReports").collect();
+    return {
+      topics: topicReports,
+      comments: commentReports,
+    };
+  },
+});
+
+export const updateReportStatus = mutation({
+  args: {
+    reportId: v.string(),
+    type: v.string(),
+    status: v.string(),
+  },
+  handler: async (ctx, args) => {
+    if (args.type === "topic") {
+      await ctx.db.patch(args.reportId as Id<"topicReports">, {
+        status: args.status,
+        updatedAt: Date.now(),
+      });
+    } else {
+      await ctx.db.patch(args.reportId as Id<"commentReports">, {
+        status: args.status,
+        updatedAt: Date.now(),
+      });
+    }
   },
 });
