@@ -26,6 +26,7 @@ import {
   Globe,
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
@@ -56,6 +57,7 @@ export default function Database() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("brands");
+  const navigate = useNavigate();
 
   // Queries
   const databaseStats = useQuery(api.marketplace.getDatabaseStats);
@@ -133,6 +135,16 @@ export default function Database() {
                 </div>
               </div>
             )}
+
+            <div className="mt-8">
+              <Button
+                variant="outline"
+                onClick={() => navigate("/database/contribute")}
+                className="neumorphic-button h-12 px-8 text-[#2d3748] bg-transparent border-0 shadow-none"
+              >
+                Tambah Data
+              </Button>
+            </div>
 
             {/* Initialize Data Button */}
             {!brands?.page?.length &&

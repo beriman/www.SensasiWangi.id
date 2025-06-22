@@ -438,4 +438,16 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_read", ["read"])
     .index("by_created_at", ["createdAt"]),
+
+  databaseContributions: defineTable({
+    type: v.string(),
+    data: v.any(),
+    status: v.string(),
+    userId: v.optional(v.id("users")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_type", ["type"])
+    .index("by_created_at", ["createdAt"]),
 });

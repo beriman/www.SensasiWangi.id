@@ -1654,3 +1654,60 @@ export const updateSuggestionPriority = mutation({
     });
   },
 });
+
+// ===== DATABASE CONTRIBUTIONS =====
+
+export const submitDatabaseContribution = mutation({
+  args: {
+    type: v.union(
+      v.literal("brand"),
+      v.literal("perfumer"),
+      v.literal("fragrance"),
+    ),
+    data: v.any(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    let userId: Id<"users"> | undefined = undefined;
+
+    if (identity) {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+        .unique();
+
+      if (user) {
+        userId = user._id;
+      }
+    }
+
+    const now = Date.now();
+
+    await ctx.db.insert("databaseContributions", {
+      type: args.type,
+      data: args.data,
+      status: "pending",
+      userId,
+      createdAt: now,
+      updatedAt: now,
+    });
+  },
+});
+
+export const updateContributionStatus = mutation({
+  args: {
+    contributionId: v.id("databaseContributions"),
+    status: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const contribution = await ctx.db.get(args.contributionId);
+    if (!contribution) {
+      throw new Error("Kontribusi tidak ditemukan");
+    }
+
+    await ctx.db.patch(args.contributionId, {
+      status: args.status,
+      updatedAt: Date.now(),
+    });
+  },
+});
