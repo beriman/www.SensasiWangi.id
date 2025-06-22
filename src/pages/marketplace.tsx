@@ -46,8 +46,16 @@ import {
   Grid,
   List,
   Bookmark,
+  Share,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/components/ui/use-toast";
 
 const CATEGORIES = [
   "Parfum Pria",
@@ -147,6 +155,64 @@ function ProductCard({
     }
   };
 
+  const { toast } = useToast();
+  const shareUrl = `${window.location.origin}/marketplace/product/${product._id}`;
+  const [shortUrl, setShortUrl] = useState<string | null>(null);
+
+  const getShortUrl = async () => {
+    if (shortUrl) return shortUrl;
+    try {
+      const res = await fetch(
+        `https://is.gd/create.php?format=simple&url=${encodeURIComponent(shareUrl)}`,
+      );
+      const txt = await res.text();
+      setShortUrl(txt);
+      return txt;
+    } catch {
+      setShortUrl(shareUrl);
+      return shareUrl;
+    }
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (navigator.share) {
+      navigator.share({ title: product.title, url: shareUrl });
+    } else {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({ title: "Link disalin" });
+    }
+  };
+
+  const shareWhatsApp = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = await getShortUrl();
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(`${product.title} ${url}`)}`,
+      "_blank",
+    );
+  };
+
+  const shareTwitter = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = await getShortUrl();
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+        product.title,
+      )}&url=${encodeURIComponent(url)}`,
+      "_blank",
+    );
+  };
+
+  const shareInstagram = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = await getShortUrl();
+    window.open(
+      `https://www.instagram.com/stories/share/?url=${encodeURIComponent(url)}`,
+      "_blank",
+    );
+  };
+
   if (viewMode === "list") {
     return (
       <Card
@@ -213,6 +279,30 @@ function ProductCard({
               >
                 <Bookmark className="h-4 w-4" />
               </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="p-2 rounded-full neumorphic-button-sm text-gray-400"
+                  >
+                    <Share className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="neumorphic-card border-0">
+                  <DropdownMenuItem onClick={handleShare}>
+                    Bagikan…
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={shareWhatsApp}>
+                    WhatsApp
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={shareTwitter}>
+                    Twitter
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={shareInstagram}>
+                    Instagram
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <div className="flex items-center justify-between">
@@ -294,6 +384,22 @@ function ProductCard({
         >
           <Bookmark className="h-4 w-4" />
         </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              onClick={(e) => e.stopPropagation()}
+              className="absolute top-3 right-20 p-2 rounded-full neumorphic-button-sm text-gray-400"
+            >
+              <Share className="h-4 w-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="neumorphic-card border-0">
+            <DropdownMenuItem onClick={handleShare}>Bagikan…</DropdownMenuItem>
+            <DropdownMenuItem onClick={shareWhatsApp}>WhatsApp</DropdownMenuItem>
+            <DropdownMenuItem onClick={shareTwitter}>Twitter</DropdownMenuItem>
+            <DropdownMenuItem onClick={shareInstagram}>Instagram</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Badge
           className={`absolute top-3 left-3 ${getConditionColor(product.condition)}`}
         >
