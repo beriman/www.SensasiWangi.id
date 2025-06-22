@@ -474,4 +474,69 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_read", ["read"])
     .index("by_created_at", ["createdAt"]),
+
+  // === Courses & Lessons ===
+  courses: defineTable({
+    title: v.string(),
+    description: v.string(),
+    category: v.string(),
+    level: v.string(),
+    price: v.number(),
+    image: v.optional(v.string()),
+    instructor: v.string(),
+    discussionTopicId: v.optional(v.id("topics")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_category", ["category"])
+    .index("by_level", ["level"])
+    .index("by_created_at", ["createdAt"]),
+
+  lessons: defineTable({
+    courseId: v.id("courses"),
+    title: v.string(),
+    videoUrl: v.string(),
+    order: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_course_order", ["courseId", "order"])
+    .index("by_course", ["courseId"]),
+
+  progress: defineTable({
+    userId: v.id("users"),
+    lessonId: v.id("lessons"),
+    progress: v.number(),
+    completed: v.boolean(),
+    updatedAt: v.number(),
+  })
+    .index("by_user_lesson", ["userId", "lessonId"])
+    .index("by_user", ["userId"]),
+
+  quizzes: defineTable({
+    lessonId: v.id("lessons"),
+    question: v.string(),
+    options: v.array(v.string()),
+    correctOption: v.number(),
+    createdAt: v.number(),
+  }).index("by_lesson", ["lessonId"]),
+
+  quizResults: defineTable({
+    lessonId: v.id("lessons"),
+    userId: v.id("users"),
+    answers: v.array(v.number()),
+    score: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_user_lesson", ["userId", "lessonId"])
+    .index("by_user", ["userId"]),
+
+  certificates: defineTable({
+    courseId: v.id("courses"),
+    userId: v.id("users"),
+    url: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_user_course", ["userId", "courseId"])
+    .index("by_user", ["userId"]),
 });
