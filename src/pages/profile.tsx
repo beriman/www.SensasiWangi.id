@@ -1,5 +1,5 @@
 import { useUser } from "@clerk/clerk-react";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   User,
@@ -22,6 +24,7 @@ import {
   Edit3,
 } from "lucide-react";
 import ProtectedRoute from "@/components/wrappers/ProtectedRoute";
+import { useEffect, useRef, useState } from "react";
 
 export default function Profile() {
   return (
@@ -63,6 +66,50 @@ function ProfileContent() {
     api.marketplace.getReviewsByTargetUser,
     userData ? { userId: userData._id } : "skip",
   );
+
+  const updateBio = useMutation(api.users.updateUserBio);
+  const [editing, setEditing] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setFullName(user?.fullName || "");
+    setUsername(user?.username || "");
+  }, [user]);
+
+  useEffect(() => {
+    setBio(userProfile?.profile?.bio || "");
+  }, [userProfile]);
+
+  const handleNameBlur = async () => {
+    if (!user) return;
+    const parts = fullName.trim().split(" ");
+    const firstName = parts.shift() || "";
+    const lastName = parts.join(" ");
+    await user.update({ firstName, lastName });
+  };
+
+  const handleUsernameBlur = async () => {
+    if (!user) return;
+    await user.update({ username });
+  };
+
+  const handleBioBlur = async () => {
+    if (!userData) return;
+    await updateBio({ bio });
+  };
+
+  const handleImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (file && user) {
+      // @ts-ignore
+      await user.setProfileImage({ file });
+    }
+  };
   const averageRating =
     userReviews && userReviews.length > 0
       ? userReviews.reduce((sum: number, r: any) => sum + r.rating, 0) /
@@ -131,25 +178,71 @@ function ProfileContent() {
             <div className="lg:col-span-1">
               <div className="neumorphic-card p-8 text-center">
                 <div className="mb-6">
-                  <Avatar className="w-24 h-24 mx-auto mb-4 neumorphic-button border-0">
-                    <AvatarImage
-                      src={user?.imageUrl}
-                      alt={user?.fullName || "User"}
+                  <div className="relative w-24 h-24 mx-auto mb-4">
+                    <Avatar className="w-24 h-24 mx-auto neumorphic-button border-0">
+                      <AvatarImage src={user?.imageUrl} alt={user?.fullName || "User"} />
+                      <AvatarFallback className="text-2xl font-semibold text-[#2d3748] bg-gradient-to-br from-[#e0e5ec] to-[#ffffff]">
+                        {getInitials(user?.fullName)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {editing && (
+                      <>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleImageChange}
+                          accept="image/*"
+                          className="hidden"
+                        />
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-white text-sm"
+                        >
+                          Ganti
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  {editing ? (
+                    <Input
+                      className="text-center mb-2"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      onBlur={handleNameBlur}
                     />
-                    <AvatarFallback className="text-2xl font-semibold text-[#2d3748] bg-gradient-to-br from-[#e0e5ec] to-[#ffffff]">
-                      {getInitials(user?.fullName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <h2 className="text-2xl font-bold text-[#1D1D1F] mb-2">
-                    {user?.fullName || "Pengguna"}
-                  </h2>
+                  ) : (
+                    <h2 className="text-2xl font-bold text-[#1D1D1F] mb-2">
+                      {user?.fullName || "Pengguna"}
+                    </h2>
+                  )}
                   <p className="text-[#86868B] mb-2">
                     {user?.primaryEmailAddress?.emailAddress}
                   </p>
-                  {userProfile?.profile?.bio && (
-                    <p className="text-sm text-[#4a5568] mb-4 italic">
-                      {userProfile.profile.bio}
-                    </p>
+                  {editing ? (
+                    <Input
+                      className="text-center mb-2"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      onBlur={handleUsernameBlur}
+                    />
+                  ) : (
+                    user?.username && (
+                      <p className="text-[#86868B] mb-2">@{user.username}</p>
+                    )
+                  )}
+                  {editing ? (
+                    <Textarea
+                      className="text-center mb-4"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      onBlur={handleBioBlur}
+                    />
+                  ) : (
+                    userProfile?.profile?.bio && (
+                      <p className="text-sm text-[#4a5568] mb-4 italic">
+                        {userProfile.profile.bio}
+                      </p>
+                    )
                   )}
                   <div className="flex justify-center gap-2 mb-6">
                     <Badge
@@ -173,9 +266,12 @@ function ProfileContent() {
                 </div>
 
                 <div className="space-y-4">
-                  <Button className="neumorphic-button w-full bg-transparent text-[#2d3748] font-semibold border-0 shadow-none hover:scale-105 active:scale-95 transition-all">
+                  <Button
+                    className="neumorphic-button w-full bg-transparent text-[#2d3748] font-semibold border-0 shadow-none hover:scale-105 active:scale-95 transition-all"
+                    onClick={() => setEditing((e) => !e)}
+                  >
                     <Edit3 className="h-4 w-4 mr-2" />
-                    Edit Profil
+                    {editing ? "Selesai" : "Edit Profil"}
                   </Button>
                   <Button
                     variant="outline"
