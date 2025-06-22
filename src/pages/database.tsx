@@ -59,20 +59,20 @@ export default function Database() {
 
   // Queries
   const databaseStats = useQuery(api.marketplace.getDatabaseStats);
-  const brands = useQuery(api.marketplace.getIndonesianBrands, {
-    paginationOpts: { numItems: 50 },
-    searchQuery: searchTerm || undefined,
-    category: selectedCategory || undefined,
-  });
-  const perfumers = useQuery(api.marketplace.getIndonesianPerfumers, {
-    paginationOpts: { numItems: 50 },
-    searchQuery: searchTerm || undefined,
-    experience: selectedCategory || undefined,
-  });
-  const fragrances = useQuery(api.marketplace.getIndonesianFragrances, {
-    paginationOpts: { numItems: 50 },
-    searchQuery: searchTerm || undefined,
-    category: selectedCategory || undefined,
+    const brands = useQuery(api.marketplace.getIndonesianBrands, {
+      paginationOpts: { numItems: 50, cursor: null },
+      searchQuery: searchTerm || undefined,
+      category: selectedCategory || undefined,
+    });
+    const perfumers = useQuery(api.marketplace.getIndonesianPerfumers, {
+      paginationOpts: { numItems: 50, cursor: null },
+      searchQuery: searchTerm || undefined,
+      experience: selectedCategory || undefined,
+    });
+    const fragrances = useQuery(api.marketplace.getIndonesianFragrances, {
+      paginationOpts: { numItems: 50, cursor: null },
+      searchQuery: searchTerm || undefined,
+      category: selectedCategory || undefined,
   });
 
   // Mutation for initializing sample data

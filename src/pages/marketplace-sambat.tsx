@@ -579,7 +579,7 @@ export default function MarketplaceSambat() {
   const [showFilters, setShowFilters] = useState(false);
 
   const products = useQuery(api.marketplace.getSambatProducts, {
-    paginationOpts: { numItems: 20 },
+    paginationOpts: { numItems: 20, cursor: null },
     category: selectedCategory || undefined,
     sortBy,
     searchQuery: searchQuery || undefined,
