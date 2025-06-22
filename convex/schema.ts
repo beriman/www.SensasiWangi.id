@@ -312,6 +312,8 @@ export default defineSchema({
     totalProducts: v.number(),
     rating: v.number(),
     totalReviews: v.number(),
+    views: v.number(),
+    likes: v.number(),
     tags: v.array(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -320,6 +322,8 @@ export default defineSchema({
     .index("by_category", ["category"])
     .index("by_active", ["isActive"])
     .index("by_rating", ["rating"])
+    .index("by_views", ["views"])
+    .index("by_likes", ["likes"])
     .index("by_created_at", ["createdAt"]),
 
   perfumers: defineTable({
@@ -426,6 +430,15 @@ export default defineSchema({
     .index("by_fragrance", ["fragranceId"])
     .index("by_user", ["userId"])
     .index("by_fragrance_user", ["fragranceId", "userId"]),
+
+  brandLikes: defineTable({
+    brandId: v.id("brands"),
+    userId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_brand", ["brandId"])
+    .index("by_user", ["userId"])
+    .index("by_brand_user", ["brandId", "userId"]),
 
   notifications: defineTable({
     userId: v.id("users"),

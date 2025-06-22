@@ -928,6 +928,142 @@ export const incrementSambatProductViews = mutation({
   },
 });
 
+// Mutation untuk like/unlike brand
+export const toggleBrandLike = mutation({
+  args: { brandId: v.id("brands") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Anda harus login untuk like brand");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+
+    if (!user) {
+      throw new Error("User tidak ditemukan");
+    }
+
+    const existingLike = await ctx.db
+      .query("brandLikes")
+      .withIndex("by_brand_user", (q) =>
+        q.eq("brandId", args.brandId).eq("userId", user._id),
+      )
+      .unique();
+
+    const brand = await ctx.db.get(args.brandId);
+    if (!brand) {
+      throw new Error("Brand tidak ditemukan");
+    }
+
+    if (existingLike) {
+      await ctx.db.delete(existingLike._id);
+      await ctx.db.patch(args.brandId, {
+        likes: Math.max(0, brand.likes - 1),
+        updatedAt: Date.now(),
+      });
+      return false;
+    } else {
+      await ctx.db.insert("brandLikes", {
+        brandId: args.brandId,
+        userId: user._id,
+        createdAt: Date.now(),
+      });
+      await ctx.db.patch(args.brandId, {
+        likes: brand.likes + 1,
+        updatedAt: Date.now(),
+      });
+      return true;
+    }
+  },
+});
+
+// Mutation untuk increment view count brand
+export const incrementBrandViews = mutation({
+  args: { brandId: v.id("brands") },
+  handler: async (ctx, args) => {
+    const brand = await ctx.db.get(args.brandId);
+    if (!brand) {
+      throw new Error("Brand tidak ditemukan");
+    }
+
+    await ctx.db.patch(args.brandId, {
+      views: brand.views + 1,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Mutation untuk like/unlike fragrance
+export const toggleFragranceLike = mutation({
+  args: { fragranceId: v.id("fragrances") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Anda harus login untuk like parfum");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+
+    if (!user) {
+      throw new Error("User tidak ditemukan");
+    }
+
+    const existingLike = await ctx.db
+      .query("fragranceLikes")
+      .withIndex("by_fragrance_user", (q) =>
+        q.eq("fragranceId", args.fragranceId).eq("userId", user._id),
+      )
+      .unique();
+
+    const fragrance = await ctx.db.get(args.fragranceId);
+    if (!fragrance) {
+      throw new Error("Parfum tidak ditemukan");
+    }
+
+    if (existingLike) {
+      await ctx.db.delete(existingLike._id);
+      await ctx.db.patch(args.fragranceId, {
+        totalLikes: Math.max(0, fragrance.totalLikes - 1),
+        updatedAt: Date.now(),
+      });
+      return false;
+    } else {
+      await ctx.db.insert("fragranceLikes", {
+        fragranceId: args.fragranceId,
+        userId: user._id,
+        createdAt: Date.now(),
+      });
+      await ctx.db.patch(args.fragranceId, {
+        totalLikes: fragrance.totalLikes + 1,
+        updatedAt: Date.now(),
+      });
+      return true;
+    }
+  },
+});
+
+// Mutation untuk increment view count fragrance
+export const incrementFragranceViews = mutation({
+  args: { fragranceId: v.id("fragrances") },
+  handler: async (ctx, args) => {
+    const fragrance = await ctx.db.get(args.fragranceId);
+    if (!fragrance) {
+      throw new Error("Parfum tidak ditemukan");
+    }
+
+    await ctx.db.patch(args.fragranceId, {
+      views: fragrance.views + 1,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 // ===== DATABASE QUERIES =====
 
 // Query untuk mendapatkan semua brand Indonesia
@@ -953,6 +1089,20 @@ export const getIndonesianBrands = query({
       query = ctx.db
         .query("brands")
         .withIndex("by_rating")
+        .order("desc")
+        .filter((q) => q.eq(q.field("country"), "Indonesia"))
+        .filter((q) => q.eq(q.field("isActive"), true));
+    } else if (args.sortBy === "popular") {
+      query = ctx.db
+        .query("brands")
+        .withIndex("by_views")
+        .order("desc")
+        .filter((q) => q.eq(q.field("country"), "Indonesia"))
+        .filter((q) => q.eq(q.field("isActive"), true));
+    } else if (args.sortBy === "liked") {
+      query = ctx.db
+        .query("brands")
+        .withIndex("by_likes")
         .order("desc")
         .filter((q) => q.eq(q.field("country"), "Indonesia"))
         .filter((q) => q.eq(q.field("isActive"), true));
@@ -1252,6 +1402,8 @@ export const initializeSampleData = mutation({
         totalProducts: 25,
         rating: 4.2,
         totalReviews: 1250,
+        views: 0,
+        likes: 0,
         tags: ["Halal", "Local", "Affordable"],
         createdAt: now,
         updatedAt: now,
@@ -1270,6 +1422,8 @@ export const initializeSampleData = mutation({
         totalProducts: 18,
         rating: 4.0,
         totalReviews: 890,
+        views: 0,
+        likes: 0,
         tags: ["Traditional", "Heritage", "Natural"],
         createdAt: now,
         updatedAt: now,
@@ -1287,6 +1441,8 @@ export const initializeSampleData = mutation({
         totalProducts: 12,
         rating: 4.5,
         totalReviews: 567,
+        views: 0,
+        likes: 0,
         tags: ["Halal", "Men", "Modern"],
         createdAt: now,
         updatedAt: now,
@@ -1304,6 +1460,8 @@ export const initializeSampleData = mutation({
         totalProducts: 8,
         rating: 4.7,
         totalReviews: 234,
+        views: 0,
+        likes: 0,
         tags: ["Natural", "Artisan", "Bali"],
         createdAt: now,
         updatedAt: now,
