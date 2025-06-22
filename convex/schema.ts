@@ -427,6 +427,20 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_fragrance_user", ["fragranceId", "userId"]),
 
+  contributions: defineTable({
+    type: v.string(), // "brand", "perfumer", "fragrance"
+    targetId: v.optional(v.string()),
+    data: v.any(),
+    status: v.string(), // "pending", "approved", "rejected"
+    userId: v.optional(v.id("users")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_type", ["type"])
+    .index("by_status", ["status"])
+    .index("by_user", ["userId"])
+    .index("by_created_at", ["createdAt"]),
+
   notifications: defineTable({
     userId: v.id("users"),
     type: v.string(),

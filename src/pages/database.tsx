@@ -138,15 +138,31 @@ export default function Database() {
             {!brands?.page?.length &&
               !perfumers?.page?.length &&
               !fragrances?.page?.length && (
-                <div className="mt-8">
+                <div className="mt-8 flex gap-4 justify-center">
                   <Button
                     onClick={() => initializeSampleData()}
                     className="neumorphic-button h-12 px-8 text-[#2d3748] bg-transparent font-semibold border-0 shadow-none"
                   >
                     Inisialisasi Data Sample
                   </Button>
+                  <Button
+                    variant="outline"
+                    className="neumorphic-button h-12 px-8 text-[#2d3748] font-semibold"
+                    onClick={() => window.location.href = "/database/contribute"}
+                  >
+                    Kontribusi Data
+                  </Button>
                 </div>
               )}
+            <div className="mt-4 text-center">
+              <Button
+                variant="outline"
+                className="neumorphic-button h-12 px-8 text-[#2d3748] font-semibold"
+                onClick={() => (window.location.href = "/database/contribute")}
+              >
+                Kontribusi Data
+              </Button>
+            </div>
           </div>
 
           {/* Tabs Navigation */}

@@ -1654,3 +1654,64 @@ export const updateSuggestionPriority = mutation({
     });
   },
 });
+
+// ===== COMMUNITY CONTRIBUTIONS =====
+
+export const createContribution = mutation({
+  args: {
+    type: v.string(),
+    data: v.any(),
+    targetId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    let userId = undefined;
+
+    if (identity) {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+        .unique();
+
+      if (user) {
+        userId = user._id;
+      }
+    }
+
+    const now = Date.now();
+
+    return await ctx.db.insert("contributions", {
+      type: args.type,
+      data: args.data,
+      targetId: args.targetId,
+      status: "pending",
+      userId,
+      createdAt: now,
+      updatedAt: now,
+    });
+  },
+});
+
+export const getContributions = query({
+  args: {
+    status: v.optional(v.string()),
+    type: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    let queryObj: any = ctx.db.query("contributions").withIndex("by_created_at").order("desc");
+
+    const results = await queryObj.collect();
+
+    let filtered = results;
+
+    if (args.status) {
+      filtered = filtered.filter((c) => c.status === args.status);
+    }
+
+    if (args.type) {
+      filtered = filtered.filter((c) => c.type === args.type);
+    }
+
+    return filtered;
+  },
+});
