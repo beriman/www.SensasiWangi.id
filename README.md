@@ -11,6 +11,12 @@ This template provides a complete foundation for building a SaaS application wit
 - **Convex** - Real-time database with serverless functions
 - **No Payments** - No payment processing
 
+### Authentication
+
+This template uses Clerk for authentication. Single Sign-On via OAuth providers
+is enabled along with optional Two-Factor Authentication (2FA) when configured
+in your Clerk dashboard.
+
 ## Documentation
 
 For detailed setup instructions and configuration guides, visit our [comprehensive documentation](https://tempolabsinc.mintlify.app/ViteClerkConvexStripe).

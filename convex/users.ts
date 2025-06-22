@@ -87,6 +87,7 @@ export const createOrUpdateUser = mutation({
       name: identity.name,
       email: identity.email,
       tokenIdentifier: identity.subject,
+      role: "buyer",
       contributionPoints: 0,
       badges: [],
       createdAt: Date.now(),
@@ -98,8 +99,16 @@ export const createOrUpdateUser = mutation({
   },
 });
 
-export const updateUserBio = mutation({
-  args: { bio: v.optional(v.string()) },
+export const updateUserProfile = mutation({
+  args: {
+    bio: v.optional(v.string()),
+    location: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    whatsapp: v.optional(v.string()),
+    instagram: v.optional(v.string()),
+    twitter: v.optional(v.string()),
+    website: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -117,17 +126,23 @@ export const updateUserBio = mutation({
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .unique();
     const now = Date.now();
+    const profilePatch = {
+      bio: args.bio,
+      location: args.location,
+      phone: args.phone,
+      whatsapp: args.whatsapp,
+      instagram: args.instagram,
+      twitter: args.twitter,
+      website: args.website,
+      lastActive: now,
+    } as any;
     if (existing) {
-      await ctx.db.patch(existing._id, { bio: args.bio, lastActive: now });
+      await ctx.db.patch(existing._id, profilePatch);
       return existing._id;
     }
     return await ctx.db.insert("userProfiles", {
       userId: user._id,
-      bio: args.bio,
-      location: null,
-      phone: null,
-      whatsapp: null,
-      instagram: null,
+      ...profilePatch,
       avatar: null,
       isVerified: false,
       rating: 0,
@@ -135,7 +150,30 @@ export const updateUserBio = mutation({
       totalSales: 0,
       totalPurchases: 0,
       joinedAt: now,
-      lastActive: now,
     });
   },
 });
+
+export const updateUserRole = mutation({
+  args: { userId: v.id("users"), role: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!currentUser) {
+      throw new Error("User not found");
+    }
+    // Only admins can update roles
+    if (currentUser.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    await ctx.db.patch(args.userId, { role: args.role });
+    return true;
+  },
+});
+

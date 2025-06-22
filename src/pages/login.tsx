@@ -20,6 +20,11 @@ export default function Login() {
           signUpUrl="/signup"
           afterSignInUrl="/dashboard"
         />
+        <div className="mt-4 text-center">
+          <a href="/reset-password" className="text-sm text-blue-600">
+            Lupa kata sandi?
+          </a>
+        </div>
       </main>
       <Footer />
     </div>
