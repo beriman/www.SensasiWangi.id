@@ -8,6 +8,7 @@ import Profile from "./pages/profile";
 import Collections from "./pages/collections";
 import Marketplace from "./pages/marketplace";
 import MarketplaceSell from "./pages/marketplace-sell";
+import MyShop from "./pages/my-shop";
 import MarketplaceSambat from "./pages/marketplace-sambat";
 import MarketplaceSambatCreate from "./pages/marketplace-sambat-create";
 import MarketplaceProduct from "./pages/marketplace-product";
@@ -43,6 +44,7 @@ function App() {
             element={<MarketplaceProduct />}
           />
           <Route path="/marketplace/sell" element={<MarketplaceSell />} />
+          <Route path="/marketplace/my-shop" element={<MyShop />} />
           <Route path="/marketplace/sambat" element={<MarketplaceSambat />} />
           <Route
             path="/marketplace/sambat/create"
