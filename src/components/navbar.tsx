@@ -59,6 +59,25 @@ export function Navbar() {
                     Dashboard
                   </Link>
                   <Link
+                    to="/forum"
+                    className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-1.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H9l-4 4z"
+                      />
+                    </svg>
+                    Forum
+                  </Link>
+                  <Link
                     to="/marketplace"
                     className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
                   >
@@ -175,6 +194,7 @@ export function Navbar() {
                     </SheetTrigger>
                     <SheetContent side="left" className="pt-10 flex flex-col space-y-4 neumorphic-bg">
                       <Link to="/dashboard" className="neumorphic-button-sm w-full text-left">Dashboard</Link>
+                      <Link to="/forum" className="neumorphic-button-sm w-full text-left">Forum</Link>
                       <Link to="/marketplace" className="neumorphic-button-sm w-full text-left">Marketplace</Link>
                       <Link to="/kursus" className="neumorphic-button-sm w-full text-left">Kursus</Link>
                       <Link to="/polling" className="neumorphic-button-sm w-full text-left">Polling</Link>
@@ -194,6 +214,25 @@ export function Navbar() {
                 </div>
               </Authenticated>
               <Unauthenticated>
+                <Link
+                  to="/forum"
+                  className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
+                >
+                  <svg
+                    className="w-4 h-4 mr-1.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H9l-4 4z"
+                    />
+                  </svg>
+                  Forum
+                </Link>
                 <Link to="/login">
                   <Button className="neumorphic-button h-10 px-6 text-sm text-[#2d3748] bg-transparent font-semibold border-0 shadow-none transition-all hover:scale-105 active:scale-95">
                     Masuk
@@ -208,6 +247,7 @@ export function Navbar() {
                     </SheetTrigger>
                     <SheetContent side="left" className="pt-10 flex flex-col space-y-4 neumorphic-bg">
                       <Link to="/login" className="neumorphic-button-sm w-full text-left">Masuk</Link>
+                      <Link to="/forum" className="neumorphic-button-sm w-full text-left">Forum</Link>
                       <Link to="/signup" className="neumorphic-button-sm w-full text-left">Daftar</Link>
                     </SheetContent>
                   </Sheet>
