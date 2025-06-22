@@ -10,6 +10,7 @@ import Marketplace from "./pages/marketplace";
 import MarketplaceSell from "./pages/marketplace-sell";
 import MarketplaceSambat from "./pages/marketplace-sambat";
 import MarketplaceSambatCreate from "./pages/marketplace-sambat-create";
+import MarketplaceSambatDetail from "./pages/marketplace-sambat-detail";
 import Admin from "./pages/admin";
 import Kursus from "./pages/kursus";
 import Database from "./pages/database";
@@ -39,6 +40,10 @@ function App() {
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/marketplace/sell" element={<MarketplaceSell />} />
           <Route path="/marketplace/sambat" element={<MarketplaceSambat />} />
+          <Route
+            path="/marketplace/sambat/:id"
+            element={<MarketplaceSambatDetail />}
+          />
           <Route
             path="/marketplace/sambat/create"
             element={<MarketplaceSambatCreate />}
