@@ -4,6 +4,7 @@ import { api } from "../../convex/_generated/api";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
+import { UserStats } from "@/components/UserStats";
 import { ArrowRight, User, Database, Clock, Shield } from "lucide-react";
 
 export default function Dashboard() {
@@ -27,6 +28,25 @@ export default function Dashboard() {
               Lihat dan kelola informasi akun serta data pengguna Anda dalam
               satu tempat.
             </p>
+          </div>
+
+          {/* User Stats Section */}
+          <div className="mb-12">
+            <UserStats
+              level={5}
+              contributionPoints={1250}
+              postsCount={8}
+              likesReceived={42}
+              commentsCount={15}
+              joinDate={new Date(user?.createdAt || "").toLocaleDateString()}
+              badges={[
+                "Reviewer Terpercaya",
+                "Kontributor Aktif",
+                "Parfum Enthusiast",
+              ]}
+              weeklyGoal={100}
+              weeklyProgress={75}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
