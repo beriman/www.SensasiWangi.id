@@ -130,7 +130,7 @@ export function Navbar() {
                 <SignInButton
                   mode="modal"
                   signUpFallbackRedirectUrl="/dashboard"
-                  signInFallbackRedirectUrl="/dashboard"
+                  fallbackRedirectUrl="/dashboard"
                 >
                   <Button className="neumorphic-button h-10 px-6 text-sm text-[#2d3748] bg-transparent font-semibold border-0 shadow-none transition-all hover:scale-105 active:scale-95">
                     Masuk

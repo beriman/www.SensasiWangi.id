@@ -7,7 +7,7 @@ export const getTopics = query({
   args: {
     paginationOpts: v.object({
       numItems: v.number(),
-      cursor: v.optional(v.union(v.string(), v.null())),
+      cursor: v.union(v.string(), v.null()),
       id: v.optional(v.number()),
     }),
     category: v.optional(v.string()),

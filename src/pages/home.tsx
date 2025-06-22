@@ -118,7 +118,7 @@ function App() {
                     <SignInButton
                       mode="modal"
                       signUpFallbackRedirectUrl="/dashboard"
-                      signInFallbackRedirectUrl="/dashboard"
+                      fallbackRedirectUrl="/dashboard"
                     >
                       <Button className="neumorphic-button h-14 px-10 text-lg text-[#2d3748] bg-transparent font-semibold border-0 shadow-none transition-all">
                         <ArrowRight className="mr-2 h-5 w-5" />
