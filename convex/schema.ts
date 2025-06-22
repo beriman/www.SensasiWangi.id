@@ -476,6 +476,17 @@ export default defineSchema({
     .index("by_read", ["read"])
     .index("by_created_at", ["createdAt"]),
 
+  reports: defineTable({
+    contentId: v.string(),
+    contentType: v.string(),
+    reason: v.string(),
+    reporterId: v.id("users"),
+    status: v.string(), // "pending", "resolved", "rejected"
+    createdAt: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_created_at", ["createdAt"]),
+
   // === Courses & Lessons ===
   courses: defineTable({
     title: v.string(),

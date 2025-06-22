@@ -51,38 +51,18 @@ function AdminContent() {
   const pendingOrders = useQuery(api.marketplace.getPendingOrders);
   const verifyPayment = useMutation(api.marketplace.verifyOrderPayment);
   const updateStatus = useMutation(api.marketplace.updateOrderStatus);
+  const allReports = useQuery(api.forum.getReports, {});
+  const resolveReport = useMutation(api.forum.resolveReport);
+  const rejectReport = useMutation(api.forum.rejectReport);
 
   // Mock data untuk demonstrasi
   const stats = {
     totalUsers: 1247,
     totalPosts: 3456,
-    pendingReports: 12,
     activeDiscussions: 89,
   };
 
-  const recentReports = [
-    {
-      id: 1,
-      type: "Spam",
-      content: "Posting berulang tentang produk...",
-      reporter: "user123",
-      status: "pending",
-    },
-    {
-      id: 2,
-      type: "Konten Tidak Pantas",
-      content: "Komentar yang menyinggung...",
-      reporter: "user456",
-      status: "pending",
-    },
-    {
-      id: 3,
-      type: "Penipuan",
-      content: "Penjualan produk palsu...",
-      reporter: "user789",
-      status: "resolved",
-    },
-  ];
+  const recentReports = allReports ?? [];
 
   const recentUsers = [
     {
@@ -107,6 +87,10 @@ function AdminContent() {
       status: "suspended",
     },
   ];
+
+  const pendingReportsCount = recentReports.filter(
+    (r: any) => r.status === "pending",
+  ).length;
 
   return (
     <div className="min-h-screen bg-[#F5F5F7]">
@@ -213,7 +197,7 @@ function AdminContent() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-[#1D1D1F]">
-                    {stats.pendingReports}
+                    {pendingReportsCount}
                   </div>
                   <p className="text-xs text-[#86868B]">Perlu ditinjau</p>
                 </CardContent>
@@ -345,16 +329,16 @@ function AdminContent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {recentReports.map((report) => (
-                      <TableRow key={report.id}>
+                    {recentReports.map((report: any) => (
+                      <TableRow key={report._id}>
                         <TableCell className="text-[#1D1D1F]">
-                          {report.type}
+                          {report.contentType}
                         </TableCell>
                         <TableCell className="text-[#86868B] max-w-xs truncate">
-                          {report.content}
+                          {report.reason}
                         </TableCell>
                         <TableCell className="text-[#86868B]">
-                          {report.reporter}
+                          {report.reporterId}
                         </TableCell>
                         <TableCell>
                           <Badge
@@ -371,7 +355,9 @@ function AdminContent() {
                           >
                             {report.status === "pending"
                               ? "Pending"
-                              : "Selesai"}
+                              : report.status === "resolved"
+                                ? "Selesai"
+                                : "Ditolak"}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -387,6 +373,7 @@ function AdminContent() {
                               <>
                                 <Button
                                   size="sm"
+                                  onClick={() => resolveReport({ reportId: report._id })}
                                   className="neumorphic-button-sm h-8 px-3 text-xs text-green-600"
                                 >
                                   <CheckCircle className="w-3 h-3 mr-1" />
@@ -394,6 +381,7 @@ function AdminContent() {
                                 </Button>
                                 <Button
                                   size="sm"
+                                  onClick={() => rejectReport({ reportId: report._id })}
                                   className="neumorphic-button-sm h-8 px-3 text-xs text-red-600"
                                 >
                                   <XCircle className="w-3 h-3 mr-1" />

@@ -43,6 +43,7 @@ import {
   Share,
   BarChart2,
   Bookmark,
+  Flag,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { usePaginatedQuery, useMutation, useQuery } from "convex/react";
@@ -144,6 +145,7 @@ export default function Forum() {
   const togglePinMutation = useMutation(api.forum.togglePinTopic);
   const incrementViewsMutation = useMutation(api.forum.incrementTopicViews);
   const createCommentMutation = useMutation(api.forum.createComment);
+  const createReportMutation = useMutation(api.forum.createReport);
   const initializeCategoriesMutation = useMutation(
     api.forum.initializeCategories,
   );
@@ -328,6 +330,32 @@ export default function Forum() {
         description: "Gagal mengubah pin. Coba lagi.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleReport = async (id: string, type: string) => {
+    if (!user) {
+      toast({
+        title: "Login diperlukan",
+        description: "Anda harus login untuk melaporkan!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reason = window.prompt("Alasan laporan?");
+    if (!reason) return;
+
+    try {
+      await createReportMutation({
+        contentId: id,
+        contentType: type,
+        reason,
+      } as any);
+      toast({ title: "Laporan dikirim" });
+    } catch (error) {
+      console.error("Error reporting:", error);
+      toast({ title: "Error", description: "Gagal mengirim laporan", variant: "destructive" });
     }
   };
 
@@ -906,6 +934,15 @@ export default function Forum() {
                                 >
                                   <Share className="h-4 w-4" />
                                 </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleReport(topic._id, "topic");
+                                  }}
+                                  className="flex items-center gap-1 hover:text-orange-500 transition-colors"
+                                >
+                                  <Flag className="h-4 w-4" />
+                                </button>
                               </div>
                               <div className="flex items-center gap-1">
                                 <Clock className="h-4 w-4" />
@@ -1045,6 +1082,15 @@ export default function Forum() {
                                 className="flex items-center gap-1 hover:text-blue-500 transition-colors"
                               >
                                 <Share className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleReport(topic._id, "topic");
+                                }}
+                                className="flex items-center gap-1 hover:text-orange-500 transition-colors"
+                              >
+                                <Flag className="h-4 w-4" />
                               </button>
                             </div>
                             <div className="flex items-center gap-1">
@@ -1189,9 +1235,16 @@ export default function Forum() {
                             }}
                             className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-[#718096]"
                           >
-                            <Share className="h-5 w-5" />
-                            <span>Bagikan</span>
-                          </button>
+                          <Share className="h-5 w-5" />
+                          <span>Bagikan</span>
+                        </button>
+                        <button
+                          onClick={() => handleReport(selectedTopic._id, "topic")}
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-[#718096]"
+                        >
+                          <Flag className="h-5 w-5" />
+                          <span>Laporkan</span>
+                        </button>
 
                           <div className="flex items-center gap-2 text-[#718096]">
                             <MessageCircle className="h-5 w-5" />
@@ -1250,6 +1303,12 @@ export default function Forum() {
                                       <p className="text-[#2d3748]">
                                         {comment.content}
                                       </p>
+                                      <button
+                                        onClick={() => handleReport(comment._id, "comment")}
+                                        className="mt-1 text-xs text-red-600 hover:underline flex items-center gap-1"
+                                      >
+                                        <Flag className="w-3 h-3" /> Laporkan
+                                      </button>
                                     </div>
                                   </div>
                                 </div>

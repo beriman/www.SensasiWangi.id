@@ -681,3 +681,63 @@ export const updateAllCategoryCounts = mutation({
     return { message: "Semua category counts berhasil diupdate" };
   },
 });
+
+// ===== Reports Management =====
+
+export const createReport = mutation({
+  args: {
+    contentId: v.string(),
+    contentType: v.string(),
+    reason: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    return await ctx.db.insert("reports", {
+      contentId: args.contentId,
+      contentType: args.contentType,
+      reason: args.reason,
+      reporterId: user._id,
+      status: "pending",
+      createdAt: Date.now(),
+    });
+  },
+});
+
+export const getReports = query({
+  args: { status: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    let q = ctx.db.query("reports");
+    if (args.status) {
+      q = q.withIndex("by_status", (qq) => qq.eq("status", args.status));
+    } else {
+      q = q.withIndex("by_created_at");
+    }
+    return await q.order("desc").collect();
+  },
+});
+
+export const resolveReport = mutation({
+  args: { reportId: v.id("reports") },
+  handler: async (ctx, args) => {
+    const report = await ctx.db.get(args.reportId);
+    if (!report) throw new Error("Report tidak ditemukan");
+    await ctx.db.patch(args.reportId, { status: "resolved" });
+  },
+});
+
+export const rejectReport = mutation({
+  args: { reportId: v.id("reports") },
+  handler: async (ctx, args) => {
+    const report = await ctx.db.get(args.reportId);
+    if (!report) throw new Error("Report tidak ditemukan");
+    await ctx.db.patch(args.reportId, { status: "rejected" });
+  },
+});
