@@ -112,13 +112,12 @@ export const togglePinTopic = mutation({
 export const getPinnedTopics = query({
   args: { category: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    let q = ctx.db.query("topics");
-
-    if (args.category) {
-      q = q.withIndex("by_category", (qq) => qq.eq("category", args.category));
-    } else {
-      q = q.withIndex("by_created_at");
-    }
+    const q = args.category
+      ? ctx
+          .db
+          .query("topics")
+          .withIndex("by_category", (qq) => qq.eq("category", args.category))
+      : ctx.db.query("topics").withIndex("by_created_at");
 
     return await q
       .filter((qq) => qq.eq(qq.field("isPinned"), true))
