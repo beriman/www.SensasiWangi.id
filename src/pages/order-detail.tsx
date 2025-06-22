@@ -4,16 +4,33 @@ import { api } from "../../convex/_generated/api";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useUser } from "@clerk/clerk-react";
+import ProtectedRoute from "@/components/wrappers/ProtectedRoute";
 
 export default function OrderDetail() {
+  return (
+    <ProtectedRoute>
+      <OrderDetailContent />
+    </ProtectedRoute>
+  );
+}
+
+function OrderDetailContent() {
+  const { user } = useUser();
   const { orderId } = useParams();
+  const currentUser = useQuery(
+    api.users.getUserByToken,
+    user?.id ? { tokenIdentifier: user.id } : "skip",
+  );
   const order = useQuery(
     api.marketplace.getOrderById,
     orderId ? { orderId: orderId as any } : "skip",
   );
-
-  if (order === undefined) return <div>Loading...</div>;
+  if (order === undefined || currentUser === undefined) return <div>Loading...</div>;
   if (order === null) return <div>Order tidak ditemukan</div>;
+  if (currentUser && currentUser._id !== order.buyerId && currentUser._id !== order.sellerId) {
+    return <div>Anda tidak memiliki akses ke order ini.</div>;
+  }
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("id-ID", {

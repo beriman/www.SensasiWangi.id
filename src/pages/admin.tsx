@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BarChart3,
@@ -45,6 +46,7 @@ export default function Admin() {
 
 function AdminContent() {
   const [activeTab, setActiveTab] = useState("overview");
+  const navigate = useNavigate();
 
   const pendingOrders = useQuery(api.marketplace.getPendingOrders);
   const verifyPayment = useMutation(api.marketplace.verifyOrderPayment);
@@ -879,10 +881,21 @@ function AdminContent() {
                               {order.paymentStatus}
                             </TableCell>
                             <TableCell className="text-[#86868B]">
-                              {order.orderStatus}
+                              <Badge variant="secondary" className="text-xs">
+                                {order.orderStatus}
+                              </Badge>
                             </TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
+                                <Button
+                                  size="sm"
+                                  className="neumorphic-button-sm h-8 px-3 text-xs"
+                                  onClick={() =>
+                                    navigate(`/marketplace/order/${order._id}`)
+                                  }
+                                >
+                                  Lihat Detail
+                                </Button>
                                 {order.paymentStatus === "pending" && (
                                   <Button
                                     size="sm"

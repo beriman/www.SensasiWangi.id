@@ -5,6 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import RoleProtectedRoute from "@/components/wrappers/RoleProtectedRoute";
 
@@ -88,9 +89,13 @@ function MyShopContent() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <div>
-                      <p className="text-sm">Status: {o.orderStatus}</p>
-                      <p className="text-sm">Pembayaran: {o.paymentStatus}</p>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        {o.orderStatus}
+                      </Badge>
+                      <span className="text-sm text-[#86868B]">
+                        {o.paymentStatus}
+                      </span>
                     </div>
                     <Button
                       size="sm"
@@ -98,8 +103,8 @@ function MyShopContent() {
                     >
                       Lihat Detail
                     </Button>
-                  </CardContent>
-                </Card>
+                 </CardContent>
+               </Card>
               ))}
             </div>
           )}
