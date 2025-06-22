@@ -26,7 +26,6 @@ import {
   Twitter,
   Globe,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import ProtectedRoute from "@/components/wrappers/ProtectedRoute";
 import { useEffect, useRef, useState } from "react";
 
@@ -105,9 +104,7 @@ function ProfileContent() {
     await updateBio({ bio });
   };
 
-  const handleImageChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && user) {
       // @ts-ignore
@@ -122,7 +119,8 @@ function ProfileContent() {
 
   const formatDate = (timestamp: number | Date | undefined) => {
     if (!timestamp) return "—";
-    const date = typeof timestamp === "number" ? new Date(timestamp) : timestamp;
+    const date =
+      typeof timestamp === "number" ? new Date(timestamp) : timestamp;
     return date.toLocaleDateString("id-ID", {
       year: "numeric",
       month: "long",
@@ -184,7 +182,10 @@ function ProfileContent() {
                 <div className="mb-6">
                   <div className="relative w-24 h-24 mx-auto mb-4">
                     <Avatar className="w-24 h-24 mx-auto neumorphic-button border-0">
-                      <AvatarImage src={user?.imageUrl} alt={user?.fullName || "User"} />
+                      <AvatarImage
+                        src={user?.imageUrl}
+                        alt={user?.fullName || "User"}
+                      />
                       <AvatarFallback className="text-2xl font-semibold text-[#2d3748] bg-gradient-to-br from-[#e0e5ec] to-[#ffffff]">
                         {getInitials(user?.fullName)}
                       </AvatarFallback>
@@ -541,14 +542,22 @@ function ProfileContent() {
                   {!recentComments || recentComments.length === 0 ? (
                     <div className="text-center py-8">
                       <MessageCircle className="h-12 w-12 text-[#86868B] mx-auto mb-4 opacity-50" />
-                      <p className="text-[#86868B]">Anda belum menulis komentar</p>
+                      <p className="text-[#86868B]">
+                        Anda belum menulis komentar
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {recentComments.map((comment) => (
-                        <div key={comment._id} className="neumorphic-card-inset p-4">
+                        <div
+                          key={comment._id}
+                          className="neumorphic-card-inset p-4"
+                        >
                           <h4 className="font-semibold text-[#1D1D1F] mb-1">
-                            <Link to={`/forum?topic=${comment.topicId}`} className="hover:underline">
+                            <Link
+                              to={`/forum?topic=${comment.topicId}`}
+                              className="hover:underline"
+                            >
                               {comment.topicTitle || "Topik"}
                             </Link>
                           </h4>

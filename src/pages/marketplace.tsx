@@ -183,7 +183,9 @@ function ProductCard({
                       <Star
                         key={n}
                         className={`h-3 w-3 ${
-                          averageRating >= n ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+                          averageRating >= n
+                            ? "text-yellow-500 fill-yellow-500"
+                            : "text-gray-300"
                         }`}
                       />
                     ))}
@@ -311,7 +313,9 @@ function ProductCard({
                 <Star
                   key={n}
                   className={`h-3 w-3 ${
-                    averageRating >= n ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+                    averageRating >= n
+                      ? "text-yellow-500 fill-yellow-500"
+                      : "text-gray-300"
                   }`}
                 />
               ))}
@@ -636,8 +640,8 @@ function SambatDialog({ product }: { product: any }) {
 
 export default function Marketplace() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedCondition, setSelectedCondition] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCondition, setSelectedCondition] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -648,8 +652,8 @@ export default function Marketplace() {
 
   const products = useQuery(api.marketplace.getProducts, {
     paginationOpts: { numItems: 20, cursor: null },
-    category: selectedCategory || undefined,
-    condition: selectedCondition || undefined,
+    category: selectedCategory === "all" ? undefined : selectedCategory,
+    condition: selectedCondition === "all" ? undefined : selectedCondition,
     minPrice: minPrice ? parseInt(minPrice) : undefined,
     maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
     sortBy,
@@ -659,7 +663,7 @@ export default function Marketplace() {
 
   const sambatProducts = useQuery(api.marketplace.getSambatProducts, {
     paginationOpts: { numItems: 20, cursor: null },
-    category: selectedCategory || undefined,
+    category: selectedCategory === "all" ? undefined : selectedCategory,
     sortBy,
     searchQuery: searchQuery || undefined,
     location: location || undefined,
@@ -786,7 +790,7 @@ export default function Marketplace() {
                     <SelectValue placeholder="Kategori" />
                   </SelectTrigger>
                   <SelectContent className="neumorphic-card border-0">
-                    <SelectItem value="">Semua Kategori</SelectItem>
+                    <SelectItem value="all">Semua Kategori</SelectItem>
                     {CATEGORIES.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
@@ -803,7 +807,7 @@ export default function Marketplace() {
                     <SelectValue placeholder="Kondisi" />
                   </SelectTrigger>
                   <SelectContent className="neumorphic-card border-0">
-                    <SelectItem value="">Semua Kondisi</SelectItem>
+                    <SelectItem value="all">Semua Kondisi</SelectItem>
                     {CONDITIONS.map((condition) => (
                       <SelectItem key={condition.value} value={condition.value}>
                         {condition.label}
@@ -920,8 +924,8 @@ export default function Marketplace() {
                   <Button
                     onClick={() => {
                       setSearchQuery("");
-                      setSelectedCategory("");
-                      setSelectedCondition("");
+                      setSelectedCategory("all");
+                      setSelectedCondition("all");
                       setMinPrice("");
                       setMaxPrice("");
                       setLocation("");

@@ -129,7 +129,7 @@ export default function Forum() {
 
   const pinnedTopics = useQuery(
     api.forum.getPinnedTopics,
-    selectedCategory ? { category: selectedCategory } : {}
+    selectedCategory ? { category: selectedCategory } : {},
   );
 
   const forumStats = useQuery(api.forum.getForumStats);
@@ -286,7 +286,10 @@ export default function Forum() {
     }
 
     try {
-      const bookmarked = await toggleBookmarkMutation({ itemId: topicId, type: "topic" });
+      const bookmarked = await toggleBookmarkMutation({
+        itemId: topicId,
+        type: "topic",
+      });
       toast({
         title: bookmarked ? "Ditambahkan ke koleksi" : "Dihapus dari koleksi",
       });
@@ -557,16 +560,16 @@ export default function Forum() {
                       className="neumorphic-input border-0 flex-1"
                     />
                     <Select
-                      value={selectedTag || ""}
+                      value={selectedTag || "all"}
                       onValueChange={(val) =>
-                        setSelectedTag(val === "" ? null : val)
+                        setSelectedTag(val === "all" ? null : val)
                       }
                     >
                       <SelectTrigger className="neumorphic-input border-0 w-full sm:w-48">
                         <SelectValue placeholder="Filter Tag" />
                       </SelectTrigger>
                       <SelectContent className="neumorphic-card border-0">
-                        <SelectItem value="">Semua Tag</SelectItem>
+                        <SelectItem value="all">Semua Kondisi</SelectItem>
                         {allTags?.map((tag) => (
                           <SelectItem key={tag} value={tag}>
                             {tag}
@@ -600,8 +603,8 @@ export default function Forum() {
                           <Plus className="h-4 w-4 mr-2" />
                           Topik Baru
                         </Button>
-                    </DialogTrigger>
-                    <DialogContent className="neumorphic-card border-0 shadow-none max-w-2xl max-h-[90vh] overflow-y-auto fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+                      </DialogTrigger>
+                      <DialogContent className="neumorphic-card border-0 shadow-none max-w-2xl max-h-[90vh] overflow-y-auto fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
                         <DialogHeader>
                           <DialogTitle className="text-[#2d3748]">
                             Buat Topik Baru
@@ -662,7 +665,7 @@ export default function Forum() {
                             <label className="text-sm font-medium text-[#2d3748]">
                               Konten
                             </label>
-                          <Textarea
+                            <Textarea
                               placeholder="Tulis konten topik Anda di sini... Bagikan pengalaman, ajukan pertanyaan, atau mulai diskusi menarik!"
                               value={newTopicContent}
                               onChange={(e) =>
@@ -765,7 +768,8 @@ export default function Forum() {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#667eea] mx-auto mb-4"></div>
                     <p className="text-[#718096]">Memuat topik...</p>
                   </div>
-                ) : unpinnedTopics.length === 0 && (!pinnedTopics || pinnedTopics.length === 0) ? (
+                ) : unpinnedTopics.length === 0 &&
+                  (!pinnedTopics || pinnedTopics.length === 0) ? (
                   <div className="neumorphic-card p-12 text-center">
                     <MessageCircle className="h-12 w-12 text-[#718096] mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-[#2d3748] mb-2">
@@ -797,27 +801,44 @@ export default function Forum() {
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                  <Badge variant={topic.isHot ? "destructive" : "secondary"} className="text-xs">
+                                  <Badge
+                                    variant={
+                                      topic.isHot ? "destructive" : "secondary"
+                                    }
+                                    className="text-xs"
+                                  >
                                     {topic.category}
                                   </Badge>
                                   {topic.isPinned && (
-                                    <Badge variant="outline" className="text-xs text-green-600 border-green-200">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs text-green-600 border-green-200"
+                                    >
                                       📌 Pinned
                                     </Badge>
                                   )}
                                   {topic.isHot && (
-                                    <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs text-orange-600 border-orange-200"
+                                    >
                                       🔥 Hot
                                     </Badge>
                                   )}
                                   {topic.hasVideo && (
-                                    <Badge variant="outline" className="text-xs text-purple-600 border-purple-200 flex items-center gap-1">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs text-purple-600 border-purple-200 flex items-center gap-1"
+                                    >
                                       <Video className="h-3 w-3" />
                                       Video
                                     </Badge>
                                   )}
                                   {(topic as any).replies === 0 && (
-                                    <Badge variant="outline" className="text-xs text-blue-600 border-blue-200">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs text-blue-600 border-blue-200"
+                                    >
                                       Belum Dijawab
                                     </Badge>
                                   )}
@@ -826,7 +847,8 @@ export default function Forum() {
                                   {topic.title}
                                 </CardTitle>
                                 <CardDescription className="text-sm text-[#718096] mt-1">
-                                  oleh {topic.authorName} • {formatDateString(topic.createdAt)}
+                                  oleh {topic.authorName} •{" "}
+                                  {formatDateString(topic.createdAt)}
                                 </CardDescription>
                                 <p className="text-sm text-[#718096] mt-2 line-clamp-2">
                                   {topic.content.substring(0, 150)}...
@@ -839,7 +861,9 @@ export default function Forum() {
                               <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-1">
                                   <MessageCircle className="h-4 w-4" />
-                                  <span>{selectedTopicComments?.length || 0} balasan</span>
+                                  <span>
+                                    {selectedTopicComments?.length || 0} balasan
+                                  </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Users className="h-4 w-4" />
@@ -884,143 +908,145 @@ export default function Forum() {
                         </Card>
                       ))}
                     {unpinnedTopics.map((topic) => (
-                    <Card
-                      key={topic._id}
-                      className="neumorphic-card transition-all duration-300 cursor-pointer border-0 shadow-none hover:scale-[1.02]"
-                      onClick={() => handleTopicClick(topic)}
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              <Badge
-                                variant={
-                                  topic.isHot ? "destructive" : "secondary"
-                                }
-                                className="text-xs"
+                      <Card
+                        key={topic._id}
+                        className="neumorphic-card transition-all duration-300 cursor-pointer border-0 shadow-none hover:scale-[1.02]"
+                        onClick={() => handleTopicClick(topic)}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                <Badge
+                                  variant={
+                                    topic.isHot ? "destructive" : "secondary"
+                                  }
+                                  className="text-xs"
+                                >
+                                  {topic.category}
+                                </Badge>
+                                {topic.isPinned && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs text-green-600 border-green-200"
+                                  >
+                                    📌 Pinned
+                                  </Badge>
+                                )}
+                                {topic.isHot && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs text-orange-600 border-orange-200"
+                                  >
+                                    🔥 Hot
+                                  </Badge>
+                                )}
+                                {topic.hasVideo && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs text-purple-600 border-purple-200 flex items-center gap-1"
+                                  >
+                                    <Video className="h-3 w-3" />
+                                    Video
+                                  </Badge>
+                                )}
+                                {(topic as any).hasImages && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs text-teal-600 border-teal-200 flex items-center gap-1"
+                                  >
+                                    <Image className="h-3 w-3" />
+                                    Gambar
+                                  </Badge>
+                                )}
+                                {(topic as any).replies === 0 && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs text-blue-600 border-blue-200"
+                                  >
+                                    Belum Dijawab
+                                  </Badge>
+                                )}
+                              </div>
+                              <CardTitle className="text-lg font-semibold text-[#2d3748] hover:text-[#667eea] transition-colors">
+                                {topic.title}
+                              </CardTitle>
+                              <CardDescription className="text-sm text-[#718096] mt-1">
+                                oleh {topic.authorName} •{" "}
+                                {formatDateString(topic.createdAt)}
+                              </CardDescription>
+                              <p className="text-sm text-[#718096] mt-2 line-clamp-2">
+                                {topic.content.substring(0, 150)}...
+                              </p>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <div className="flex items-center justify-between text-sm text-[#718096]">
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-1">
+                                <MessageCircle className="h-4 w-4" />
+                                <span>
+                                  {selectedTopicComments?.length || 0} balasan
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Users className="h-4 w-4" />
+                                <span>{topic.views} dilihat</span>
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleLikeTopic(topic._id);
+                                }}
+                                className="flex items-center gap-1 hover:text-red-500 transition-colors"
                               >
-                                {topic.category}
-                              </Badge>
-                              {topic.isPinned && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs text-green-600 border-green-200"
-                                >
-                                  📌 Pinned
-                                </Badge>
-                              )}
-                              {topic.isHot && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs text-orange-600 border-orange-200"
-                                >
-                                  🔥 Hot
-                                </Badge>
-                              )}
-                              {topic.hasVideo && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs text-purple-600 border-purple-200 flex items-center gap-1"
-                                >
-                                  <Video className="h-3 w-3" />
-                                  Video
-                                </Badge>
-                              )}
-                              {(topic as any).hasImages && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs text-teal-600 border-teal-200 flex items-center gap-1"
-                                >
-                                  <Image className="h-3 w-3" />
-                                  Gambar
-                                </Badge>
-                              )}
-                              {(topic as any).replies === 0 && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs text-blue-600 border-blue-200"
-                                >
-                                  Belum Dijawab
-                                </Badge>
-                              )}
-                            </div>
-                            <CardTitle className="text-lg font-semibold text-[#2d3748] hover:text-[#667eea] transition-colors">
-                              {topic.title}
-                            </CardTitle>
-                            <CardDescription className="text-sm text-[#718096] mt-1">
-                              oleh {topic.authorName} •{" "}
-                              {formatDateString(topic.createdAt)}
-                            </CardDescription>
-                            <p className="text-sm text-[#718096] mt-2 line-clamp-2">
-                              {topic.content.substring(0, 150)}...
-                            </p>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <div className="flex items-center justify-between text-sm text-[#718096]">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1">
-                              <MessageCircle className="h-4 w-4" />
-                              <span>
-                                {selectedTopicComments?.length || 0} balasan
-                              </span>
+                                <Heart className="h-4 w-4" />
+                                <span>{topic.likes}</span>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleBookmarkTopic(topic._id);
+                                }}
+                                className={`flex items-center gap-1 hover:text-yellow-500 transition-colors ${
+                                  userBookmarks?.some(
+                                    (b: any) => b.data._id === topic._id,
+                                  )
+                                    ? "text-yellow-500"
+                                    : ""
+                                }`}
+                              >
+                                <Bookmark className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (navigator.share) {
+                                    navigator.share({
+                                      title: topic.title,
+                                      url: `${window.location.origin}/forum?topic=${topic._id}`,
+                                    });
+                                  } else {
+                                    navigator.clipboard.writeText(
+                                      `${window.location.origin}/forum?topic=${topic._id}`,
+                                    );
+                                    toast({ title: "Link disalin" });
+                                  }
+                                }}
+                                className="flex items-center gap-1 hover:text-blue-500 transition-colors"
+                              >
+                                <Share className="h-4 w-4" />
+                              </button>
                             </div>
                             <div className="flex items-center gap-1">
-                              <Users className="h-4 w-4" />
-                              <span>{topic.views} dilihat</span>
+                              <Clock className="h-4 w-4" />
+                              <span>{formatDate(topic.updatedAt)}</span>
                             </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleLikeTopic(topic._id);
-                              }}
-                              className="flex items-center gap-1 hover:text-red-500 transition-colors"
-                            >
-                              <Heart className="h-4 w-4" />
-                              <span>{topic.likes}</span>
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleBookmarkTopic(topic._id);
-                              }}
-                              className={`flex items-center gap-1 hover:text-yellow-500 transition-colors ${
-                                userBookmarks?.some((b: any) => b.data._id === topic._id)
-                                  ? "text-yellow-500"
-                                  : ""
-                              }`}
-                            >
-                              <Bookmark className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (navigator.share) {
-                                  navigator.share({
-                                    title: topic.title,
-                                    url: `${window.location.origin}/forum?topic=${topic._id}`,
-                                  });
-                                } else {
-                                  navigator.clipboard.writeText(
-                                    `${window.location.origin}/forum?topic=${topic._id}`,
-                                  );
-                                  toast({ title: "Link disalin" });
-                                }
-                              }}
-                              className="flex items-center gap-1 hover:text-blue-500 transition-colors"
-                            >
-                              <Share className="h-4 w-4" />
-                            </button>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            <span>{formatDate(topic.updatedAt)}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    ))}
                   </>
                 )}
               </div>
@@ -1082,26 +1108,32 @@ export default function Forum() {
                           <p className="text-[#2d3748] leading-relaxed">
                             {selectedTopic.content}
                           </p>
-                          {selectedTopic.imageUrls && selectedTopic.imageUrls.length > 0 && (
-                            <div className="grid grid-cols-2 gap-4 mt-4">
-                              {selectedTopic.imageUrls.map((url, idx) => (
-                                <img key={idx} src={url} className="w-full rounded-lg" />
-                              ))}
-                            </div>
-                          )}
-                          {selectedTopic.videoUrls && selectedTopic.videoUrls.length > 0 && (
-                            <div className="space-y-4 mt-4">
-                              {selectedTopic.videoUrls.map((v, idx) => (
-                                <iframe
-                                  key={idx}
-                                  src={v}
-                                  className="w-full aspect-video rounded-lg"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowFullScreen
-                                />
-                              ))}
-                            </div>
-                          )}
+                          {selectedTopic.imageUrls &&
+                            selectedTopic.imageUrls.length > 0 && (
+                              <div className="grid grid-cols-2 gap-4 mt-4">
+                                {selectedTopic.imageUrls.map((url, idx) => (
+                                  <img
+                                    key={idx}
+                                    src={url}
+                                    className="w-full rounded-lg"
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          {selectedTopic.videoUrls &&
+                            selectedTopic.videoUrls.length > 0 && (
+                              <div className="space-y-4 mt-4">
+                                {selectedTopic.videoUrls.map((v, idx) => (
+                                  <iframe
+                                    key={idx}
+                                    src={v}
+                                    className="w-full aspect-video rounded-lg"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                  />
+                                ))}
+                              </div>
+                            )}
                         </div>
 
                         <div className="flex items-center gap-4 pt-4 border-t border-[#e2e8f0]">
@@ -1119,9 +1151,13 @@ export default function Forum() {
                             <span>{selectedTopic.likes} Suka</span>
                           </button>
                           <button
-                            onClick={() => handleBookmarkTopic(selectedTopic._id)}
+                            onClick={() =>
+                              handleBookmarkTopic(selectedTopic._id)
+                            }
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-[#718096] ${
-                              userBookmarks?.some((b: any) => b.data._id === selectedTopic._id)
+                              userBookmarks?.some(
+                                (b: any) => b.data._id === selectedTopic._id,
+                              )
                                 ? "text-yellow-500"
                                 : ""
                             }`}
@@ -1158,7 +1194,9 @@ export default function Forum() {
                           {currentUser &&
                             selectedTopic.authorId === currentUser._id && (
                               <Button
-                                onClick={() => handleTogglePin(selectedTopic._id)}
+                                onClick={() =>
+                                  handleTogglePin(selectedTopic._id)
+                                }
                                 variant="outline"
                                 className="neumorphic-button-sm"
                               >
