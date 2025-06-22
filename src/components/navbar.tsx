@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Navbar() {
   const { user, isLoaded } = useUser();
@@ -33,6 +34,7 @@ export function Navbar() {
 
           {isLoaded ? (
             <div className="flex items-center gap-4">
+              <ThemeToggle />
               <Authenticated>
                 <div className="hidden md:flex items-center gap-3">
                   <Link
@@ -140,6 +142,7 @@ export function Navbar() {
             </div>
           ) : (
             <div className="flex items-center gap-4">
+              <ThemeToggle />
               <div className="flex items-center gap-4">
                 <div className="h-4 w-16 bg-[#F5F5F7] rounded-full animate-pulse"></div>
                 <div className="h-8 w-8 rounded-full bg-[#F5F5F7] animate-pulse"></div>
