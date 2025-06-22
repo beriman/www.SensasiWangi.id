@@ -10,6 +10,8 @@ import { Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./theme-toggle";
+import { Sheet, SheetTrigger, SheetContent } from "./ui/sheet";
+import { Menu } from "lucide-react";
 
 export function Navbar() {
   const { user, isLoaded } = useUser();
@@ -164,6 +166,36 @@ export function Navbar() {
                     }}
                   />
                 </div>
+                <div className="md:hidden">
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="neumorphic-button-sm border-0 shadow-none bg-transparent text-[#1D1D1F]"
+                      >
+                        <Menu className="w-5 h-5" />
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="pt-10 flex flex-col space-y-4 neumorphic-bg">
+                      <Link to="/dashboard" className="neumorphic-button-sm w-full text-left">Dashboard</Link>
+                      <Link to="/marketplace" className="neumorphic-button-sm w-full text-left">Marketplace</Link>
+                      <Link to="/kursus" className="neumorphic-button-sm w-full text-left">Kursus</Link>
+                      <Link to="/polling" className="neumorphic-button-sm w-full text-left">Polling</Link>
+                      <Link to="/profile" className="neumorphic-button-sm w-full text-left">Profil</Link>
+                      <UserButton
+                        afterSignOutUrl="/"
+                        appearance={{
+                          elements: {
+                            avatarBox: "w-8 h-8 rounded-full neumorphic-button-sm border-0",
+                            userButtonPopoverCard: "neumorphic-card border-0 shadow-none",
+                            userButtonPopoverActionButton: "neumorphic-button-sm text-[#2d3748] hover:bg-transparent",
+                          },
+                        }}
+                      />
+                    </SheetContent>
+                  </Sheet>
+                </div>
               </Authenticated>
               <Unauthenticated>
                 <Link to="/login">
@@ -171,6 +203,23 @@ export function Navbar() {
                     Masuk
                   </Button>
                 </Link>
+                <div className="md:hidden">
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="neumorphic-button-sm border-0 shadow-none bg-transparent text-[#1D1D1F]"
+                      >
+                        <Menu className="w-5 h-5" />
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="pt-10 flex flex-col space-y-4 neumorphic-bg">
+                      <Link to="/login" className="neumorphic-button-sm w-full text-left">Masuk</Link>
+                      <Link to="/signup" className="neumorphic-button-sm w-full text-left">Daftar</Link>
+                    </SheetContent>
+                  </Sheet>
+                </div>
               </Unauthenticated>
             </div>
           ) : (
