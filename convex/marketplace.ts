@@ -499,6 +499,15 @@ export const updatePaymentStatus = mutation({
       updatedAt: Date.now(),
     });
 
+    if (args.paymentStatus === "paid") {
+      const buyer = await ctx.db.get(order.buyerId);
+      if (buyer) {
+        await ctx.db.patch(buyer._id, {
+          contributionPoints: (buyer.contributionPoints ?? 0) + 5,
+        });
+      }
+    }
+
     // Jika payment failed, kembalikan status produk ke active
     if (args.paymentStatus === "failed") {
       await ctx.db.patch(order.productId, {
@@ -594,7 +603,43 @@ export const createReview = mutation({
     await ctx.db.patch(user._id, {
       reviewCount: newReviewCount,
       badges: Array.from(badges),
+      contributionPoints: (user.contributionPoints ?? 0) + 3,
     });
+
+    const sellerProfile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", order.sellerId))
+      .unique();
+    let sellerRating = undefined;
+    let sellerTotalReviews = undefined;
+    if (sellerProfile) {
+      sellerTotalReviews = (sellerProfile.totalReviews ?? 0) + 1;
+      sellerRating =
+        ((sellerProfile.rating ?? 0) * (sellerProfile.totalReviews ?? 0) +
+          args.rating) /
+        sellerTotalReviews;
+      await ctx.db.patch(sellerProfile._id, {
+        rating: sellerRating,
+        totalReviews: sellerTotalReviews,
+      });
+    }
+
+    const sellerUser = await ctx.db.get(order.sellerId);
+    if (sellerUser) {
+      const sellerBadges = new Set(sellerUser.badges ?? []);
+      if (
+        sellerRating !== undefined &&
+        sellerTotalReviews !== undefined &&
+        sellerRating >= 4.5 &&
+        sellerTotalReviews >= 10
+      ) {
+        sellerBadges.add("Seller Terpercaya");
+      }
+      await ctx.db.patch(sellerUser._id, {
+        badges: Array.from(sellerBadges),
+        contributionPoints: (sellerUser.contributionPoints ?? 0) + 5,
+      });
+    }
   },
 });
 
