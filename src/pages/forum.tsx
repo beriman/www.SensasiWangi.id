@@ -52,6 +52,7 @@ import { useUser } from "@clerk/clerk-react";
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 interface Topic {
   _id: Id<"topics">;
@@ -103,8 +104,8 @@ export default function Forum() {
   );
   const [embeddedVideos, setEmbeddedVideos] = useState<VideoData[]>([]);
   const [embeddedImages, setEmbeddedImages] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedTag, setSelectedTag] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"newest" | "popular" | "unanswered">(
     "newest",
   );
@@ -119,17 +120,19 @@ export default function Forum() {
   const topicsResult = usePaginatedQuery(
     api.forum.getTopics,
     {
-      category: selectedCategory || undefined,
+      category: selectedCategory === "all" ? undefined : selectedCategory,
       sortBy: sortBy,
       searchQuery: searchQuery || undefined,
-      tag: selectedTag || undefined,
+      tag: selectedTag === "all" ? undefined : selectedTag,
     },
     { initialNumItems: 10 },
   );
 
   const pinnedTopics = useQuery(
     api.forum.getPinnedTopics,
-    selectedCategory ? { category: selectedCategory } : {},
+    selectedCategory !== "all"
+      ? { category: selectedCategory }
+      : { category: undefined },
   );
 
   const forumStats = useQuery(api.forum.getForumStats);
@@ -404,6 +407,8 @@ export default function Forum() {
   const unpinnedTopics = topics.filter((t) => !t.isPinned);
   const hasMore = topicsResult?.status === "CanLoadMore";
   const isLoading = topicsResult?.status === "LoadingFirstPage";
+  const isLoadingCategories = categories === undefined;
+  const isLoadingStats = forumStats === undefined;
 
   const loadMore = () => {
     if (hasMore) {
@@ -430,6 +435,11 @@ export default function Forum() {
     categories?.filter((cat) => cat.type === "enthusiasts") || [];
   const formulatorsCategories =
     categories?.filter((cat) => cat.type === "formulators") || [];
+
+  // Show loading spinner if essential data is still loading
+  if (isLoadingCategories || isLoadingStats) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
@@ -560,16 +570,14 @@ export default function Forum() {
                       className="neumorphic-input border-0 flex-1"
                     />
                     <Select
-                      value={selectedTag || "all"}
-                      onValueChange={(val) =>
-                        setSelectedTag(val === "all" ? null : val)
-                      }
+                      value={selectedTag}
+                      onValueChange={(val) => setSelectedTag(val)}
                     >
                       <SelectTrigger className="neumorphic-input border-0 w-full sm:w-48">
                         <SelectValue placeholder="Filter Tag" />
                       </SelectTrigger>
                       <SelectContent className="neumorphic-card border-0">
-                        <SelectItem value="all">Semua Kondisi</SelectItem>
+                        <SelectItem value="all">Semua Tag</SelectItem>
                         {allTags?.map((tag) => (
                           <SelectItem key={tag} value={tag}>
                             {tag}
@@ -577,9 +585,9 @@ export default function Forum() {
                         ))}
                       </SelectContent>
                     </Select>
-                    {selectedCategory && (
+                    {selectedCategory !== "all" && (
                       <Button
-                        onClick={() => setSelectedCategory(null)}
+                        onClick={() => setSelectedCategory("all")}
                         variant="outline"
                         className="neumorphic-button-sm bg-transparent text-[#718096] border-0 shadow-none"
                       >
