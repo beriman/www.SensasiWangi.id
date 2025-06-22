@@ -34,6 +34,7 @@ import {
   MapPin,
   Star,
   MessageCircle,
+  Share,
   Plus,
   ShoppingCart,
   Truck,
@@ -124,6 +125,19 @@ function ProductCard({
     }
   };
 
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/marketplace/product/${product._id}`;
+    const shareData = { title: product.title, url };
+    if (navigator.share) {
+      navigator.share(shareData);
+    } else {
+      navigator.clipboard.writeText(url);
+      alert("Link disalin");
+    }
+  };
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -193,26 +207,32 @@ function ProductCard({
                   </div>
                 )}
               </div>
-              <button
-                onClick={handleLike}
-                className={`p-2 rounded-full neumorphic-button-sm transition-colors ${
-                  hasLiked ? "text-red-500" : "text-gray-400"
-                }`}
-              >
-                <Heart
-                  className={`h-4 w-4 ${hasLiked ? "fill-current" : ""}`}
-                />
-              </button>
-              <button
-                onClick={handleBookmark}
-                className={`p-2 rounded-full neumorphic-button-sm transition-colors ${
-                  bookmarks?.some((b: any) => b.data._id === product._id)
-                    ? "text-yellow-500"
-                    : "text-gray-400"
-                }`}
-              >
-                <Bookmark className="h-4 w-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleLike}
+                  className={`p-2 rounded-full neumorphic-button-sm transition-colors ${
+                    hasLiked ? "text-red-500" : "text-gray-400"
+                  }`}
+                >
+                  <Heart className={`h-4 w-4 ${hasLiked ? "fill-current" : ""}`} />
+                </button>
+                <button
+                  onClick={handleBookmark}
+                  className={`p-2 rounded-full neumorphic-button-sm transition-colors ${
+                    bookmarks?.some((b: any) => b.data._id === product._id)
+                      ? "text-yellow-500"
+                      : "text-gray-400"
+                  }`}
+                >
+                  <Bookmark className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="p-2 rounded-full neumorphic-button-sm text-gray-400"
+                >
+                  <Share className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center justify-between">
@@ -293,6 +313,12 @@ function ProductCard({
           }`}
         >
           <Bookmark className="h-4 w-4" />
+        </button>
+        <button
+          onClick={handleShare}
+          className="absolute top-3 right-20 p-2 rounded-full neumorphic-button-sm text-gray-400"
+        >
+          <Share className="h-4 w-4" />
         </button>
         <Badge
           className={`absolute top-3 left-3 ${getConditionColor(product.condition)}`}
@@ -409,6 +435,17 @@ function SambatProductCard({ product }: { product: any }) {
       toggleBookmark({ itemId: product._id, type: "product" });
     }
   };
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/marketplace/sambat/${product._id}`;
+    const shareData = { title: product.title, url };
+    if (navigator.share) {
+      navigator.share(shareData);
+    } else {
+      navigator.clipboard.writeText(url);
+      alert("Link disalin");
+    }
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -468,6 +505,12 @@ function SambatProductCard({ product }: { product: any }) {
           }`}
         >
           <Bookmark className="h-4 w-4" />
+        </button>
+        <button
+          onClick={handleShare}
+          className="absolute top-3 right-20 p-2 rounded-full neumorphic-button-sm text-gray-400"
+        >
+          <Share className="h-4 w-4" />
         </button>
         <Badge className="absolute top-3 left-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white">
           SAMBAT
