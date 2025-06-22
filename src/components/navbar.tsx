@@ -9,7 +9,6 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
-import { ThemeToggle } from "./theme-toggle";
 import { LanguageToggle } from "./language-toggle";
 import { Sheet, SheetTrigger, SheetContent } from "./ui/sheet";
 import { Menu } from "lucide-react";
@@ -37,7 +36,6 @@ export function Navbar() {
 
           {isLoaded ? (
             <div className="flex items-center gap-4">
-              <ThemeToggle />
               <LanguageToggle />
               <LanguageToggle />
               <Authenticated>
@@ -267,11 +265,8 @@ export function Navbar() {
             </div>
           ) : (
             <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <div className="flex items-center gap-4">
-                <div className="h-4 w-16 bg-[#F5F5F7] rounded-full animate-pulse"></div>
-                <div className="h-8 w-8 rounded-full bg-[#F5F5F7] animate-pulse"></div>
-              </div>
+              <div className="h-4 w-16 bg-[#F5F5F7] rounded-full animate-pulse"></div>
+              <div className="h-8 w-8 rounded-full bg-[#F5F5F7] animate-pulse"></div>
             </div>
           )}
         </div>
