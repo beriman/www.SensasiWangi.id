@@ -23,6 +23,7 @@ import FAQ from "./pages/faq";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import OrderReviewPage from "./pages/order-review";
+import OrderDetail from "./pages/order-detail";
 import MarketplaceCheckout from "./pages/marketplace-checkout";
 import { Toaster } from "@/components/ui/toaster";
 import NotificationListener from "@/components/notification-listener";
@@ -57,6 +58,10 @@ function App() {
             element={<MarketplaceSambatCreate />}
           />
           <Route path="/marketplace/checkout" element={<MarketplaceCheckout />} />
+          <Route
+            path="/marketplace/order/:orderId"
+            element={<OrderDetail />}
+          />
           <Route path="/admin" element={<Admin />} />
           <Route path="/kursus" element={<Kursus />} />
           <Route path="/database" element={<Database />} />

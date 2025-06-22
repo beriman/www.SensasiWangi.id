@@ -92,6 +92,12 @@ function MyShopContent() {
                       <p className="text-sm">Status: {o.orderStatus}</p>
                       <p className="text-sm">Pembayaran: {o.paymentStatus}</p>
                     </div>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/marketplace/order/${o._id}`)}
+                    >
+                      Lihat Detail
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
