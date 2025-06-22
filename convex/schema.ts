@@ -166,6 +166,7 @@ export default defineSchema({
     paymentExpiry: v.optional(v.number()),
     trackingNumber: v.optional(v.string()),
     notes: v.optional(v.string()),
+    paymentProofUrl: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

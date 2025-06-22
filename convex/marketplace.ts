@@ -509,6 +509,25 @@ export const updatePaymentStatus = mutation({
   },
 });
 
+// Mutation untuk upload bukti pembayaran
+export const uploadPaymentProof = mutation({
+  args: {
+    orderId: v.id("orders"),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) {
+      throw new Error("Order tidak ditemukan");
+    }
+    const url = await ctx.storage.getUrl(args.storageId);
+    await ctx.db.patch(args.orderId, {
+      paymentProofUrl: url,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 // Mutation untuk membuat review
 export const createReview = mutation({
   args: {
@@ -1964,6 +1983,13 @@ export const updateSuggestionPriority = mutation({
       priority: args.priority,
       updatedAt: Date.now(),
     });
+  },
+});
+
+// Action untuk mendapatkan URL upload ke storage
+export const generateUploadUrl = mutation({
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
   },
 });
 
