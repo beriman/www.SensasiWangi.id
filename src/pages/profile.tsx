@@ -48,6 +48,11 @@ function ProfileContent() {
     userData ? { authorId: userData._id } : "skip",
   );
 
+  const userProfile = useQuery(
+    api.marketplace.getUserProfile,
+    userData ? { userId: userData._id } : "skip",
+  );
+
   const formatDate = (timestamp: number | Date | undefined) => {
     if (!timestamp) return "—";
     const date = typeof timestamp === "number" ? new Date(timestamp) : timestamp;
@@ -76,6 +81,15 @@ function ProfileContent() {
     (sum, topic) => sum + topic.views,
     0,
   );
+
+  const getUserBadge = () => {
+    const posts = userTopics?.length || 0;
+    if (posts >= 10) return "Top Contributor";
+    if (posts >= 5) return "Kontributor";
+    return "Pemula";
+  };
+
+  const userBadge = getUserBadge();
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
@@ -113,16 +127,21 @@ function ProfileContent() {
                   <h2 className="text-2xl font-bold text-[#1D1D1F] mb-2">
                     {user?.fullName || "Pengguna"}
                   </h2>
-                  <p className="text-[#86868B] mb-4">
+                  <p className="text-[#86868B] mb-2">
                     {user?.primaryEmailAddress?.emailAddress}
                   </p>
+                  {userProfile?.profile?.bio && (
+                    <p className="text-sm text-[#4a5568] mb-4 italic">
+                      {userProfile.profile.bio}
+                    </p>
+                  )}
                   <div className="flex justify-center gap-2 mb-6">
                     <Badge
                       variant="secondary"
                       className="neumorphic-button-sm bg-transparent text-[#667eea] border-0 shadow-none"
                     >
                       <Trophy className="h-3 w-3 mr-1" />
-                      Enthusiast
+                      {userBadge}
                     </Badge>
                     {user?.primaryEmailAddress?.verification.status ===
                       "verified" && (
@@ -219,6 +238,13 @@ function ProfileContent() {
                         label="Username"
                         value={user?.username || "Belum diatur"}
                       />
+                      {userProfile?.profile?.bio && (
+                        <InfoItem
+                          icon={<User className="h-4 w-4" />}
+                          label="Bio"
+                          value={userProfile.profile.bio}
+                        />
+                      )}
                     </div>
                     <div className="space-y-4">
                       <InfoItem
