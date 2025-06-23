@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { UserStats } from "@/components/UserStats";
+import { ActivityMetrics } from "@/components/ActivityMetrics";
 import {
   ArrowRight,
   User,
@@ -67,6 +68,8 @@ export default function Dashboard() {
           weeklyProgress={(userData?.contributionPoints || 0) % 100}
         />
       </div>
+
+      <ActivityMetrics posts={userTopics || []} comments={userComments || []} />
 
       {marketplaceStats && (
         <div className="mb-12">
