@@ -21,6 +21,7 @@ import type * as notifications from "../notifications.js";
 import type * as rewards from "../rewards.js";
 import type * as users from "../users.js";
 import type * as search from "../search.js";
+import type * as admin from "../admin.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -39,7 +40,8 @@ declare const fullApi: ApiFromModules<{
   rewards: typeof rewards;
   users: typeof users;
   search: typeof search;
-}>; 
+  admin: typeof admin;
+}>;
 export declare const api: FilterApi<
   typeof fullApi,
   FunctionReference<any, "public">

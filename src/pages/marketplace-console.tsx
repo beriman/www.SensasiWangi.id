@@ -39,20 +39,20 @@ function MarketplaceConsoleContent() {
 
   const marketplaceStats = useQuery(api.marketplace.getMarketplaceStats);
   const userProducts = useQuery(
-    api.marketplace.getProductsByUser,
-    userData ? { userId: userData._id } : "skip",
+    api.marketplace.getProductsBySeller,
+    userData ? { sellerId: userData._id } : "skip",
   );
   const userOrders = useQuery(
     api.marketplace.getOrdersByUser,
-    userData ? { userId: userData._id } : "skip",
+    userData ? { userId: userData._id, type: "buyer" } : "skip",
   );
   const userSales = useQuery(
-    api.marketplace.getSalesByUser,
-    userData ? { userId: userData._id } : "skip",
+    api.marketplace.getOrdersByUser,
+    userData ? { userId: userData._id, type: "seller" } : "skip",
   );
 
   const totalRevenue =
-    userSales?.reduce((sum, sale) => sum + sale.amount, 0) || 0;
+    userSales?.reduce((sum, sale) => sum + sale.totalAmount, 0) || 0;
   const activeProducts =
     userProducts?.filter((p) => p.status === "active").length || 0;
   const soldProducts = userSales?.length || 0;
@@ -175,14 +175,6 @@ function MarketplaceConsoleContent() {
                                   ? "Aktif"
                                   : "Tidak Aktif"}
                               </Badge>
-                              {product.featured && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs text-orange-600 border-orange-200"
-                                >
-                                  ⭐ Featured
-                                </Badge>
-                              )}
                             </div>
                             <h4 className="font-semibold text-[#1D1D1F] mb-1">
                               {product.title}
@@ -197,10 +189,6 @@ function MarketplaceConsoleContent() {
                               <span className="flex items-center gap-1">
                                 <Eye className="h-3 w-3" />
                                 {product.views || 0}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Star className="h-3 w-3" />
-                                {product.rating || 0}
                               </span>
                             </div>
                           </div>
@@ -252,15 +240,15 @@ function MarketplaceConsoleContent() {
                             <div className="flex items-center gap-2 mb-2">
                               <Badge
                                 variant={
-                                  order.status === "completed"
+                                  order.orderStatus === "delivered"
                                     ? "default"
                                     : "secondary"
                                 }
                                 className="text-xs"
                               >
-                                {order.status === "completed"
+                                {order.orderStatus === "delivered"
                                   ? "Selesai"
-                                  : order.status === "pending"
+                                  : order.orderStatus === "pending"
                                     ? "Pending"
                                     : "Dibatalkan"}
                               </Badge>
@@ -272,7 +260,7 @@ function MarketplaceConsoleContent() {
                               {new Intl.NumberFormat("id-ID", {
                                 style: "currency",
                                 currency: "IDR",
-                              }).format(order.total)}
+                              }).format(order.totalAmount)}
                             </p>
                             <div className="flex items-center gap-4 text-xs text-[#86868B]">
                               <span className="flex items-center gap-1">
