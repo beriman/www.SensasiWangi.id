@@ -20,6 +20,7 @@ import {
   Eye,
   Trophy,
   Star,
+  Award,
   Settings,
   Edit3,
   Instagram,
@@ -146,6 +147,11 @@ function ProfileContent() {
     (sum, topic) => sum + topic.views,
     0,
   );
+
+  const contributionPoints = userData?.contributionPoints || 0;
+  const level = Math.floor(contributionPoints / 100) + 1;
+  const progressPercentage = contributionPoints % 100;
+  const badges = userData?.badges || [];
 
   const getUserBadge = () => {
     const posts = userTopics?.length || 0;
@@ -342,6 +348,66 @@ function ProfileContent() {
                       {averageRating.toFixed(1)}
                     </span>
                   </div>
+                </div>
+              </div>
+
+              {/* Gamification */}
+              <div className="neumorphic-card p-6 mt-6">
+                <h3 className="text-lg font-semibold text-[#1D1D1F] mb-4">
+                  Gamifikasi
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="h-4 w-4 text-[#667eea]" />
+                      <span className="text-sm text-[#86868B]">Level</span>
+                    </div>
+                    <span className="text-sm font-semibold text-[#1D1D1F]">
+                      {level}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Star className="h-4 w-4 text-[#667eea]" />
+                      <span className="text-sm text-[#86868B]">Poin Kontribusi</span>
+                    </div>
+                    <span className="text-sm font-semibold text-[#1D1D1F]">
+                      {contributionPoints}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-[#86868B]">Menuju Level {level + 1}</span>
+                      <span className="text-[#1D1D1F] font-medium">
+                        {progressPercentage}/100
+                      </span>
+                    </div>
+                    <div className="neumorphic-card-inset rounded-full h-2 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+                        style={{ width: `${progressPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+                  {badges.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mt-2 mb-2">
+                        <Award className="h-4 w-4 text-[#667eea]" />
+                        <span className="text-sm text-[#86868B]">Lencana</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {badges.map((b, i) => (
+                          <Badge
+                            key={i}
+                            variant="outline"
+                            className="neumorphic-button-sm px-2 py-0"
+                          >
+                            {b}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
