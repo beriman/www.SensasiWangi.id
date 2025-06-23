@@ -137,14 +137,8 @@ export default function Dashboard() {
 
               {/* Activity Metrics */}
               <ActivityMetrics
-                topicsCount={userTopics?.length || 0}
-                commentsCount={userComments?.length || 0}
-                likesReceived={
-                  userTopics?.reduce((sum, t) => sum + t.likes, 0) || 0
-                }
-                viewsReceived={
-                  userTopics?.reduce((sum, t) => sum + t.views, 0) || 0
-                }
+                posts={userTopics || []}
+                comments={userComments || []}
               />
 
               {/* Quick Actions */}
@@ -315,14 +309,6 @@ export default function Dashboard() {
                                       ? "Aktif"
                                       : "Tidak Aktif"}
                                   </Badge>
-                                  {product.featured && (
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs text-orange-600 border-orange-200"
-                                    >
-                                      ⭐ Featured
-                                    </Badge>
-                                  )}
                                 </div>
                                 <h4 className="font-semibold text-[#1D1D1F] mb-1">
                                   {product.title}
@@ -337,10 +323,6 @@ export default function Dashboard() {
                                   <span className="flex items-center gap-1">
                                     <Eye className="h-3 w-3" />
                                     {product.views || 0}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Star className="h-3 w-3" />
-                                    {product.rating || 0}
                                   </span>
                                 </div>
                               </div>
