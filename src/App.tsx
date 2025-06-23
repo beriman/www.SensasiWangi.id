@@ -32,6 +32,7 @@ import MarketplaceCheckout from "./pages/marketplace-checkout";
 import Settings from "./pages/settings";
 import { Toaster } from "@/components/ui/toaster";
 import NotificationListener from "@/components/notification-listener";
+import NotFound from "./pages/not-found";
 
 function App() {
   return (
@@ -80,6 +81,7 @@ function App() {
           <Route path="/polling" element={<Polling />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/order/:orderId/review" element={<OrderReviewPage />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
         <NotificationListener />
