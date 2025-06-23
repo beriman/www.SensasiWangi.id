@@ -441,7 +441,10 @@ export const createOrder = mutation({
     }
 
     const now = Date.now();
-    const totalAmount = product.price + args.shippingCost;
+    const points = user.contributionPoints ?? 0;
+    const discountRate = points >= 500 ? 0.1 : points >= 100 ? 0.05 : 0;
+    const discountedPrice = product.price - product.price * discountRate;
+    const totalAmount = discountedPrice + args.shippingCost;
 
     // Generate virtual account number (simulasi)
     const vaNumber = `8808${Date.now().toString().slice(-8)}`;
@@ -454,7 +457,7 @@ export const createOrder = mutation({
       buyerName: user.name || "Anonymous",
       sellerName: seller.name || "Anonymous",
       productTitle: product.title,
-      price: product.price,
+      price: discountedPrice,
       shippingAddress: args.shippingAddress,
       origin: args.origin,
       destination: args.destination,

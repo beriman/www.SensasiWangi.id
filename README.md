@@ -41,3 +41,13 @@ Available endpoints:
 
 Use the optional `verified=true` query parameter to explicitly fetch verified
 records for marketplace or course integrations.
+
+## Reward System
+
+User contributions earn points which unlock reward tiers:
+
+- **Bronze**: <100 points – no discount
+- **Silver**: 100+ points – 5% marketplace discount and access to exclusive content
+- **Gold**: 500+ points – 10% marketplace discount and exclusive content
+
+Discounts are automatically applied when creating marketplace orders.
