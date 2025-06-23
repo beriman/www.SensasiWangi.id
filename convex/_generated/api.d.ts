@@ -18,8 +18,8 @@ import type * as courses from "../courses.js";
 import type * as forum from "../forum.js";
 import type * as marketplace from "../marketplace.js";
 import type * as notifications from "../notifications.js";
-import type * as users from "../users.js";
 import type * as rewards from "../rewards.js";
+import type * as users from "../users.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -35,9 +35,9 @@ declare const fullApi: ApiFromModules<{
   forum: typeof forum;
   marketplace: typeof marketplace;
   notifications: typeof notifications;
-  users: typeof users;
   rewards: typeof rewards;
-}>; 
+  users: typeof users;
+}>;
 export declare const api: FilterApi<
   typeof fullApi,
   FunctionReference<any, "public">
