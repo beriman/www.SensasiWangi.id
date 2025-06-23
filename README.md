@@ -68,3 +68,13 @@ Detail perencanaan fitur dapat dilihat di: [`planning/USER/profile-plan.md`](/pl
 - **Integrasi**: Notifikasi pencapaian dan update real-time menggunakan Convex subscriptions.
 
 _Versi dokumen: 1.1.0 (Updated: Juni 2025)_
+
+## Development Seeds
+
+Populate your Convex deployment with sample marketplace data using:
+
+```bash
+CONVEX_URL=<your_convex_url> npx ts-node scripts/seed.ts
+```
+
+The command calls `api.marketplace.initializeSampleData` to insert starter brands, perfumers and fragrances for local testing.
