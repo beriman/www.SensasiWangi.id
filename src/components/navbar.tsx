@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { SearchBar } from "./search-bar";
 import { LanguageToggle } from "./language-toggle";
 import { Sheet, SheetTrigger, SheetContent } from "./ui/sheet";
 import {
@@ -332,6 +333,7 @@ export function Navbar() {
 
           {isLoaded ? (
             <div className="flex items-center gap-4">
+              <SearchBar />
               <LanguageToggle />
               <Authenticated>
                 {/* Notification Bell */}
