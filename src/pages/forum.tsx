@@ -1211,6 +1211,7 @@ export default function Forum() {
                                   <img
                                     key={idx}
                                     src={url}
+                                    alt={selectedTopic.title}
                                     className="w-full rounded-lg"
                                   />
                                 ))}
