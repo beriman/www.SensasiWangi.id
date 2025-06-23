@@ -1,11 +1,12 @@
-import { UserButton, useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
+import { UserButton, useUser, useClerk } from "@clerk/clerk-react";
 import {
   Authenticated,
   Unauthenticated,
   useMutation,
   useQuery,
 } from "convex/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
@@ -23,8 +24,20 @@ import {
 import { Menu, ChevronDown, Bell } from "lucide-react";
 
 export function Navbar() {
+  const navigate = useNavigate();
   const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
   const createOrUpdateUser = useMutation(api.users.createOrUpdateUser);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const handleLogout = () => {
+    signOut();
+    setShowLogoutConfirm(false);
+  };
+
+  const handleDashboard = () => {
+    navigate("/dashboard");
+  };
 
   const currentUser = useQuery(
     api.users.getUserByToken,
@@ -132,8 +145,8 @@ export function Navbar() {
               </svg>
               Database
             </Link>
-            <Link
-              to="/profile"
+            <Button
+              onClick={handleDashboard}
               className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
             >
               <svg
@@ -149,8 +162,8 @@ export function Navbar() {
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                 />
               </svg>
-              Profil
-            </Link>
+              Dashboard
+            </Button>
             <Link
               to="/login"
               className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
@@ -165,7 +178,7 @@ export function Navbar() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={1.5}
-                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3v1"
                 />
               </svg>
               Login
@@ -274,11 +287,8 @@ export function Navbar() {
                     Database
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/profile"
-                    className="flex items-center px-2 py-2 text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg transition-colors"
-                  >
+                <DropdownMenuItem onClick={handleDashboard}>
+                  <div className="flex items-center px-2 py-2 text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg transition-colors">
                     <svg
                       className="w-4 h-4 mr-2"
                       fill="none"
@@ -292,8 +302,8 @@ export function Navbar() {
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                       />
                     </svg>
-                    Profil
-                  </Link>
+                    Dashboard
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link
@@ -343,19 +353,9 @@ export function Navbar() {
                   </Button>
                 </div>
                 <div className="hidden md:flex items-center gap-3">
-                  <UserButton
-                    afterSignOutUrl="/"
-                    appearance={{
-                      elements: {
-                        avatarBox:
-                          "w-8 h-8 rounded-full neumorphic-button-sm border-0",
-                        userButtonPopoverCard:
-                          "neumorphic-card border-0 shadow-none",
-                        userButtonPopoverActionButton:
-                          "neumorphic-button-sm text-[#2d3748] hover:bg-transparent",
-                      },
-                    }}
-                  />
+                  <Button onClick={() => setShowLogoutConfirm(true)}>
+                    Logout
+                  </Button>
                 </div>
                 <div className="md:hidden">
                   <Sheet>
@@ -396,41 +396,65 @@ export function Navbar() {
                       >
                         Database
                       </Link>
-                      <Link
-                        to="/profile"
+                      <Button
+                        onClick={handleDashboard}
                         className="neumorphic-button-sm w-full text-left"
                       >
-                        Profil
-                      </Link>
-                      <Link
-                        to="/login"
+                        Dashboard
+                      </Button>
+                      <Button
+                        onClick={() => setShowLogoutConfirm(true)}
                         className="neumorphic-button-sm w-full text-left"
                       >
-                        Login
-                      </Link>
-                      <UserButton
-                        afterSignOutUrl="/"
-                        appearance={{
-                          elements: {
-                            avatarBox:
-                              "w-8 h-8 rounded-full neumorphic-button-sm border-0",
-                            userButtonPopoverCard:
-                              "neumorphic-card border-0 shadow-none",
-                            userButtonPopoverActionButton:
-                              "neumorphic-button-sm text-[#2d3748] hover:bg-transparent",
-                          },
-                        }}
-                      />
+                        Logout
+                      </Button>
                     </SheetContent>
                   </Sheet>
                 </div>
               </Authenticated>
+              <Unauthenticated>
+                <Link to="/login">
+                  <Button>Login</Button>
+                </Link>
+              </Unauthenticated>
             </div>
           ) : (
             <></>
           )}
+
+          {/* Logout Confirmation Dialog */}
+          <Dialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Konfirmasi Logout</DialogTitle>
+                <DialogDescription>
+                  Apakah Anda yakin ingin logout?
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowLogoutConfirm(false)}
+                >
+                  Batal
+                </Button>
+                <Button variant="destructive" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </nav>
   );
 }
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";

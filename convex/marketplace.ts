@@ -237,9 +237,14 @@ export const createProduct = mutation({
       throw new Error("User tidak ditemukan");
     }
 
+    // Update user role to seller if not already
+    if (user.role === "buyer") {
+      await ctx.db.patch(user._id, { role: "seller" });
+    }
+
     const now = Date.now();
 
-    return await ctx.db.insert("products", {
+    const productId = await ctx.db.insert("products", {
       title: args.title,
       description: args.description,
       price: args.price,
@@ -262,6 +267,23 @@ export const createProduct = mutation({
       createdAt: now,
       updatedAt: now,
     });
+
+    // Award contribution points for creating product
+    await ctx.db.patch(user._id, {
+      contributionPoints: (user.contributionPoints || 0) + 10,
+    });
+
+    // Create notification for successful product creation
+    await ctx.db.insert("notifications", {
+      userId: user._id,
+      type: "product",
+      message: `Produk "${args.title}" berhasil dipublikasikan di marketplace`,
+      url: `/marketplace/product/${productId}`,
+      read: false,
+      createdAt: now,
+    });
+
+    return productId;
   },
 });
 
@@ -759,6 +781,115 @@ export const getMarketplaceStats = query({
         (sum, order) => sum + order.totalAmount,
         0,
       ),
+    };
+  },
+});
+
+// Query untuk mendapatkan seller analytics
+export const getSellerAnalytics = query({
+  args: { sellerId: v.id("users") },
+  handler: async (ctx, args) => {
+    const products = await ctx.db
+      .query("products")
+      .withIndex("by_seller", (q) => q.eq("sellerId", args.sellerId))
+      .collect();
+
+    const orders = await ctx.db
+      .query("orders")
+      .withIndex("by_seller", (q) => q.eq("sellerId", args.sellerId))
+      .collect();
+
+    const totalViews = products.reduce((sum, p) => sum + (p.views || 0), 0);
+    const totalLikes = products.reduce((sum, p) => sum + (p.likes || 0), 0);
+    const totalSambats = products.reduce(
+      (sum, p) => sum + (p.sambatCount || 0),
+      0,
+    );
+    const completedOrders = orders.filter((o) => o.orderStatus === "delivered");
+    const totalRevenue = completedOrders.reduce(
+      (sum, o) => sum + o.totalAmount,
+      0,
+    );
+
+    // Calculate monthly performance
+    const now = Date.now();
+    const lastMonth = now - 30 * 24 * 60 * 60 * 1000;
+    const thisMonthOrders = orders.filter((o) => o.createdAt > lastMonth);
+    const thisMonthRevenue = thisMonthOrders
+      .filter((o) => o.orderStatus === "delivered")
+      .reduce((sum, o) => sum + o.totalAmount, 0);
+
+    return {
+      totalProducts: products.length,
+      activeProducts: products.filter((p) => p.status === "active").length,
+      soldProducts: products.filter((p) => p.status === "sold").length,
+      totalViews,
+      totalLikes,
+      totalSambats,
+      totalOrders: orders.length,
+      completedOrders: completedOrders.length,
+      totalRevenue,
+      thisMonthRevenue,
+      averageRating: 4.8, // Placeholder - would calculate from reviews
+      conversionRate:
+        products.length > 0 ? (completedOrders.length / totalViews) * 100 : 0,
+    };
+  },
+});
+
+// Query untuk mendapatkan trending categories
+export const getTrendingCategories = query({
+  handler: async (ctx) => {
+    const products = await ctx.db.query("products").collect();
+    const categoryStats = products.reduce(
+      (acc, product) => {
+        if (!acc[product.category]) {
+          acc[product.category] = {
+            category: product.category,
+            count: 0,
+            totalViews: 0,
+            totalLikes: 0,
+          };
+        }
+        acc[product.category].count++;
+        acc[product.category].totalViews += product.views || 0;
+        acc[product.category].totalLikes += product.likes || 0;
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
+
+    return Object.values(categoryStats)
+      .sort((a: any, b: any) => b.totalViews - a.totalViews)
+      .slice(0, 5);
+  },
+});
+
+// Query untuk mendapatkan recommended pricing
+export const getRecommendedPricing = query({
+  args: { category: v.string(), condition: v.string() },
+  handler: async (ctx, args) => {
+    const similarProducts = await ctx.db
+      .query("products")
+      .withIndex("by_category", (q) => q.eq("category", args.category))
+      .filter((q) => q.eq(q.field("condition"), args.condition))
+      .collect();
+
+    if (similarProducts.length === 0) {
+      return { min: 0, max: 0, average: 0, count: 0 };
+    }
+
+    const prices = similarProducts.map((p) => p.price).sort((a, b) => a - b);
+    const min = prices[0];
+    const max = prices[prices.length - 1];
+    const average =
+      prices.reduce((sum, price) => sum + price, 0) / prices.length;
+
+    return {
+      min,
+      max,
+      average: Math.round(average),
+      count: similarProducts.length,
     };
   },
 });
@@ -2002,10 +2133,10 @@ export const submitVerificationRequest = mutation({
       args.itemType === "brand"
         ? "brands"
         : args.itemType === "perfumer"
-        ? "perfumers"
-        : args.itemType === "fragrance"
-        ? "fragrances"
-        : null;
+          ? "perfumers"
+          : args.itemType === "fragrance"
+            ? "fragrances"
+            : null;
     if (!table) throw new Error("Invalid item type");
     await ctx.db.patch(args.itemId as any, {
       verificationStatus: "pending",
@@ -2020,10 +2151,10 @@ export const moderateVerificationRequest = mutation({
       args.itemType === "brand"
         ? "brands"
         : args.itemType === "perfumer"
-        ? "perfumers"
-        : args.itemType === "fragrance"
-        ? "fragrances"
-        : null;
+          ? "perfumers"
+          : args.itemType === "fragrance"
+            ? "fragrances"
+            : null;
     if (!table) throw new Error("Invalid item type");
     await ctx.db.patch(args.itemId as any, {
       verificationStatus: args.approve ? "approved" : "rejected",
@@ -2229,9 +2360,7 @@ export const calculateShippingCost = action({
     }
     const data = await res.json();
     try {
-      return (
-        data.rajaongkir.results[0].costs[0].cost[0].value as number
-      );
+      return data.rajaongkir.results[0].costs[0].cost[0].value as number;
     } catch (_) {
       throw new Error("Invalid response from RajaOngkir");
     }

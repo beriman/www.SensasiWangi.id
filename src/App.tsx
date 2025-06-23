@@ -28,6 +28,7 @@ import ResetPassword from "./pages/reset-password";
 import OrderReviewPage from "./pages/order-review";
 import OrderDetail from "./pages/order-detail";
 import MarketplaceCheckout from "./pages/marketplace-checkout";
+
 import Settings from "./pages/settings";
 import { Toaster } from "@/components/ui/toaster";
 import NotificationListener from "@/components/notification-listener";
@@ -63,11 +64,12 @@ function App() {
             path="/marketplace/sambat/create"
             element={<MarketplaceSambatCreate />}
           />
-          <Route path="/marketplace/checkout" element={<MarketplaceCheckout />} />
           <Route
-            path="/marketplace/order/:orderId"
-            element={<OrderDetail />}
+            path="/marketplace/checkout"
+            element={<MarketplaceCheckout />}
           />
+
+          <Route path="/marketplace/order/:orderId" element={<OrderDetail />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/kursus" element={<Kursus />} />
           <Route path="/kursus/:id" element={<CourseDetail />} />

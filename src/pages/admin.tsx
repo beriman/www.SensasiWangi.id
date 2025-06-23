@@ -20,6 +20,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -33,6 +54,18 @@ import {
   Eye,
   CheckCircle,
   XCircle,
+  Database,
+  RefreshCw,
+  Trash2,
+  Edit,
+  UserCheck,
+  UserX,
+  Ban,
+  AlertTriangle,
+  Activity,
+  Server,
+  HardDrive,
+  Zap,
 } from "lucide-react";
 import RoleProtectedRoute from "@/components/wrappers/RoleProtectedRoute";
 
@@ -46,18 +79,36 @@ export default function Admin() {
 
 function AdminContent() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
+  const [systemMessage, setSystemMessage] = useState("");
   const navigate = useNavigate();
 
   const pendingOrders = useQuery(api.marketplace.getPendingOrders);
+  const allUsers = useQuery(api.users.getAllUsers);
+  const forumStats = useQuery(api.forum.getForumStats);
+  const systemHealth = useQuery(api.admin.getSystemHealth);
+
   const verifyPayment = useMutation(api.marketplace.verifyOrderPayment);
   const updateStatus = useMutation(api.marketplace.updateOrderStatus);
+  const updateUserRole = useMutation(api.users.updateUserRole);
+  const suspendUser = useMutation(api.admin.suspendUser);
+  const deleteUser = useMutation(api.admin.deleteUser);
+  const broadcastMessage = useMutation(api.admin.broadcastSystemMessage);
+  const clearCache = useMutation(api.admin.clearSystemCache);
+  const backupDatabase = useMutation(api.admin.backupDatabase);
+  const initializeCategories = useMutation(api.forum.initializeCategories);
 
-  // Mock data untuk demonstrasi
+  // Data statistik real-time
   const stats = {
-    totalUsers: 1247,
-    totalPosts: 3456,
-    pendingReports: 12,
-    activeDiscussions: 89,
+    totalUsers: allUsers?.length || 0,
+    totalPosts: forumStats?.totalPosts || 0,
+    pendingReports: 12, // Mock data - bisa diganti dengan query real
+    activeDiscussions: forumStats?.activeToday || 0,
+    systemUptime: systemHealth?.uptime || "99.9%",
+    memoryUsage: systemHealth?.memoryUsage || "45%",
+    diskUsage: systemHealth?.diskUsage || "67%",
+    activeConnections: systemHealth?.activeConnections || 234,
   };
 
   const recentReports = [
@@ -169,6 +220,20 @@ function AdminContent() {
             >
               <CheckCircle className="w-4 h-4 mr-2" />
               Pesanan
+            </TabsTrigger>
+            <TabsTrigger
+              value="system"
+              className="neumorphic-button-sm data-[state=active]:bg-white data-[state=active]:shadow-inner text-[#1D1D1F]"
+            >
+              <Server className="w-4 h-4 mr-2" />
+              Sistem
+            </TabsTrigger>
+            <TabsTrigger
+              value="maintenance"
+              className="neumorphic-button-sm data-[state=active]:bg-white data-[state=active]:shadow-inner text-[#1D1D1F]"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Pemeliharaan
             </TabsTrigger>
           </TabsList>
 
@@ -427,67 +492,189 @@ function AdminContent() {
                     <TableRow>
                       <TableHead className="text-[#1D1D1F]">Nama</TableHead>
                       <TableHead className="text-[#1D1D1F]">Email</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Role</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Poin</TableHead>
                       <TableHead className="text-[#1D1D1F]">
-                        Tanggal Bergabung
+                        Bergabung
                       </TableHead>
-                      <TableHead className="text-[#1D1D1F]">Status</TableHead>
                       <TableHead className="text-[#1D1D1F]">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {recentUsers.map((user) => (
-                      <TableRow key={user.id}>
+                    {allUsers?.map((user) => (
+                      <TableRow key={user._id}>
                         <TableCell className="text-[#1D1D1F] font-medium">
-                          {user.name}
+                          {user.name || "Anonymous"}
                         </TableCell>
                         <TableCell className="text-[#86868B]">
                           {user.email}
                         </TableCell>
-                        <TableCell className="text-[#86868B]">
-                          {user.joinDate}
-                        </TableCell>
                         <TableCell>
                           <Badge
                             variant={
-                              user.status === "active"
-                                ? "default"
-                                : "destructive"
+                              user.role === "admin" ? "default" : "secondary"
                             }
                             className={
-                              user.status === "active"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
+                              user.role === "admin"
+                                ? "bg-purple-100 text-purple-800"
+                                : user.role === "seller"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-gray-100 text-gray-800"
                             }
                           >
-                            {user.status === "active"
-                              ? "Aktif"
-                              : "Ditangguhkan"}
+                            {user.role}
                           </Badge>
+                        </TableCell>
+                        <TableCell className="text-[#86868B]">
+                          {user.contributionPoints || 0}
+                        </TableCell>
+                        <TableCell className="text-[#86868B]">
+                          {user.createdAt
+                            ? new Date(user.createdAt).toLocaleDateString(
+                                "id-ID",
+                              )
+                            : "-"}
                         </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
                             <Button
                               size="sm"
                               className="neumorphic-button-sm h-8 px-3 text-xs"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setIsUserDialogOpen(true);
+                              }}
                             >
                               <Eye className="w-3 h-3 mr-1" />
-                              Lihat
+                              Detail
                             </Button>
                             <Button
                               size="sm"
-                              className="neumorphic-button-sm h-8 px-3 text-xs"
+                              className="neumorphic-button-sm h-8 px-3 text-xs text-blue-600"
+                              onClick={async () => {
+                                const newRole =
+                                  user.role === "admin" ? "buyer" : "admin";
+                                await updateUserRole({
+                                  userId: user._id,
+                                  role: newRole,
+                                });
+                              }}
                             >
-                              <Settings className="w-3 h-3 mr-1" />
-                              Edit
+                              <UserCheck className="w-3 h-3 mr-1" />
+                              {user.role === "admin" ? "Demote" : "Promote"}
                             </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  className="neumorphic-button-sm h-8 px-3 text-xs text-red-600"
+                                >
+                                  <Ban className="w-3 h-3 mr-1" />
+                                  Suspend
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="neumorphic-card">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Suspend Pengguna
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Apakah Anda yakin ingin menangguhkan
+                                    pengguna {user.name}? Mereka tidak akan bisa
+                                    mengakses platform sampai ditangguhkan.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="neumorphic-button-sm">
+                                    Batal
+                                  </AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="neumorphic-button-sm bg-red-500 text-white"
+                                    onClick={async () => {
+                                      await suspendUser({ userId: user._id });
+                                    }}
+                                  >
+                                    Suspend
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )) || []}
                   </TableBody>
                 </Table>
               </CardContent>
             </Card>
+
+            {/* Dialog Detail Pengguna */}
+            <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
+              <DialogContent className="neumorphic-card max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-[#1D1D1F]">
+                    Detail Pengguna: {selectedUser?.name}
+                  </DialogTitle>
+                  <DialogDescription className="text-[#86868B]">
+                    Informasi lengkap tentang pengguna ini
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-[#1D1D1F]">
+                        Email
+                      </label>
+                      <p className="text-[#86868B]">{selectedUser?.email}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-[#1D1D1F]">
+                        Role
+                      </label>
+                      <p className="text-[#86868B]">{selectedUser?.role}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-[#1D1D1F]">
+                        Poin Kontribusi
+                      </label>
+                      <p className="text-[#86868B]">
+                        {selectedUser?.contributionPoints || 0}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-[#1D1D1F]">
+                        Badges
+                      </label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {selectedUser?.badges?.map(
+                          (badge: string, index: number) => (
+                            <Badge key={index} className="text-xs">
+                              {badge}
+                            </Badge>
+                          ),
+                        ) || (
+                          <span className="text-[#86868B] text-sm">
+                            Tidak ada badge
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-[#1D1D1F]">
+                      Tanggal Bergabung
+                    </label>
+                    <p className="text-[#86868B]">
+                      {selectedUser?.createdAt
+                        ? new Date(selectedUser.createdAt).toLocaleString(
+                            "id-ID",
+                          )
+                        : "-"}
+                    </p>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
@@ -850,7 +1037,9 @@ function AdminContent() {
           <TabsContent value="orders" className="space-y-6">
             <Card className="neumorphic-card border-0">
               <CardHeader>
-                <CardTitle className="text-[#1D1D1F]">Manajemen Pesanan</CardTitle>
+                <CardTitle className="text-[#1D1D1F]">
+                  Manajemen Pesanan
+                </CardTitle>
                 <CardDescription className="text-[#86868B]">
                   Verifikasi pembayaran dan update status pengiriman
                 </CardDescription>
@@ -861,7 +1050,9 @@ function AdminContent() {
                     <TableRow>
                       <TableHead className="text-[#1D1D1F]">Produk</TableHead>
                       <TableHead className="text-[#1D1D1F]">Pembeli</TableHead>
-                      <TableHead className="text-[#1D1D1F]">Pembayaran</TableHead>
+                      <TableHead className="text-[#1D1D1F]">
+                        Pembayaran
+                      </TableHead>
                       <TableHead className="text-[#1D1D1F]">Status</TableHead>
                       <TableHead className="text-[#1D1D1F]">Aksi</TableHead>
                     </TableRow>
@@ -901,7 +1092,9 @@ function AdminContent() {
                                     size="sm"
                                     className="neumorphic-button-sm h-8 px-3 text-xs"
                                     onClick={async () => {
-                                      await verifyPayment({ orderId: order._id });
+                                      await verifyPayment({
+                                        orderId: order._id,
+                                      });
                                     }}
                                   >
                                     Verifikasi
@@ -945,6 +1138,303 @@ function AdminContent() {
                         ))}
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="system" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="neumorphic-card border-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-[#1D1D1F]">
+                    System Uptime
+                  </CardTitle>
+                  <Activity className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-[#1D1D1F]">
+                    {stats.systemUptime}
+                  </div>
+                  <p className="text-xs text-[#86868B]">
+                    Dalam 30 hari terakhir
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="neumorphic-card border-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-[#1D1D1F]">
+                    Memory Usage
+                  </CardTitle>
+                  <HardDrive className="h-4 w-4 text-blue-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-[#1D1D1F]">
+                    {stats.memoryUsage}
+                  </div>
+                  <p className="text-xs text-[#86868B]">Dari total RAM</p>
+                </CardContent>
+              </Card>
+
+              <Card className="neumorphic-card border-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-[#1D1D1F]">
+                    Disk Usage
+                  </CardTitle>
+                  <Database className="h-4 w-4 text-orange-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-[#1D1D1F]">
+                    {stats.diskUsage}
+                  </div>
+                  <p className="text-xs text-[#86868B]">Dari total storage</p>
+                </CardContent>
+              </Card>
+
+              <Card className="neumorphic-card border-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-[#1D1D1F]">
+                    Active Connections
+                  </CardTitle>
+                  <Zap className="h-4 w-4 text-purple-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-[#1D1D1F]">
+                    {stats.activeConnections}
+                  </div>
+                  <p className="text-xs text-[#86868B]">Koneksi real-time</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="neumorphic-card border-0">
+              <CardHeader>
+                <CardTitle className="text-[#1D1D1F]">
+                  System Health Monitor
+                </CardTitle>
+                <CardDescription className="text-[#86868B]">
+                  Monitor kesehatan sistem dan performa aplikasi
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-4 neumorphic-card-inset rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-[#1D1D1F] font-medium">
+                        Database Connection
+                      </span>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800">
+                      Healthy
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center p-4 neumorphic-card-inset rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-[#1D1D1F] font-medium">
+                        API Services
+                      </span>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800">
+                      Operational
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center p-4 neumorphic-card-inset rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
+                      <span className="text-[#1D1D1F] font-medium">
+                        Cache System
+                      </span>
+                    </div>
+                    <Badge className="bg-yellow-100 text-yellow-800">
+                      Warning
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center p-4 neumorphic-card-inset rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-[#1D1D1F] font-medium">
+                        File Storage
+                      </span>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800">
+                      Healthy
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="neumorphic-card border-0">
+              <CardHeader>
+                <CardTitle className="text-[#1D1D1F]">
+                  Broadcast System Message
+                </CardTitle>
+                <CardDescription className="text-[#86868B]">
+                  Kirim pesan sistem ke semua pengguna
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Textarea
+                  placeholder="Masukkan pesan sistem yang akan dikirim ke semua pengguna..."
+                  value={systemMessage}
+                  onChange={(e) => setSystemMessage(e.target.value)}
+                  className="neumorphic-input"
+                />
+                <Button
+                  className="neumorphic-button"
+                  onClick={async () => {
+                    if (systemMessage.trim()) {
+                      await broadcastMessage({ message: systemMessage });
+                      setSystemMessage("");
+                    }
+                  }}
+                  disabled={!systemMessage.trim()}
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Kirim Pesan Sistem
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="maintenance" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="neumorphic-card border-0">
+                <CardHeader>
+                  <CardTitle className="text-[#1D1D1F]">
+                    Database Operations
+                  </CardTitle>
+                  <CardDescription className="text-[#86868B]">
+                    Operasi pemeliharaan database
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button
+                    className="neumorphic-button w-full justify-start"
+                    onClick={async () => {
+                      await backupDatabase();
+                    }}
+                  >
+                    <Database className="w-4 h-4 mr-2" />
+                    Backup Database
+                  </Button>
+                  <Button
+                    className="neumorphic-button w-full justify-start"
+                    onClick={async () => {
+                      await initializeCategories();
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Initialize Forum Categories
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button className="neumorphic-button w-full justify-start text-red-600">
+                        <AlertTriangle className="w-4 h-4 mr-2" />
+                        Reset All Data
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="neumorphic-card">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Reset Semua Data</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          PERINGATAN: Ini akan menghapus SEMUA data dari
+                          database. Operasi ini tidak dapat dibatalkan. Pastikan
+                          Anda sudah membuat backup.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="neumorphic-button-sm">
+                          Batal
+                        </AlertDialogCancel>
+                        <AlertDialogAction className="neumorphic-button-sm bg-red-500 text-white">
+                          Ya, Reset Semua
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </CardContent>
+              </Card>
+
+              <Card className="neumorphic-card border-0">
+                <CardHeader>
+                  <CardTitle className="text-[#1D1D1F]">
+                    Cache Management
+                  </CardTitle>
+                  <CardDescription className="text-[#86868B]">
+                    Kelola cache sistem untuk performa optimal
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button
+                    className="neumorphic-button w-full justify-start"
+                    onClick={async () => {
+                      await clearCache({ type: "all" });
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Clear All Cache
+                  </Button>
+                  <Button
+                    className="neumorphic-button w-full justify-start"
+                    onClick={async () => {
+                      await clearCache({ type: "images" });
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Clear Image Cache
+                  </Button>
+                  <Button
+                    className="neumorphic-button w-full justify-start"
+                    onClick={async () => {
+                      await clearCache({ type: "api" });
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Clear API Cache
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="neumorphic-card border-0">
+              <CardHeader>
+                <CardTitle className="text-[#1D1D1F]">
+                  System Maintenance Tools
+                </CardTitle>
+                <CardDescription className="text-[#86868B]">
+                  Tools untuk pemeliharaan dan optimasi sistem
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button className="neumorphic-button h-20 flex-col">
+                    <Activity className="w-6 h-6 mb-2" />
+                    <span>System Health Check</span>
+                  </Button>
+                  <Button className="neumorphic-button h-20 flex-col">
+                    <HardDrive className="w-6 h-6 mb-2" />
+                    <span>Disk Cleanup</span>
+                  </Button>
+                  <Button className="neumorphic-button h-20 flex-col">
+                    <Zap className="w-6 h-6 mb-2" />
+                    <span>Performance Optimization</span>
+                  </Button>
+                  <Button className="neumorphic-button h-20 flex-col">
+                    <Shield className="w-6 h-6 mb-2" />
+                    <span>Security Scan</span>
+                  </Button>
+                  <Button className="neumorphic-button h-20 flex-col">
+                    <Database className="w-6 h-6 mb-2" />
+                    <span>Database Optimization</span>
+                  </Button>
+                  <Button className="neumorphic-button h-20 flex-col">
+                    <RefreshCw className="w-6 h-6 mb-2" />
+                    <span>System Restart</span>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

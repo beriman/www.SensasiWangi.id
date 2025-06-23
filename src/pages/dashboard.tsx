@@ -4,6 +4,9 @@ import { api } from "../../convex/_generated/api";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserStats } from "@/components/UserStats";
 import { ActivityMetrics } from "@/components/ActivityMetrics";
 import {
@@ -15,10 +18,22 @@ import {
   Package,
   ShoppingCart,
   DollarSign,
+  TrendingUp,
+  Eye,
+  Star,
+  Plus,
+  BarChart3,
+  Calendar,
+  ArrowUpRight,
+  ArrowDownRight,
+  MessageCircle,
 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useState } from "react";
 
 export default function Dashboard() {
   const { user } = useUser();
+  const [activeTab, setActiveTab] = useState("overview");
   const userData = useQuery(
     api.users.getUserByToken,
     user?.id ? { tokenIdentifier: user.id } : "skip",
@@ -34,7 +49,35 @@ export default function Dashboard() {
     userData ? { authorId: userData._id } : "skip",
   );
 
+  // Marketplace data
   const marketplaceStats = useQuery(api.marketplace.getMarketplaceStats);
+  const userProducts = useQuery(
+    api.marketplace.getProductsBySeller,
+    userData ? { sellerId: userData._id } : "skip",
+  );
+  const userBuyerOrders = useQuery(
+    api.marketplace.getOrdersByUser,
+    userData ? { userId: userData._id, type: "buyer" } : "skip",
+  );
+  const userSellerOrders = useQuery(
+    api.marketplace.getOrdersByUser,
+    userData ? { userId: userData._id, type: "seller" } : "skip",
+  );
+
+  const totalRevenue =
+    userSellerOrders
+      ?.filter((o) => o.orderStatus === "delivered")
+      .reduce((sum, order) => sum + order.totalAmount, 0) || 0;
+  const activeProducts =
+    userProducts?.filter((p) => p.status === "active").length || 0;
+  const soldProducts =
+    userProducts?.filter((p) => p.status === "sold").length || 0;
+  const totalViews =
+    userProducts?.reduce((sum, p) => sum + (p.views || 0), 0) || 0;
+  const totalLikes =
+    userProducts?.reduce((sum, p) => sum + (p.likes || 0), 0) || 0;
+  const totalSambats =
+    userProducts?.reduce((sum, p) => sum + (p.sambatCount || 0), 0) || 0;
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
@@ -52,179 +95,441 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* User Stats Section */}
-          <div className="mb-12">
-            <UserStats
-              level={Math.floor((userData?.contributionPoints || 0) / 100) + 1}
-              contributionPoints={userData?.contributionPoints || 0}
-              postsCount={userTopics?.length || 0}
-              likesReceived={
-                userTopics?.reduce((sum, t) => sum + t.likes, 0) || 0
-              }
-              commentsCount={userComments?.length || 0}
-              joinDate={new Date(user?.createdAt || "").toLocaleDateString()}
-              badges={userData?.badges || []}
-          weeklyGoal={100}
-          weeklyProgress={(userData?.contributionPoints || 0) % 100}
-        />
-      </div>
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="neumorphic-card p-1 mb-8">
+              <TabsTrigger
+                value="overview"
+                className="neumorphic-button-sm bg-transparent text-[#718096] border-0 shadow-none data-[state=active]:bg-white data-[state=active]:text-[#1D1D1F] data-[state=active]:shadow-inner"
+              >
+                <User className="h-4 w-4 mr-2" />
+                Ringkasan
+              </TabsTrigger>
+              <TabsTrigger
+                value="marketplace"
+                className="neumorphic-button-sm bg-transparent text-[#718096] border-0 shadow-none data-[state=active]:bg-white data-[state=active]:text-[#1D1D1F] data-[state=active]:shadow-inner"
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Marketplace
+              </TabsTrigger>
+            </TabsList>
 
-      <ActivityMetrics posts={userTopics || []} comments={userComments || []} />
+            <TabsContent value="overview" className="space-y-12">
+              {/* User Stats Section */}
+              <UserStats
+                level={
+                  Math.floor((userData?.contributionPoints || 0) / 100) + 1
+                }
+                contributionPoints={userData?.contributionPoints || 0}
+                postsCount={userTopics?.length || 0}
+                likesReceived={
+                  userTopics?.reduce((sum, t) => sum + t.likes, 0) || 0
+                }
+                commentsCount={userComments?.length || 0}
+                joinDate={new Date(user?.createdAt || "").toLocaleDateString()}
+                badges={userData?.badges || []}
+                weeklyGoal={100}
+                weeklyProgress={(userData?.contributionPoints || 0) % 100}
+              />
 
-      {marketplaceStats && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-[#1D1D1F] mb-4">
-            Marketplace Stats
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="neumorphic-card p-4 text-center">
-              <Package className="h-6 w-6 text-[#667eea] mx-auto mb-2" />
-              <div className="text-xl font-bold text-[#667eea]">
-                {marketplaceStats.activeProducts}
-              </div>
-              <div className="text-sm text-[#718096]">Produk Aktif</div>
-            </div>
-            <div className="neumorphic-card p-4 text-center">
-              <ShoppingCart className="h-6 w-6 text-[#667eea] mx-auto mb-2" />
-              <div className="text-xl font-bold text-[#667eea]">
-                {marketplaceStats.soldProducts}
-              </div>
-              <div className="text-sm text-[#718096]">Terjual</div>
-            </div>
-            <div className="neumorphic-card p-4 text-center">
-              <ArrowRight className="h-6 w-6 text-[#667eea] mx-auto mb-2" />
-              <div className="text-xl font-bold text-[#667eea]">
-                {marketplaceStats.totalOrders}
-              </div>
-              <div className="text-sm text-[#718096]">Total Order</div>
-            </div>
-            <div className="neumorphic-card p-4 text-center">
-              <DollarSign className="h-6 w-6 text-[#667eea] mx-auto mb-2" />
-              <div className="text-xl font-bold text-[#667eea]">
-                {new Intl.NumberFormat("id-ID", {
-                  notation: "compact",
-                  maximumFractionDigits: 1,
-                }).format(marketplaceStats.totalValue)}
-              </div>
-              <div className="text-sm text-[#718096]">Total Nilai</div>
-            </div>
-          </div>
-        </div>
-      )}
+              {/* Activity Metrics */}
+              <ActivityMetrics
+                topicsCount={userTopics?.length || 0}
+                commentsCount={userComments?.length || 0}
+                likesReceived={
+                  userTopics?.reduce((sum, t) => sum + t.likes, 0) || 0
+                }
+                viewsReceived={
+                  userTopics?.reduce((sum, t) => sum + t.views, 0) || 0
+                }
+              />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Clerk User Data */}
-            <DataCard
-              title="Informasi Pengguna Clerk"
-              icon={<User className="h-5 w-5 text-[#0066CC]" />}
-            >
-              <div className="space-y-2">
-                <DataRow label="Nama Lengkap" value={user?.fullName} />
-                <DataRow
-                  label="Email"
-                  value={user?.primaryEmailAddress?.emailAddress}
-                />
-                <DataRow label="ID Pengguna" value={user?.id} />
-                <DataRow
-                  label="Dibuat"
-                  value={new Date(user?.createdAt || "").toLocaleDateString()}
-                />
-                <DataRow
-                  label="Email Terverifikasi"
-                  value={
-                    user?.primaryEmailAddress?.verification.status ===
-                    "verified"
-                      ? "Ya"
-                      : "Tidak"
-                  }
-                />
-              </div>
-            </DataCard>
-
-            {/* Database User Data */}
-            <DataCard
-              title="Informasi Pengguna Database"
-              icon={<Database className="h-5 w-5 text-[#0066CC]" />}
-            >
-              <div className="space-y-2">
-                <DataRow label="ID Database" value={userData?._id} />
-                <DataRow label="Nama" value={userData?.name} />
-                <DataRow label="Email" value={userData?.email} />
-                <DataRow label="Token ID" value={userData?.tokenIdentifier} />
-                <DataRow
-                  label="Terakhir Diperbarui"
-                  value={
-                    userData?._creationTime
-                      ? new Date(userData._creationTime).toLocaleDateString()
-                      : undefined
-                  }
-                />
-              </div>
-            </DataCard>
-
-            {/* Session Information */}
-            <DataCard
-              title="Sesi Saat Ini"
-              icon={<Clock className="h-5 w-5 text-[#0066CC]" />}
-            >
-              <div className="space-y-2">
-                <DataRow
-                  label="Terakhir Aktif"
-                  value={new Date(user?.lastSignInAt || "").toLocaleString()}
-                />
-                <DataRow
-                  label="Strategi Auth"
-                  value={user?.primaryEmailAddress?.verification.strategy}
-                />
-              </div>
-            </DataCard>
-
-            {/* Additional User Details */}
-            <DataCard
-              title="Detail Profil"
-              icon={<Shield className="h-5 w-5 text-[#0066CC]" />}
-            >
-              <div className="space-y-2">
-                <DataRow label="Username" value={user?.username} />
-                <DataRow label="Nama Depan" value={user?.firstName} />
-                <DataRow label="Nama Belakang" value={user?.lastName} />
-                <DataRow
-                  label="Gambar Profil"
-                  value={user?.imageUrl ? "Tersedia" : "Belum Diatur"}
-                />
-              </div>
-            </DataCard>
-          </div>
-
-          {/* JSON Data Preview */}
-          <div className="mt-12">
-            <DataCard
-              title="Pratinjau Data Mentah"
-              className="neumorphic-card-inset"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-sm font-medium text-[#1D1D1F] mb-2">
-                    Data Pengguna Clerk
-                  </h3>
-                  <pre className="neumorphic-input p-6 text-sm overflow-auto max-h-64 border-0">
-                    {JSON.stringify(user, null, 2)}
-                  </pre>
+              {/* Quick Actions */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Link to="/profile" className="block">
+                  <div className="neumorphic-card p-6 text-center transition-all hover:scale-105 active:scale-95">
+                    <User className="h-8 w-8 text-[#667eea] mx-auto mb-3" />
+                    <h3 className="font-semibold text-[#1D1D1F] mb-2">
+                      Profil Saya
+                    </h3>
+                    <p className="text-sm text-[#86868B]">
+                      Kelola informasi profil dan aktivitas forum
+                    </p>
+                  </div>
+                </Link>
+                <div
+                  className="block cursor-pointer"
+                  onClick={() => setActiveTab("marketplace")}
+                >
+                  <div className="neumorphic-card p-6 text-center transition-all hover:scale-105 active:scale-95">
+                    <ShoppingCart className="h-8 w-8 text-[#667eea] mx-auto mb-3" />
+                    <h3 className="font-semibold text-[#1D1D1F] mb-2">
+                      Konsol Marketplace
+                    </h3>
+                    <p className="text-sm text-[#86868B]">
+                      Kelola penjualan dan riwayat pembelian
+                    </p>
+                  </div>
                 </div>
+                <Link to="/forum" className="block">
+                  <div className="neumorphic-card p-6 text-center transition-all hover:scale-105 active:scale-95">
+                    <Database className="h-8 w-8 text-[#667eea] mx-auto mb-3" />
+                    <h3 className="font-semibold text-[#1D1D1F] mb-2">Forum</h3>
+                    <p className="text-sm text-[#86868B]">
+                      Diskusi dan berbagi pengalaman parfum
+                    </p>
+                  </div>
+                </Link>
+                <Link to="/collections" className="block">
+                  <div className="neumorphic-card p-6 text-center transition-all hover:scale-105 active:scale-95">
+                    <Package className="h-8 w-8 text-[#667eea] mx-auto mb-3" />
+                    <h3 className="font-semibold text-[#1D1D1F] mb-2">
+                      Koleksi
+                    </h3>
+                    <p className="text-sm text-[#86868B]">
+                      Lihat dan kelola koleksi parfum Anda
+                    </p>
+                  </div>
+                </Link>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="marketplace" className="space-y-8">
+              {/* Marketplace Console Header */}
+              <div className="flex justify-between items-start mb-8">
                 <div>
-                  <h3 className="text-sm font-medium text-[#1D1D1F] mb-2">
-                    Data Pengguna Database
-                  </h3>
-                  <pre className="neumorphic-input p-6 text-sm overflow-auto max-h-64 border-0">
-                    {JSON.stringify(userData, null, 2)}
-                  </pre>
+                  <h2 className="text-3xl font-semibold text-[#1D1D1F] tracking-tight mb-2">
+                    Konsol Marketplace
+                  </h2>
+                  <p className="text-lg text-[#86868B] max-w-[600px] leading-relaxed">
+                    Kelola penjualan, lihat riwayat pembelian, dan analisis
+                    performa produk Anda
+                  </p>
+                </div>
+                <Link to="/marketplace/sell">
+                  <Button className="neumorphic-button bg-transparent text-[#2d3748] font-semibold border-0 shadow-none hover:scale-105 active:scale-95 transition-all">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Jual Produk Baru
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Stats Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div className="neumorphic-card p-6 text-center">
+                  <div className="neumorphic-card-inset w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Package className="h-6 w-6 text-[#667eea]" />
+                  </div>
+                  <div className="text-2xl font-bold text-[#1D1D1F] mb-1">
+                    {activeProducts}
+                  </div>
+                  <div className="text-sm text-[#86868B]">Produk Aktif</div>
+                </div>
+                <div className="neumorphic-card p-6 text-center">
+                  <div className="neumorphic-card-inset w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <ShoppingCart className="h-6 w-6 text-[#667eea]" />
+                  </div>
+                  <div className="text-2xl font-bold text-[#1D1D1F] mb-1">
+                    {soldProducts}
+                  </div>
+                  <div className="text-sm text-[#86868B]">Produk Terjual</div>
+                </div>
+                <div className="neumorphic-card p-6 text-center">
+                  <div className="neumorphic-card-inset w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <DollarSign className="h-6 w-6 text-[#667eea]" />
+                  </div>
+                  <div className="text-2xl font-bold text-[#1D1D1F] mb-1">
+                    {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                      notation: "compact",
+                      maximumFractionDigits: 1,
+                    }).format(totalRevenue)}
+                  </div>
+                  <div className="text-sm text-[#86868B]">Total Pendapatan</div>
+                </div>
+                <div className="neumorphic-card p-6 text-center">
+                  <div className="neumorphic-card-inset w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Eye className="h-6 w-6 text-[#667eea]" />
+                  </div>
+                  <div className="text-2xl font-bold text-[#1D1D1F] mb-1">
+                    {totalViews}
+                  </div>
+                  <div className="text-sm text-[#86868B]">Total Views</div>
+                </div>
+                <div className="neumorphic-card p-6 text-center">
+                  <div className="neumorphic-card-inset w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <MessageCircle className="h-6 w-6 text-[#667eea]" />
+                  </div>
+                  <div className="text-2xl font-bold text-[#1D1D1F] mb-1">
+                    {totalSambats}
+                  </div>
+                  <div className="text-sm text-[#86868B]">Total Sambat</div>
                 </div>
               </div>
-            </DataCard>
-          </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Sales Management */}
+                <Card className="neumorphic-card border-0 shadow-none">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-[#1D1D1F]">
+                      <Package className="h-5 w-5 text-[#667eea]" />
+                      Manajemen Penjualan
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {!userProducts || userProducts.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Package className="h-12 w-12 text-[#86868B] mx-auto mb-4 opacity-50" />
+                        <p className="text-[#86868B] mb-4">
+                          Anda belum memiliki produk untuk dijual
+                        </p>
+                        <Link to="/marketplace/sell">
+                          <Button className="neumorphic-button bg-transparent text-[#2d3748] font-semibold border-0 shadow-none">
+                            Mulai Jual Produk
+                          </Button>
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {userProducts.slice(0, 3).map((product) => (
+                          <div
+                            key={product._id}
+                            className="neumorphic-card-inset p-4 transition-all hover:scale-[1.02]"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge
+                                    variant={
+                                      product.status === "active"
+                                        ? "default"
+                                        : "secondary"
+                                    }
+                                    className="text-xs"
+                                  >
+                                    {product.status === "active"
+                                      ? "Aktif"
+                                      : "Tidak Aktif"}
+                                  </Badge>
+                                  {product.featured && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs text-orange-600 border-orange-200"
+                                    >
+                                      ⭐ Featured
+                                    </Badge>
+                                  )}
+                                </div>
+                                <h4 className="font-semibold text-[#1D1D1F] mb-1">
+                                  {product.title}
+                                </h4>
+                                <p className="text-sm text-[#86868B] mb-2">
+                                  {new Intl.NumberFormat("id-ID", {
+                                    style: "currency",
+                                    currency: "IDR",
+                                  }).format(product.price)}
+                                </p>
+                                <div className="flex items-center gap-4 text-xs text-[#86868B]">
+                                  <span className="flex items-center gap-1">
+                                    <Eye className="h-3 w-3" />
+                                    {product.views || 0}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Star className="h-3 w-3" />
+                                    {product.rating || 0}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {userProducts.length > 3 && (
+                          <div className="text-center pt-4">
+                            <Link to="/marketplace/my-shop">
+                              <Button
+                                variant="outline"
+                                className="neumorphic-button-sm bg-transparent text-[#718096] border-0 shadow-none"
+                              >
+                                Lihat Semua Produk ({userProducts.length})
+                              </Button>
+                            </Link>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Purchase History */}
+                <Card className="neumorphic-card border-0 shadow-none">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-[#1D1D1F]">
+                      <ShoppingCart className="h-5 w-5 text-[#667eea]" />
+                      Riwayat Pembelian
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {!userBuyerOrders || userBuyerOrders.length === 0 ? (
+                      <div className="text-center py-8">
+                        <ShoppingCart className="h-12 w-12 text-[#86868B] mx-auto mb-4 opacity-50" />
+                        <p className="text-[#86868B]">
+                          Anda belum melakukan pembelian
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {userBuyerOrders.slice(0, 3).map((order) => (
+                          <div
+                            key={order._id}
+                            className="neumorphic-card-inset p-4"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge
+                                    variant={
+                                      order.orderStatus === "delivered"
+                                        ? "default"
+                                        : "secondary"
+                                    }
+                                    className="text-xs"
+                                  >
+                                    {order.orderStatus === "delivered"
+                                      ? "Selesai"
+                                      : order.orderStatus === "pending"
+                                        ? "Pending"
+                                        : order.orderStatus === "shipped"
+                                          ? "Dikirim"
+                                          : "Dibatalkan"}
+                                  </Badge>
+                                </div>
+                                <h4 className="font-semibold text-[#1D1D1F] mb-1">
+                                  {order.productTitle}
+                                </h4>
+                                <p className="text-sm text-[#86868B] mb-2">
+                                  {new Intl.NumberFormat("id-ID", {
+                                    style: "currency",
+                                    currency: "IDR",
+                                  }).format(order.totalAmount)}
+                                </p>
+                                <div className="flex items-center gap-4 text-xs text-[#86868B]">
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    {new Date(
+                                      order.createdAt,
+                                    ).toLocaleDateString("id-ID")}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {userBuyerOrders.length > 3 && (
+                          <div className="text-center pt-4">
+                            <Button
+                              variant="outline"
+                              className="neumorphic-button-sm bg-transparent text-[#718096] border-0 shadow-none"
+                            >
+                              Lihat Semua Pesanan ({userBuyerOrders.length})
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Analytics Section */}
+              <Card className="neumorphic-card border-0 shadow-none mt-8">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-[#1D1D1F]">
+                    <BarChart3 className="h-5 w-5 text-[#667eea]" />
+                    Analisis Penjualan
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="text-center">
+                      <div className="neumorphic-card-inset w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <TrendingUp className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="text-2xl font-bold text-[#1D1D1F] mb-1">
+                        +12%
+                      </div>
+                      <div className="text-sm text-[#86868B]">
+                        Penjualan Bulan Ini
+                      </div>
+                      <div className="flex items-center justify-center gap-1 text-xs text-green-600 mt-1">
+                        <ArrowUpRight className="h-3 w-3" />
+                        Naik dari bulan lalu
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="neumorphic-card-inset w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Eye className="h-6 w-6 text-[#667eea]" />
+                      </div>
+                      <div className="text-2xl font-bold text-[#1D1D1F] mb-1">
+                        {Math.round(totalViews / (userProducts?.length || 1))}
+                      </div>
+                      <div className="text-sm text-[#86868B]">
+                        Rata-rata Views per Produk
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="neumorphic-card-inset w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Star className="h-6 w-6 text-yellow-500" />
+                      </div>
+                      <div className="text-2xl font-bold text-[#1D1D1F] mb-1">
+                        4.8
+                      </div>
+                      <div className="text-sm text-[#86868B]">
+                        Rating Rata-rata
+                      </div>
+                      <div className="flex items-center justify-center gap-1 text-xs text-green-600 mt-1">
+                        <ArrowUpRight className="h-3 w-3" />
+                        Meningkat 0.2 poin
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Link to="/marketplace/sell">
+                  <Button className="neumorphic-button w-full bg-transparent text-[#2d3748] font-semibold border-0 shadow-none hover:scale-105 active:scale-95 transition-all">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Tambah Produk Baru
+                  </Button>
+                </Link>
+                <Link to="/marketplace/my-shop">
+                  <Button
+                    variant="outline"
+                    className="neumorphic-button-sm w-full bg-transparent text-[#718096] border-0 shadow-none hover:scale-105 active:scale-95 transition-all"
+                  >
+                    <Package className="h-4 w-4 mr-2" />
+                    Kelola Toko Saya
+                  </Button>
+                </Link>
+                <Link to="/marketplace">
+                  <Button
+                    variant="outline"
+                    className="neumorphic-button-sm w-full bg-transparent text-[#718096] border-0 shadow-none hover:scale-105 active:scale-95 transition-all"
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Jelajahi Marketplace
+                  </Button>
+                </Link>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
@@ -260,7 +565,6 @@ function DataRow({
 }) {
   return (
     <div className="flex justify-between py-2 border-b border-[#F5F5F7] last:border-0">
-      <span className="text-[#86868B]">{label}</span>
       <span className="text-[#1D1D1F] font-medium">{value || "—"}</span>
     </div>
   );

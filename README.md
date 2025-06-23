@@ -46,8 +46,25 @@ records for marketplace or course integrations.
 
 User contributions earn points which unlock reward tiers:
 
-- **Bronze**: <100 points – no discount
-- **Silver**: 100+ points – 5% marketplace discount and access to exclusive content
-- **Gold**: 500+ points – 10% marketplace discount and exclusive content
+- **Bronze**: <5000 points – no discount
+- **Silver**: 5000+ points – 5% marketplace discount and access to exclusive content
+- **Gold**: 10000+ points – 10% marketplace discount and exclusive content
 
 Discounts are automatically applied when creating marketplace orders.
+
+## Fitur Profile
+
+Fitur Profile dirancang untuk meningkatkan engagement pengguna melalui sistem gamifikasi yang mencakup:
+
+- **Sistem Poin dan Level**: Pengguna mendapatkan poin dari aktivitas seperti menyelesaikan modul kursus, berpartisipasi di forum, transaksi marketplace, dan memberikan ulasan. Poin akan menentukan level pengguna (dari Pemula hingga Master).
+- **Badge Prestasi**: Pengguna dapat mengoleksi badge berdasarkan pencapaian tertentu, seperti "Ahli Citrus" atau "Raja Woody".
+- **Leaderboard Komunitas**: Terdapat papan peringkat global, bulanan, dan berdasarkan minat untuk mendorong kompetisi sehat.
+
+Detail perencanaan fitur dapat dilihat di: [`planning/USER/profile-plan.md`](/planning/USER/profile-plan.md)
+
+### Implementasi
+- **Backend**: Menggunakan Convex function untuk menghitung poin dan menyimpan data di database.
+- **Frontend**: Halaman profil baru dengan komponen `UserStats` dan integrasi Clerk.
+- **Integrasi**: Notifikasi pencapaian dan update real-time menggunakan Convex subscriptions.
+
+_Versi dokumen: 1.1.0 (Updated: Juni 2025)_

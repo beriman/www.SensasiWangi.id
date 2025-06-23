@@ -88,7 +88,6 @@ export function UserStats({
           </div>
         </div>
       </div>
-
       {/* Activity Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <StatCard
@@ -113,7 +112,6 @@ export function UserStats({
           isDate
         />
       </div>
-
       {/* Badges Section */}
       {badges.length > 0 && (
         <div className="neumorphic-card p-6 mb-6">
@@ -135,39 +133,7 @@ export function UserStats({
           </div>
         </div>
       )}
-
       {/* Achievement Goals */}
-      <div className="neumorphic-card p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Target className="w-5 h-5 text-[#0066CC]" />
-          <h3 className="text-lg font-semibold text-[#1D1D1F]">
-            Target Pencapaian
-          </h3>
-        </div>
-        <div className="space-y-3">
-          <AchievementItem
-            title="Kontributor Aktif"
-            description="Buat 10 postingan dalam sebulan"
-            progress={postsCount}
-            target={10}
-            completed={postsCount >= 10}
-          />
-          <AchievementItem
-            title="Populer"
-            description="Dapatkan 50 like"
-            progress={likesReceived}
-            target={50}
-            completed={likesReceived >= 50}
-          />
-          <AchievementItem
-            title="Diskusi Aktif"
-            description="Buat 25 komentar"
-            progress={commentsCount}
-            target={25}
-            completed={commentsCount >= 25}
-          />
-        </div>
-      </div>
     </div>
   );
 }
