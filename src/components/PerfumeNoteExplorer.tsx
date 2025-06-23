@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import * as d3 from "d3";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -167,6 +168,7 @@ export default function PerfumeNoteExplorer() {
   const [searchTerm, setSearchTerm] = useState("");
   const [favorites, setFavorites] = useState<string[]>([]);
   const [hoveredNote, setHoveredNote] = useState<string | null>(null);
+  const svgRef = useRef<SVGSVGElement | null>(null);
 
   const allNotes = PERFUME_FAMILIES.flatMap((family) => family.notes);
 
@@ -190,6 +192,99 @@ export default function PerfumeNoteExplorer() {
     if (intensity <= 8) return "bg-orange-200";
     return "bg-red-200";
   };
+
+  useEffect(() => {
+    if (!svgRef.current) return;
+    const width = 600;
+    const height = 400;
+    const svg = d3.select(svgRef.current);
+    svg.selectAll('*').remove();
+
+    const nodes = allNotes.map((n) => ({ ...n }));
+    const links: { source: string; target: string }[] = [];
+    allNotes.forEach((n) => {
+      n.combinations.forEach((c) => {
+        const target = allNotes.find((t) => t.name === c);
+        if (target) {
+          links.push({ source: n.id, target: target.id });
+        }
+      });
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const simulation = d3
+      .forceSimulation(nodes as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .force('link', d3.forceLink(links).id((d: any) => d.id).distance(80))
+      .force('charge', d3.forceManyBody().strength(-200))
+      .force('center', d3.forceCenter(width / 2, height / 2));
+
+    const link = svg
+      .append('g')
+      .attr('stroke', '#ccc')
+      .selectAll('line')
+      .data(links)
+      .enter()
+      .append('line');
+
+    const node = svg
+      .append('g')
+      .selectAll('circle')
+      .data(nodes)
+      .enter()
+      .append('circle')
+      .attr('r', 8)
+      .attr('fill', (d) => d.color)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 1.5)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .call(
+        d3
+          .drag<SVGCircleElement, any>()
+          .on('start', (event, d: any) => {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+          })
+          .on('drag', (event, d: any) => {
+            d.fx = event.x;
+            d.fy = event.y;
+          })
+          .on('end', (event, d: any) => {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+          })
+      )
+      .on('click', (_event, d) => {
+        const note = allNotes.find((n) => n.id === d.id);
+        if (note) setSelectedNote(note);
+      });
+
+    node.append('title').text((d) => d.name);
+
+    simulation.on('tick', () => {
+      link
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .attr('x1', (d: any) => d.source.x)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .attr('y1', (d: any) => d.source.y)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .attr('x2', (d: any) => d.target.x)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .attr('y2', (d: any) => d.target.y);
+
+      node
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .attr('cx', (d: any) => d.x)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .attr('cy', (d: any) => d.y);
+    });
+
+    return () => {
+      simulation.stop();
+    };
+  }, [allNotes]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
@@ -220,6 +315,16 @@ export default function PerfumeNoteExplorer() {
               className="pl-12 border-0 bg-transparent focus:ring-0 shadow-none"
             />
           </div>
+        </div>
+
+        {/* Interactive Graph */}
+        <div className="flex justify-center mb-8">
+          <svg
+            ref={svgRef}
+            width={600}
+            height={400}
+            className="bg-white rounded-lg shadow-[8px_8px_16px_#d1d5db,-8px_-8px_16px_#ffffff]"
+          />
         </div>
 
         {/* Family Overview */}
