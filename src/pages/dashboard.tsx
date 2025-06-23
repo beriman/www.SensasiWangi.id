@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { UserStats } from "@/components/UserStats";
+import { TrendingDiscussions } from "@/components/TrendingDiscussions";
 import {
   ArrowRight,
   User,
@@ -108,6 +109,8 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      <TrendingDiscussions />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Clerk User Data */}

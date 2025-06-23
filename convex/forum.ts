@@ -776,3 +776,22 @@ export const updateAllCategoryCounts = mutation({
     return { message: "Semua category counts berhasil diupdate" };
   },
 });
+
+// Query untuk mendapatkan topik yang sedang trending (isHot)
+export const getHotTopics = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 5;
+
+    const topics = await ctx.db
+      .query("topics")
+      .withIndex("by_likes")
+      .order("desc")
+      .collect();
+
+    return topics
+      .filter((t) => t.isHot)
+      .sort((a, b) => b.likes + b.views - (a.likes + a.views))
+      .slice(0, limit);
+  },
+});
