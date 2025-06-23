@@ -22,6 +22,7 @@ import Privacy from "./pages/privacy";
 import Terms from "./pages/terms";
 import Polling from "./pages/polling";
 import FAQ from "./pages/faq";
+import Onboarding from "./pages/onboarding";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import ResetPassword from "./pages/reset-password";
@@ -79,6 +80,7 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/polling" element={<Polling />} />
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/order/:orderId/review" element={<OrderReviewPage />} />
         </Routes>
         {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}

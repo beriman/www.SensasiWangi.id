@@ -117,6 +117,9 @@ function App() {
                         {t('home.hero.buttonStart')}
                       </Button>
                     </Link>
+                    <Link to="/onboarding" className="text-sm text-[#667eea] underline ml-4 inline-flex items-center">
+                      Panduan Singkat
+                    </Link>
                   </Unauthenticated>
                 </>
               )}

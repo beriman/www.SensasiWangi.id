@@ -7,7 +7,7 @@ export default function Signup() {
     <div className="min-h-screen flex flex-col neumorphic-bg">
       <Navbar />
       <main className="flex-grow flex items-center justify-center">
-        <SignUp path="/signup" routing="path" signInUrl="/login" afterSignUpUrl="/dashboard" />
+        <SignUp path="/signup" routing="path" signInUrl="/login" afterSignUpUrl="/onboarding" />
       </main>
       <Footer />
     </div>
