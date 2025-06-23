@@ -52,8 +52,6 @@ export const getTopics = query({
 
     let filteredPage = topics.page;
 
-
-
     // Filter berdasarkan tag jika ada
     if (args.tag) {
       filteredPage = filteredPage.filter((topic) =>
@@ -109,8 +107,7 @@ export const getPinnedTopics = query({
   args: { category: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const q = args.category
-      ? ctx
-          .db
+      ? ctx.db
           .query("topics")
           .withIndex("by_category", (qq) => qq.eq("category", args.category))
       : ctx.db.query("topics").withIndex("by_created_at");
@@ -266,25 +263,36 @@ export const createTopic = mutation({
     // Tambah poin kontribusi pada user
     const newPoints = (user.contributionPoints ?? 0) + 10;
     const newBadges = user.badges ? [...user.badges] : [];
+    const oldBadgeCount = newBadges.length;
+
     if (newPoints >= 100 && !newBadges.includes("Kontributor Aktif")) {
       newBadges.push("Kontributor Aktif");
     }
     if (newPoints >= 500 && !newBadges.includes("Master Diskusi")) {
       newBadges.push("Master Diskusi");
     }
+
     await ctx.db.patch(user._id, {
       contributionPoints: newPoints,
       badges: newBadges,
     });
 
+    // Buat notifikasi untuk badge baru
+    if (newBadges.length > oldBadgeCount) {
+      const newBadge = newBadges[newBadges.length - 1];
+      await ctx.db.insert("notifications", {
+        userId: user._id,
+        type: "badge",
+        message: `Selamat! Anda mendapatkan badge "${newBadge}" karena membuat topik baru`,
+        read: false,
+        createdAt: Date.now(),
+      });
+    }
+
     // Update category count setelah topic dibuat
-    await ctx.scheduler.runAfter(
-      0,
-      "forum:updateCategoryCount" as any,
-      {
-        categoryName: args.category,
-      },
-    );
+    await ctx.scheduler.runAfter(0, "forum:updateCategoryCount" as any, {
+      categoryName: args.category,
+    });
 
     return topicId;
   },
@@ -334,6 +342,18 @@ export const toggleTopicLike = mutation({
         createdAt: Date.now(),
       });
       newLikes = topic.likes + 1;
+
+      // Buat notifikasi untuk pemilik topik (jika bukan like sendiri)
+      if (topic.authorId !== user._id) {
+        await ctx.db.insert("notifications", {
+          userId: topic.authorId,
+          type: "like",
+          message: `${user.name || "Anonymous"} menyukai topik Anda "${topic.title}"`,
+          url: `/forum?topic=${topic._id}`,
+          read: false,
+          createdAt: Date.now(),
+        });
+      }
     }
 
     await ctx.db.patch(args.topicId, {
@@ -351,7 +371,10 @@ export const toggleTopicLike = mutation({
 
 // Mutation untuk upvote/downvote topik
 export const toggleTopicVote = mutation({
-  args: { topicId: v.id("topics"), value: v.union(v.literal(1), v.literal(-1)) },
+  args: {
+    topicId: v.id("topics"),
+    value: v.union(v.literal(1), v.literal(-1)),
+  },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -395,7 +418,10 @@ export const toggleTopicVote = mutation({
       newScore = newScore - existing.value + args.value;
     }
 
-    await ctx.db.patch(args.topicId, { score: newScore, updatedAt: Date.now() });
+    await ctx.db.patch(args.topicId, {
+      score: newScore,
+      updatedAt: Date.now(),
+    });
 
     return newScore;
   },
@@ -459,23 +485,38 @@ export const createComment = mutation({
     // Tambah poin kontribusi pada user
     const newPoints = (user.contributionPoints ?? 0) + 2;
     const newBadges = user.badges ? [...user.badges] : [];
+    const oldBadgeCount = newBadges.length;
+
     if (newPoints >= 100 && !newBadges.includes("Kontributor Aktif")) {
       newBadges.push("Kontributor Aktif");
     }
     if (newPoints >= 500 && !newBadges.includes("Master Diskusi")) {
       newBadges.push("Master Diskusi");
     }
+
     await ctx.db.patch(user._id, {
       contributionPoints: newPoints,
       badges: newBadges,
     });
+
+    // Buat notifikasi untuk badge baru
+    if (newBadges.length > oldBadgeCount) {
+      const newBadge = newBadges[newBadges.length - 1];
+      await ctx.db.insert("notifications", {
+        userId: user._id,
+        type: "badge",
+        message: `Selamat! Anda mendapatkan badge "${newBadge}" karena aktif berkomentar`,
+        read: false,
+        createdAt: Date.now(),
+      });
+    }
 
     const topic = await ctx.db.get(args.topicId);
     if (topic && topic.authorId !== user._id) {
       await ctx.db.insert("notifications", {
         userId: topic.authorId,
         type: "comment",
-        message: `${user.name || "Anonymous"} mengomentari topik Anda \"${topic.title}\"`,
+        message: `${user.name || "Anonymous"} mengomentari topik Anda "${topic.title}"`,
         url: `/forum?topic=${topic._id}`,
         read: false,
         createdAt: now,
@@ -488,7 +529,10 @@ export const createComment = mutation({
 
 // Mutation untuk upvote/downvote komentar
 export const toggleCommentVote = mutation({
-  args: { commentId: v.id("comments"), value: v.union(v.literal(1), v.literal(-1)) },
+  args: {
+    commentId: v.id("comments"),
+    value: v.union(v.literal(1), v.literal(-1)),
+  },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Anda harus login untuk vote");
@@ -526,7 +570,10 @@ export const toggleCommentVote = mutation({
       newScore = newScore - existing.value + args.value;
     }
 
-    await ctx.db.patch(args.commentId, { score: newScore, updatedAt: Date.now() });
+    await ctx.db.patch(args.commentId, {
+      score: newScore,
+      updatedAt: Date.now(),
+    });
     return newScore;
   },
 });
