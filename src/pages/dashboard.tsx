@@ -32,12 +32,46 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 
 export default function Dashboard() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState("overview");
   const userData = useQuery(
     api.users.getUserByToken,
-    user?.id ? { tokenIdentifier: user.id } : "skip",
+    isLoaded && user?.id ? { tokenIdentifier: user.id } : "skip",
   );
+
+  // Show loading if user data is not ready
+  if (!isLoaded || !user || userData === undefined) {
+    return (
+      <div className="min-h-screen flex flex-col neumorphic-bg">
+        <Navbar />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#667eea]"></div>
+            <p className="text-[#86868B]">Memuat dashboard...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Redirect to login if user data is null (shouldn't happen with ProtectedRoute)
+  if (userData === null) {
+    return (
+      <div className="min-h-screen flex flex-col neumorphic-bg">
+        <Navbar />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-[#86868B] mb-4">
+              Terjadi kesalahan saat memuat data pengguna.
+            </p>
+            <a href="/login" className="text-[#667eea] hover:text-[#5a67d8]">
+              Silakan login kembali
+            </a>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const userTopics = useQuery(
     api.forum.getTopicsByAuthor,

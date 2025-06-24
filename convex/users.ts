@@ -6,7 +6,7 @@ export const getUserByToken = query({
   handler: async (ctx, args) => {
     // Get the user's identity from the auth context
     const identity = await ctx.auth.getUserIdentity();
-    
+
     if (!identity) {
       return null;
     }
@@ -14,9 +14,7 @@ export const getUserByToken = query({
     // Check if we've already stored this identity before
     const user = await ctx.db
       .query("users")
-      .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.subject)
-      )
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
       .unique();
 
     if (user !== null) {
@@ -30,69 +28,111 @@ export const getUserByToken = query({
 export const createOrUpdateUser = mutation({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    
+
     if (!identity) {
-      return null;
+      throw new Error("Tidak dapat mengautentikasi pengguna");
     }
+
+    const now = Date.now();
 
     // Check if user exists
     const existingUser = await ctx.db
       .query("users")
-      .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.subject)
-      )
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
       .unique();
 
     if (existingUser) {
-      // Update if needed
-      if (existingUser.name !== identity.name || existingUser.email !== identity.email) {
-        await ctx.db.patch(existingUser._id, {
-          name: identity.name,
-          email: identity.email,
-        });
+      // Update user information and ensure all fields are properly set
+      const updateData: any = {};
+
+      // Update basic info if changed
+      if (existingUser.name !== identity.name) {
+        updateData.name = identity.name;
       }
-      // Initialize fields if missing
-      const patch: any = {};
-      if (existingUser.contributionPoints === undefined) {
-        patch.contributionPoints = 0;
-      }
-      if (existingUser.badges === undefined) {
-        patch.badges = [];
-      }
-      if (existingUser.createdAt === undefined) {
-        patch.createdAt = Date.now();
-      }
-      if (existingUser.reviewCount === undefined) {
-        patch.reviewCount = 0;
-      }
-      if (existingUser.helpfulCount === undefined) {
-        patch.helpfulCount = 0;
-      }
-      if (Object.keys(patch).length > 0) {
-        await ctx.db.patch(existingUser._id, patch);
+      if (existingUser.email !== identity.email) {
+        updateData.email = identity.email;
       }
 
-      // Check membership achievement
-      const badges = new Set(existingUser.badges ?? []);
-      const days = Math.floor((Date.now() - (existingUser.createdAt ?? Date.now())) / 86400000);
-      if (days >= 365) {
-        badges.add("Member setia");
+      // Initialize missing fields
+      if (existingUser.contributionPoints === undefined) {
+        updateData.contributionPoints = 0;
       }
-      await ctx.db.patch(existingUser._id, { badges: Array.from(badges) });
+      if (existingUser.badges === undefined) {
+        updateData.badges = [];
+      }
+      if (existingUser.createdAt === undefined) {
+        updateData.createdAt = now;
+      }
+      if (existingUser.reviewCount === undefined) {
+        updateData.reviewCount = 0;
+      }
+      if (existingUser.helpfulCount === undefined) {
+        updateData.helpfulCount = 0;
+      }
+      if (existingUser.role === undefined) {
+        updateData.role = "buyer";
+      }
+
+      // Update if there are changes
+      if (Object.keys(updateData).length > 0) {
+        await ctx.db.patch(existingUser._id, updateData);
+      }
+
+      // Check and award membership badges
+      const badges = new Set(existingUser.badges ?? []);
+      const userCreatedAt = existingUser.createdAt ?? now;
+      const daysSinceJoining = Math.floor((now - userCreatedAt) / 86400000);
+
+      let badgesUpdated = false;
+      if (daysSinceJoining >= 30 && !badges.has("Member Baru")) {
+        badges.add("Member Baru");
+        badgesUpdated = true;
+      }
+      if (daysSinceJoining >= 365 && !badges.has("Member Setia")) {
+        badges.add("Member Setia");
+        badgesUpdated = true;
+      }
+
+      if (badgesUpdated) {
+        await ctx.db.patch(existingUser._id, { badges: Array.from(badges) });
+      }
+
       return await ctx.db.get(existingUser._id);
     }
 
-    // Create new user
-    const userId = await ctx.db.insert("users", {
-      name: identity.name,
-      email: identity.email,
+    // Create new user with all required fields
+    const newUser = {
+      name: identity.name ?? "Pengguna Baru",
+      email: identity.email ?? "",
       tokenIdentifier: identity.subject,
       role: "buyer",
       contributionPoints: 0,
-      badges: [],
-      createdAt: Date.now(),
+      badges: ["Pendatang Baru"],
+      createdAt: now,
       reviewCount: 0,
       helpfulCount: 0,
+    };
+
+    const userId = await ctx.db.insert("users", newUser);
+
+    // Create initial user profile
+    await ctx.db.insert("userProfiles", {
+      userId: userId,
+      bio: undefined,
+      location: undefined,
+      phone: undefined,
+      whatsapp: undefined,
+      instagram: undefined,
+      twitter: undefined,
+      website: undefined,
+      avatar: undefined,
+      isVerified: false,
+      rating: 0,
+      totalReviews: 0,
+      totalSales: 0,
+      totalPurchases: 0,
+      joinedAt: now,
+      lastActive: now,
     });
 
     return await ctx.db.get(userId);
@@ -176,4 +216,3 @@ export const updateUserRole = mutation({
     return true;
   },
 });
-

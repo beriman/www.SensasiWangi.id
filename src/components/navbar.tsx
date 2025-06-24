@@ -30,9 +30,16 @@ export function Navbar() {
   const createOrUpdateUser = useMutation(api.users.createOrUpdateUser);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const handleLogout = () => {
-    signOut();
-    setShowLogoutConfirm(false);
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      setShowLogoutConfirm(false);
+      // Redirect to home page after logout
+      navigate("/");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      setShowLogoutConfirm(false);
+    }
   };
 
   const handleDashboard = () => {
