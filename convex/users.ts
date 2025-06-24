@@ -59,6 +59,15 @@ export const createOrUpdateUser = mutation({
       if (existingUser.badges === undefined) {
         patch.badges = [];
       }
+      if (existingUser.experiencePoints === undefined) {
+        patch.experiencePoints = 0;
+      }
+      if (existingUser.level === undefined) {
+        patch.level = 1;
+      }
+      if (existingUser.achievements === undefined) {
+        patch.achievements = [];
+      }
       if (existingUser.createdAt === undefined) {
         patch.createdAt = Date.now();
       }
@@ -90,6 +99,9 @@ export const createOrUpdateUser = mutation({
       role: "buyer",
       contributionPoints: 0,
       badges: [],
+      experiencePoints: 0,
+      level: 1,
+      achievements: [],
       createdAt: Date.now(),
       reviewCount: 0,
       helpfulCount: 0,
@@ -183,3 +195,22 @@ export const getAllUsers = query({
   },
 });
 
+export const getUserProfile = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) {
+      return null;
+    }
+
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", q => q.eq("userId", args.userId))
+      .unique();
+
+    return {
+      ...user,
+      profile: profile || null,
+    };
+  },
+});

@@ -221,6 +221,7 @@ export const createProduct = mutation({
     shippingOptions: v.array(v.string()),
     tags: v.array(v.string()),
     isNegotiable: v.boolean(),
+    stock: v.number(), // Tambah parameter stok
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -264,6 +265,7 @@ export const createProduct = mutation({
       likes: 0,
       sambatCount: 0,
       isNegotiable: args.isNegotiable,
+      stock: args.stock, // Set nilai stok
       createdAt: now,
       updatedAt: now,
     });
@@ -453,6 +455,11 @@ export const createOrder = mutation({
       throw new Error("Produk tidak tersedia");
     }
 
+    // Cek stok tersedia
+    if (product.stock < 1) {
+      throw new Error("Produk sudah habis");
+    }
+
     if (product.sellerId === user._id) {
       throw new Error("Anda tidak bisa membeli produk sendiri");
     }
@@ -496,9 +503,10 @@ export const createOrder = mutation({
       updatedAt: now,
     });
 
-    // Update status produk menjadi sold (sementara pending)
+    // Update status dan kurangi stok
     await ctx.db.patch(args.productId, {
       status: "sold",
+      stock: product.stock - 1, // Kurangi stok
       updatedAt: now,
     });
 
@@ -533,12 +541,16 @@ export const updatePaymentStatus = mutation({
       }
     }
 
-    // Jika payment failed, kembalikan status produk ke active
+    // Jika payment failed, kembalikan status dan stok produk
     if (args.paymentStatus === "failed") {
-      await ctx.db.patch(order.productId, {
-        status: "active",
-        updatedAt: Date.now(),
-      });
+      const product = await ctx.db.get(order.productId);
+      if (product) {
+        await ctx.db.patch(order.productId, {
+          status: "active",
+          stock: (product.stock || 0) + 1, // Kembalikan stok
+          updatedAt: Date.now(),
+        });
+      }
     }
   },
 });

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "git": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-git"],
+      "cwd": "."
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem", "./"]
+    }
+  }
+}

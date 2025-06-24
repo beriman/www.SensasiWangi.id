@@ -10,6 +10,9 @@ export default defineSchema({
     role: v.string(),
     contributionPoints: v.number(),
     badges: v.array(v.string()),
+    experiencePoints: v.number(), // Baru: Poin pengalaman untuk leveling
+    level: v.number(),            // Baru: Level pengguna
+    achievements: v.array(v.id("achievements")), // Baru: Prestasi yang diraih
     createdAt: v.number(),
     reviewCount: v.number(),
     helpfulCount: v.number(),
@@ -111,6 +114,7 @@ export default defineSchema({
     title: v.string(),
     description: v.string(),
     price: v.number(),
+    stock: v.number(), // Tambah field stok
     originalPrice: v.optional(v.number()),
     category: v.string(),
     condition: v.string(), // "new", "like-new", "good", "fair"
@@ -309,6 +313,16 @@ export default defineSchema({
     totalPurchases: v.number(),
     joinedAt: v.number(),
     lastActive: v.number(),
+    privacySettings: v.optional(v.object({ // Baru: Pengaturan privasi
+      showEmail: v.boolean(),
+      showPhone: v.boolean(),
+      showActivity: v.boolean(),
+    })),
+    notificationPreferences: v.optional(v.object({ // Baru: Preferensi notifikasi
+      email: v.boolean(),
+      push: v.boolean(),
+      inApp: v.boolean(),
+    })),
   })
     .index("by_user", ["userId"])
     .index("by_rating", ["rating"])
