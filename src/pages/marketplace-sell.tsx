@@ -89,6 +89,7 @@ function MarketplaceSellContent() {
     condition: "",
     description: "",
     price: "",
+    stock: "",
     originalPrice: "",
     size: "",
     location: "",
@@ -159,6 +160,9 @@ function MarketplaceSellContent() {
     if (!formData.price || parseInt(formData.price) <= 0) {
       newErrors.price = "Harga wajib diisi dan harus lebih dari 0";
     }
+    if (!formData.stock || parseInt(formData.stock) <= 0) {
+      newErrors.stock = "Stok wajib diisi dan harus lebih dari 0";
+    }
     if (!formData.location.trim()) newErrors.location = "Lokasi wajib diisi";
     if (formData.shippingMethods.length === 0) {
       newErrors.shippingMethods = "Pilih minimal satu metode pengiriman";
@@ -190,6 +194,7 @@ function MarketplaceSellContent() {
         condition: formData.condition,
         description: formData.description.trim(),
         price: parseInt(formData.price),
+        stock: parseInt(formData.stock),
         originalPrice: formData.originalPrice
           ? parseInt(formData.originalPrice)
           : undefined,
@@ -550,6 +555,31 @@ function MarketplaceSellContent() {
                           </div>
                         </div>
 
+                        <div>
+                          <Label
+                            htmlFor="stock"
+                            className="text-[#2d3748] font-medium"
+                          >
+                            Stok Tersedia *
+                          </Label>
+                          <Input
+                            id="stock"
+                            type="number"
+                            placeholder="0"
+                            value={formData.stock}
+                            onChange={(e) =>
+                              handleInputChange("stock", e.target.value)
+                            }
+                            className={`neumorphic-input border-0 mt-1 ${errors.stock ? "ring-2 ring-red-500" : ""}`}
+                          />
+                          {errors.stock && (
+                            <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                              <AlertCircle className="h-3 w-3" />
+                              {errors.stock}
+                            </p>
+                          )}
+                        </div>
+
                         <div className="flex items-center space-x-2">
                           <Switch
                             id="negotiable"
@@ -772,9 +802,13 @@ function MarketplaceSellContent() {
                         <span className="text-sm">Info Dasar Produk</span>
                       </div>
                       <div
-                        className={`flex items-center gap-2 ${formData.price && formData.location ? "text-green-600" : "text-[#718096]"}`}
+                        className={`flex items-center gap-2 ${
+                          formData.price && formData.location && formData.stock
+                            ? "text-green-600"
+                            : "text-[#718096]"
+                        }`}
                       >
-                        {formData.price && formData.location ? (
+                        {formData.price && formData.location && formData.stock ? (
                           <CheckCircle className="h-4 w-4" />
                         ) : (
                           <div className="h-4 w-4 rounded-full border-2 border-[#718096]" />
