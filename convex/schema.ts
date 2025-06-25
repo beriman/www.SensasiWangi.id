@@ -305,6 +305,7 @@ export default defineSchema({
     instagram: v.optional(v.string()),
     twitter: v.optional(v.string()),
     website: v.optional(v.string()),
+    interests: v.optional(v.array(v.string())),
     avatar: v.optional(v.string()),
     isVerified: v.boolean(),
     rating: v.number(),

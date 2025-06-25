@@ -39,6 +39,19 @@ const FEATURES = [
   },
 ] as const;
 
+const STATS = [
+  { icon: <Users className="h-6 w-6" />, label: "Members", value: "5k+" },
+  { icon: <MessageCircle className="h-6 w-6" />, label: "Posts", value: "10k+" },
+  { icon: <TrendingUp className="h-6 w-6" />, label: "Reviews", value: "3k+" },
+] as const;
+
+const MEMBERSHIP = [
+  { feature: "Access Forum", buyer: true, business: true },
+  { feature: "Sell Products", buyer: false, business: true },
+  { feature: "View Analytics", buyer: false, business: true },
+  { feature: "Earn Badges", buyer: true, business: true },
+] as const;
+
 const TESTIMONIALS = [
   {
     content:
@@ -188,8 +201,82 @@ function App() {
             </div>
           </div>
           {/* Features Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 py-12">
+            {FEATURES.map((f) => (
+              <div key={f.titleKey} className="neumorphic-card p-6 text-center">
+                <div className="text-[#667eea] mb-4 mx-auto">{f.icon}</div>
+                <h3 className="text-lg font-semibold text-[#2d3748] mb-2">
+                  {t(f.titleKey)}
+                </h3>
+                <p className="text-[#718096]">{t(f.descKey)}</p>
+              </div>
+            ))}
+          </div>
+
           {/* Stats Section */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 py-12">
+            {STATS.map((s) => (
+              <div key={s.label} className="neumorphic-card p-6 text-center">
+                <div className="text-[#667eea] mb-2 mx-auto">{s.icon}</div>
+                <div className="text-2xl font-bold text-[#2d3748]">{s.value}</div>
+                <p className="text-[#718096]">{s.label}</p>
+              </div>
+            ))}
+          </div>
+
           {/* Testimonials Section */}
+          <div className="py-16">
+            <h2 className="text-3xl font-bold text-center text-[#2d3748] mb-10">
+              {t('home.testimonials')}
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              {TESTIMONIALS.map((tst, i) => (
+                <div key={i} className="neumorphic-card p-8">
+                  <p className="text-lg text-[#4a5568] mb-6">"{tst.content}"</p>
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={tst.image}
+                      alt={tst.author}
+                      className="h-12 w-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="font-semibold text-[#2d3748]">{tst.author}</p>
+                      <p className="text-sm text-[#718096]">
+                        {tst.role}, {tst.company}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Membership Comparison */}
+          <div className="py-20">
+            <h2 className="text-3xl font-bold text-center text-[#2d3748] mb-8">
+              {t('home.membership.heading')}
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left">
+                <thead>
+                  <tr>
+                    <th className="py-3" />
+                    <th className="py-3 text-center">{t('home.membership.buyer')}</th>
+                    <th className="py-3 text-center">{t('home.membership.business')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {MEMBERSHIP.map((m) => (
+                    <tr key={m.feature} className="border-t">
+                      <td className="py-3 font-medium text-[#2d3748]">{m.feature}</td>
+                      <td className="py-3 text-center">{m.buyer ? '✓' : '-'}</td>
+                      <td className="py-3 text-center">{m.business ? '✓' : '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
           {/* CTA Section */}
         </div>
