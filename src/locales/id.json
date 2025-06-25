@@ -40,6 +40,12 @@
         "title": "Database",
         "desc": "Jelajahi database parfum lengkap dengan catatan dan komposisi"
       }
+    },
+    "testimonials": "Testimoni",
+    "membership": {
+      "heading": "Perbandingan Keanggotaan",
+      "buyer": "Pembeli",
+      "business": "Bisnis"
     }
   },
   "database": {

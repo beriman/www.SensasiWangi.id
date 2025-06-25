@@ -28,7 +28,13 @@ export const getUserByToken = query({
 });
 
 export const createOrUpdateUser = mutation({
-  handler: async (ctx) => {
+  args: {
+    role: v.optional(v.string()),
+    displayName: v.optional(v.string()),
+    interests: v.optional(v.array(v.string())),
+    location: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     
     if (!identity) {
@@ -45,11 +51,20 @@ export const createOrUpdateUser = mutation({
 
     if (existingUser) {
       // Update if needed
-      if (existingUser.name !== identity.name || existingUser.email !== identity.email) {
-        await ctx.db.patch(existingUser._id, {
-          name: identity.name,
-          email: identity.email,
-        });
+      const patchUser: any = {};
+      if (args.displayName && existingUser.name !== args.displayName) {
+        patchUser.name = args.displayName;
+      } else if (existingUser.name !== identity.name) {
+        patchUser.name = identity.name;
+      }
+      if (existingUser.email !== identity.email) {
+        patchUser.email = identity.email;
+      }
+      if (args.role && existingUser.role !== args.role) {
+        patchUser.role = args.role;
+      }
+      if (Object.keys(patchUser).length > 0) {
+        await ctx.db.patch(existingUser._id, patchUser);
       }
       // Initialize fields if missing
       const patch: any = {};
@@ -88,15 +103,48 @@ export const createOrUpdateUser = mutation({
         badges.add("Member setia");
       }
       await ctx.db.patch(existingUser._id, { badges: Array.from(badges) });
+
+      if (args.location || args.interests) {
+        const existingProfile = await ctx.db
+          .query("userProfiles")
+          .withIndex("by_user", (q) => q.eq("userId", existingUser._id))
+          .unique();
+        const profilePatch: any = { lastActive: Date.now() };
+        if (args.location) profilePatch.location = args.location;
+        if (args.interests) profilePatch.interests = args.interests;
+        if (existingProfile) {
+          await ctx.db.patch(existingProfile._id, profilePatch);
+        } else {
+          await ctx.db.insert("userProfiles", {
+            userId: existingUser._id,
+            bio: undefined,
+            location: args.location,
+            interests: args.interests ?? [],
+            phone: undefined,
+            whatsapp: undefined,
+            instagram: undefined,
+            twitter: undefined,
+            website: undefined,
+            avatar: null,
+            isVerified: false,
+            rating: 0,
+            totalReviews: 0,
+            totalSales: 0,
+            totalPurchases: 0,
+            joinedAt: Date.now(),
+            lastActive: Date.now(),
+          });
+        }
+      }
       return await ctx.db.get(existingUser._id);
     }
 
     // Create new user
     const userId = await ctx.db.insert("users", {
-      name: identity.name,
+      name: args.displayName ?? identity.name,
       email: identity.email,
       tokenIdentifier: identity.subject,
-      role: "buyer",
+      role: args.role ?? "buyer",
       contributionPoints: 0,
       badges: [],
       experiencePoints: 0,
@@ -105,6 +153,25 @@ export const createOrUpdateUser = mutation({
       createdAt: Date.now(),
       reviewCount: 0,
       helpfulCount: 0,
+    });
+    await ctx.db.insert("userProfiles", {
+      userId,
+      bio: undefined,
+      location: args.location,
+      interests: args.interests ?? [],
+      phone: undefined,
+      whatsapp: undefined,
+      instagram: undefined,
+      twitter: undefined,
+      website: undefined,
+      avatar: null,
+      isVerified: false,
+      rating: 0,
+      totalReviews: 0,
+      totalSales: 0,
+      totalPurchases: 0,
+      joinedAt: Date.now(),
+      lastActive: Date.now(),
     });
 
     return await ctx.db.get(userId);
@@ -115,6 +182,7 @@ export const updateUserProfile = mutation({
   args: {
     bio: v.optional(v.string()),
     location: v.optional(v.string()),
+    interests: v.optional(v.array(v.string())),
     phone: v.optional(v.string()),
     whatsapp: v.optional(v.string()),
     instagram: v.optional(v.string()),
@@ -141,6 +209,7 @@ export const updateUserProfile = mutation({
     const profilePatch = {
       bio: args.bio,
       location: args.location,
+      interests: args.interests,
       phone: args.phone,
       whatsapp: args.whatsapp,
       instagram: args.instagram,

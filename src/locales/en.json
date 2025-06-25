@@ -40,6 +40,12 @@
         "title": "Database",
         "desc": "Explore a full perfume database with notes and compositions"
       }
+    },
+    "testimonials": "Testimonials",
+    "membership": {
+      "heading": "Membership Comparison",
+      "buyer": "Buyer",
+      "business": "Business"
     }
   },
   "database": {
