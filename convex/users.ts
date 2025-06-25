@@ -188,6 +188,7 @@ export const updateUserProfile = mutation({
     instagram: v.optional(v.string()),
     twitter: v.optional(v.string()),
     website: v.optional(v.string()),
+    avatar: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -206,17 +207,18 @@ export const updateUserProfile = mutation({
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .unique();
     const now = Date.now();
-    const profilePatch = {
-      bio: args.bio,
-      location: args.location,
-      interests: args.interests,
-      phone: args.phone,
-      whatsapp: args.whatsapp,
-      instagram: args.instagram,
-      twitter: args.twitter,
-      website: args.website,
-      lastActive: now,
-    } as any;
+  const profilePatch = {
+    bio: args.bio,
+    location: args.location,
+    interests: args.interests,
+    phone: args.phone,
+    whatsapp: args.whatsapp,
+    instagram: args.instagram,
+    twitter: args.twitter,
+    website: args.website,
+    avatar: args.avatar,
+    lastActive: now,
+  } as any;
     if (existing) {
       await ctx.db.patch(existing._id, profilePatch);
       return existing._id;
@@ -224,7 +226,7 @@ export const updateUserProfile = mutation({
     return await ctx.db.insert("userProfiles", {
       userId: user._id,
       ...profilePatch,
-      avatar: null,
+      avatar: args.avatar ?? null,
       isVerified: false,
       rating: 0,
       totalReviews: 0,
