@@ -66,6 +66,8 @@ interface Topic {
   score: number;
   isHot: boolean;
   isPinned: boolean;
+  isLocked: boolean;
+  solvedCommentId?: Id<"comments"> | null;
   hasVideo: boolean;
   hasImages: boolean;
   tags: string[];
@@ -146,6 +148,8 @@ export default function Forum() {
   const toggleTopicVoteMutation = useMutation(api.forum.toggleTopicVote);
   const toggleBookmarkMutation = useMutation(api.bookmarks.toggleBookmark);
   const togglePinMutation = useMutation(api.forum.togglePinTopic);
+  const toggleLockMutation = useMutation(api.forum.toggleLockTopic);
+  const markSolvedMutation = useMutation(api.forum.markTopicSolved);
   const incrementViewsMutation = useMutation(api.forum.incrementTopicViews);
   const createCommentMutation = useMutation(api.forum.createComment);
   const toggleCommentVoteMutation = useMutation(api.forum.toggleCommentVote);
@@ -361,6 +365,26 @@ export default function Forum() {
     }
   };
 
+  const handleToggleLock = async (topicId: Id<"topics">) => {
+    if (!user) {
+      toast({
+        title: "Login diperlukan",
+        description: "Anda harus login untuk lock topik!",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      const locked = await toggleLockMutation({ topicId });
+      toast({ title: locked ? "Topik dikunci" : "Kunci dibuka" });
+      if (selectedTopic && selectedTopic._id === topicId) {
+        setSelectedTopic({ ...selectedTopic, isLocked: locked });
+      }
+    } catch (error) {
+      console.error("Error toggling lock:", error);
+    }
+  };
+
   const handleTopicClick = async (topic: Topic) => {
     // Increment view count
     try {
@@ -431,6 +455,17 @@ export default function Forum() {
       );
     } catch (error) {
       console.error("Error toggling comment vote:", error);
+    }
+  };
+
+  const handleMarkSolved = async (commentId: Id<"comments">) => {
+    if (!user || !selectedTopic) return;
+    try {
+      await markSolvedMutation({ topicId: selectedTopic._id, commentId });
+      setSelectedTopic({ ...selectedTopic, solvedCommentId: commentId });
+      toast({ title: "Topik ditandai selesai" });
+    } catch (err) {
+      console.error("Error marking solved", err);
     }
   };
 
@@ -885,6 +920,14 @@ export default function Forum() {
                                       🔥 Hot
                                     </Badge>
                                   )}
+                                  {topic.solvedCommentId && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs text-emerald-600 border-emerald-200"
+                                    >
+                                      ✔ Solved
+                                    </Badge>
+                                  )}
                                   {topic.hasVideo && (
                                     <Badge
                                       variant="outline"
@@ -1017,6 +1060,14 @@ export default function Forum() {
                                     className="text-xs text-orange-600 border-orange-200"
                                   >
                                     🔥 Hot
+                                  </Badge>
+                                )}
+                                {topic.solvedCommentId && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs text-emerald-600 border-emerald-200"
+                                  >
+                                    ✔ Solved
                                   </Badge>
                                 )}
                                 {topic.hasVideo && (
@@ -1188,6 +1239,14 @@ export default function Forum() {
                               🔥 Hot
                             </Badge>
                           )}
+                          {selectedTopic.solvedCommentId && (
+                            <Badge
+                              variant="outline"
+                              className="text-xs text-emerald-600 border-emerald-200"
+                            >
+                              ✔ Solved
+                            </Badge>
+                          )}
                         </div>
                         <DialogTitle className="text-2xl font-bold text-[#2d3748] text-left">
                           {selectedTopic.title}
@@ -1310,6 +1369,18 @@ export default function Forum() {
                                 {selectedTopic.isPinned ? "Unpin" : "Pin"}
                               </Button>
                             )}
+                          {currentUser &&
+                            selectedTopic.authorId === currentUser._id && (
+                              <Button
+                                onClick={() =>
+                                  handleToggleLock(selectedTopic._id)
+                                }
+                                variant="outline"
+                                className="neumorphic-button-sm"
+                              >
+                                {selectedTopic.isLocked ? "Unlock" : "Lock"}
+                              </Button>
+                            )}
                         </div>
 
                         {/* Comments Section Placeholder */}
@@ -1336,7 +1407,13 @@ export default function Forum() {
                                         .charAt(0)
                                         .toUpperCase()}
                                     </div>
-                                    <div className="flex-1">
+                                    <div
+                                      className={`flex-1 ${
+                                        selectedTopic.solvedCommentId === comment._id
+                                          ? "bg-emerald-50"
+                                          : ""
+                                      }`}
+                                    >
                                       <div className="flex items-center gap-2 mb-1">
                                         <span className="font-medium text-[#2d3748]">
                                           {comment.authorName}
@@ -1344,12 +1421,20 @@ export default function Forum() {
                                         <span className="text-xs text-[#718096]">
                                           {formatDate(comment.createdAt)}
                                         </span>
+                                        {selectedTopic.solvedCommentId === comment._id && (
+                                          <Badge
+                                            variant="outline"
+                                            className="text-xs text-emerald-600 border-emerald-200"
+                                          >
+                                            ✔ Solved
+                                          </Badge>
+                                        )}
                                       </div>
                                       <p className="text-[#2d3748]">
                                         {comment.content}
                                       </p>
                                       <div className="flex items-center gap-2 text-xs mt-2">
-                                        <button
+                                      <button
                                           onClick={() => handleVoteComment(comment._id, 1)}
                                           className="hover:text-green-600"
                                         >
@@ -1362,6 +1447,16 @@ export default function Forum() {
                                         >
                                           Downvote
                                         </button>
+                                        {currentUser &&
+                                          selectedTopic?.authorId === currentUser._id &&
+                                          !selectedTopic.solvedCommentId && (
+                                            <button
+                                              onClick={() => handleMarkSolved(comment._id)}
+                                              className="hover:text-emerald-600"
+                                            >
+                                              Tandai Solved
+                                            </button>
+                                          )}
                                       </div>
                                     </div>
                                   </div>
@@ -1370,6 +1465,9 @@ export default function Forum() {
                             </div>
                           )}
 
+                          {selectedTopic.isLocked && (
+                            <p className="text-sm text-red-600">Diskusi telah dikunci.</p>
+                          )}
                           {/* Reply Form */}
                           <div className="neumorphic-card-inset p-4">
                             <h4 className="font-medium text-[#2d3748] mb-3">
@@ -1382,10 +1480,10 @@ export default function Forum() {
                                 setNewCommentContent(e.target.value)
                               }
                               className="neumorphic-input border-0 mb-3"
-                            />
+                              />
                             <Button
                               onClick={handleCreateComment}
-                              disabled={!user || !newCommentContent.trim()}
+                              disabled={!user || !newCommentContent.trim() || selectedTopic?.isLocked}
                               className="neumorphic-button bg-transparent text-[#2d3748] font-semibold border-0 shadow-none disabled:opacity-50"
                             >
                               <Send className="h-4 w-4 mr-2" />
