@@ -43,6 +43,8 @@ export default defineSchema({
     score: v.number(),
     isHot: v.boolean(),
     isPinned: v.boolean(),
+    isLocked: v.boolean(),
+    solvedCommentId: v.optional(v.id("comments")),
     hasVideo: v.boolean(),
     hasImages: v.boolean(),
     tags: v.array(v.string()),
@@ -109,6 +111,16 @@ export default defineSchema({
     .index("by_comment", ["commentId"])
     .index("by_user", ["userId"])
     .index("by_comment_user", ["commentId", "userId"]),
+
+  topicReports: defineTable({
+    topicId: v.id("topics"),
+    reporterId: v.id("users"),
+    reason: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_topic", ["topicId"])
+    .index("by_reporter", ["reporterId"])
+    .index("by_topic_reporter", ["topicId", "reporterId"]),
 
   products: defineTable({
     title: v.string(),

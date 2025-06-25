@@ -52,6 +52,16 @@ export const getTopics = query({
 
     let filteredPage = topics.page;
 
+    if (args.searchQuery) {
+      const lower = args.searchQuery.toLowerCase();
+      filteredPage = filteredPage.filter(
+        (topic) =>
+          topic.tags.some((t) => t.toLowerCase().includes(lower)) ||
+          topic.title.toLowerCase().includes(lower) ||
+          topic.content.toLowerCase().includes(lower),
+      );
+    }
+
     // Filter berdasarkan tag jika ada
     if (args.tag) {
       filteredPage = filteredPage.filter((topic) =>
@@ -102,6 +112,89 @@ export const togglePinTopic = mutation({
   },
 });
 
+// Mutation untuk lock/unlock topik
+export const toggleLockTopic = mutation({
+  args: { topicId: v.id("topics") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+
+    if (!user) throw new Error("User tidak ditemukan");
+
+    const topic = await ctx.db.get(args.topicId);
+    if (!topic) throw new Error("Topik tidak ditemukan");
+
+    if (topic.authorId !== user._id && user.role !== "admin") {
+      throw new Error("Tidak memiliki izin");
+    }
+
+    await ctx.db.patch(args.topicId, {
+      isLocked: !topic.isLocked,
+      updatedAt: Date.now(),
+    });
+
+    return !topic.isLocked;
+  },
+});
+
+// Mutation untuk melaporkan topik
+export const reportTopic = mutation({
+  args: { topicId: v.id("topics"), reason: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    await ctx.db.insert("topicReports", {
+      topicId: args.topicId,
+      reporterId: user._id,
+      reason: args.reason,
+      createdAt: Date.now(),
+    });
+
+    return true;
+  },
+});
+
+// Mutation untuk menandai topik sebagai solved
+export const markTopicSolved = mutation({
+  args: { topicId: v.id("topics"), commentId: v.id("comments") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    const topic = await ctx.db.get(args.topicId);
+    if (!topic) throw new Error("Topik tidak ditemukan");
+
+    if (topic.authorId !== user._id) {
+      throw new Error("Bukan pemilik topik");
+    }
+
+    await ctx.db.patch(args.topicId, {
+      solvedCommentId: args.commentId,
+      updatedAt: Date.now(),
+    });
+
+    return true;
+  },
+});
+
 // Query untuk mendapatkan semua topik yang dipin
 export const getPinnedTopics = query({
   args: { category: v.optional(v.string()) },
@@ -116,6 +209,24 @@ export const getPinnedTopics = query({
       .filter((qq) => qq.eq(qq.field("isPinned"), true))
       .order("desc")
       .collect();
+  },
+});
+
+// Query untuk mendapatkan topik yang hot
+export const getHotTopics = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const topics = await ctx.db
+      .query("topics")
+      .withIndex("by_likes")
+      .order("desc")
+      .collect();
+
+    const hot = topics
+      .filter((t) => t.isHot)
+      .slice(0, args.limit ?? 10);
+
+    return hot;
   },
 });
 
@@ -251,6 +362,8 @@ export const createTopic = mutation({
       score: 0,
       isHot: false,
       isPinned: false,
+      isLocked: false,
+      solvedCommentId: undefined,
       hasVideo: args.hasVideo,
       hasImages: args.hasImages,
       tags: args.tags,
@@ -469,6 +582,14 @@ export const createComment = mutation({
       throw new Error("User tidak ditemukan");
     }
 
+    const topic = await ctx.db.get(args.topicId);
+    if (!topic) {
+      throw new Error("Topik tidak ditemukan");
+    }
+    if (topic.isLocked) {
+      throw new Error("Diskusi telah dikunci");
+    }
+
     const now = Date.now();
 
     const commentId = await ctx.db.insert("comments", {
@@ -511,7 +632,6 @@ export const createComment = mutation({
       });
     }
 
-    const topic = await ctx.db.get(args.topicId);
     if (topic && topic.authorId !== user._id) {
       await ctx.db.insert("notifications", {
         userId: topic.authorId,
