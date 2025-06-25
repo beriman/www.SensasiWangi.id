@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
@@ -59,123 +61,7 @@ const SORT_OPTIONS = [
   { value: "price_high", label: "Harga Tertinggi" },
 ];
 
-// Sample course data
-const SAMPLE_COURSES = [
-  {
-    id: 1,
-    title: "Dasar-Dasar Parfumeri: Memahami Piramida Aroma",
-    instructor: "Master Perfumer Jean-Claude",
-    category: "Dasar Parfum",
-    level: "beginner",
-    duration: "4 jam",
-    students: 1250,
-    rating: 4.8,
-    reviews: 324,
-    price: 299000,
-    originalPrice: 399000,
-    image:
-      "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400&q=80",
-    description:
-      "Pelajari konsep fundamental dalam parfumeri, mulai dari top notes hingga base notes.",
-    isPopular: true,
-    isBestseller: false,
-  },
-  {
-    id: 2,
-    title: "Teknik Blending Profesional untuk Parfum Niche",
-    instructor: "Perfumer Sarah Martinez",
-    category: "Teknik Blending",
-    level: "intermediate",
-    duration: "6 jam",
-    students: 890,
-    rating: 4.9,
-    reviews: 156,
-    price: 599000,
-    originalPrice: null,
-    image:
-      "https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=400&q=80",
-    description:
-      "Kuasai teknik blending advanced untuk menciptakan parfum niche yang unik dan berkualitas tinggi.",
-    isPopular: false,
-    isBestseller: true,
-  },
-  {
-    id: 3,
-    title: "Analisis Molekul Aroma dan Komposisi Kimia",
-    instructor: "Dr. Ahmad Perfume Lab",
-    category: "Analisis Aroma",
-    level: "advanced",
-    duration: "8 jam",
-    students: 456,
-    rating: 4.7,
-    reviews: 89,
-    price: 899000,
-    originalPrice: null,
-    image:
-      "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=400&q=80",
-    description:
-      "Memahami struktur molekul aroma dan cara menganalisis komposisi parfum secara ilmiah.",
-    isPopular: false,
-    isBestseller: false,
-  },
-  {
-    id: 4,
-    title: "Membangun Brand Parfum dari Nol",
-    instructor: "Entrepreneur Lisa Chen",
-    category: "Bisnis Parfum",
-    level: "intermediate",
-    duration: "5 jam",
-    students: 723,
-    rating: 4.6,
-    reviews: 201,
-    price: 449000,
-    originalPrice: 599000,
-    image:
-      "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&q=80",
-    description:
-      "Panduan lengkap memulai bisnis parfum, dari konsep hingga pemasaran.",
-    isPopular: true,
-    isBestseller: false,
-  },
-  {
-    id: 5,
-    title: "Parfum Komersial: Formula dan Produksi Massal",
-    instructor: "Industry Expert Robert Kim",
-    category: "Parfum Komersial",
-    level: "advanced",
-    duration: "7 jam",
-    students: 334,
-    rating: 4.5,
-    reviews: 67,
-    price: 799000,
-    originalPrice: null,
-    image:
-      "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&q=80",
-    description:
-      "Pelajari cara mengembangkan formula parfum untuk produksi komersial skala besar.",
-    isPopular: false,
-    isBestseller: false,
-  },
-  {
-    id: 6,
-    title: "Kreativitas dalam Parfumeri: Menciptakan Signature Scent",
-    instructor: "Creative Director Maya Sari",
-    category: "Dasar Parfum",
-    level: "beginner",
-    duration: "3 jam",
-    students: 1567,
-    rating: 4.9,
-    reviews: 445,
-    price: 199000,
-    originalPrice: 299000,
-    image:
-      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80",
-    description:
-      "Temukan kreativitas Anda dalam menciptakan parfum signature yang mencerminkan kepribadian.",
-    isPopular: true,
-    isBestseller: true,
-  },
-];
+// Data diambil dari database melalui Convex
 
 function CourseCard({ course }: { course: any }) {
   const formatPrice = (price: number) => {
@@ -289,6 +175,7 @@ function CourseCard({ course }: { course: any }) {
 }
 
 export default function Kursus() {
+  const courses = useQuery(api.courses.listCourses);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
@@ -296,7 +183,7 @@ export default function Kursus() {
   const [showFilters, setShowFilters] = useState(false);
 
   // Filter courses based on search and filters
-  const filteredCourses = SAMPLE_COURSES.filter((course) => {
+  const filteredCourses = (courses ?? []).filter((course: any) => {
     const matchesSearch =
       course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       course.instructor.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -320,7 +207,7 @@ export default function Kursus() {
       case "price_high":
         return b.price - a.price;
       default:
-        return b.id - a.id; // newest first
+        return b.createdAt - a.createdAt; // newest first
     }
   });
 
@@ -494,8 +381,8 @@ export default function Kursus() {
 
           {/* Courses Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {sortedCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+            {sortedCourses.map((course: any) => (
+              <CourseCard key={course._id} course={course} />
             ))}
           </div>
 
