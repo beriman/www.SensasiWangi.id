@@ -54,7 +54,7 @@ export function Navbar() {
 
   useEffect(() => {
     if (user) {
-      createOrUpdateUser();
+      createOrUpdateUser({});
     }
   }, [user, createOrUpdateUser]);
 
