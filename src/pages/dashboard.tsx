@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserStats } from "@/components/UserStats";
 import { ActivityMetrics } from "@/components/ActivityMetrics";
+import NotificationCenter from "@/components/notification-center";
 import {
   ArrowRight,
   User,
@@ -189,6 +190,9 @@ export default function Dashboard() {
                   </div>
                 </Link>
               </div>
+
+              {/* Notification Center */}
+              <NotificationCenter />
             </TabsContent>
 
             <TabsContent value="marketplace" className="space-y-8">

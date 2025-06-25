@@ -113,6 +113,13 @@ export const createOrUpdateUser = mutation({
         if (args.location) profilePatch.location = args.location;
         if (args.interests) profilePatch.interests = args.interests;
         if (existingProfile) {
+          if (existingProfile.notificationPreferences === undefined) {
+            profilePatch.notificationPreferences = {
+              email: true,
+              push: true,
+              inApp: true,
+            };
+          }
           await ctx.db.patch(existingProfile._id, profilePatch);
         } else {
           await ctx.db.insert("userProfiles", {
@@ -133,6 +140,11 @@ export const createOrUpdateUser = mutation({
             totalPurchases: 0,
             joinedAt: Date.now(),
             lastActive: Date.now(),
+            notificationPreferences: {
+              email: true,
+              push: true,
+              inApp: true,
+            },
           });
         }
       }
@@ -172,6 +184,11 @@ export const createOrUpdateUser = mutation({
       totalPurchases: 0,
       joinedAt: Date.now(),
       lastActive: Date.now(),
+      notificationPreferences: {
+        email: true,
+        push: true,
+        inApp: true,
+      },
     });
 
     return await ctx.db.get(userId);
@@ -188,6 +205,13 @@ export const updateUserProfile = mutation({
     instagram: v.optional(v.string()),
     twitter: v.optional(v.string()),
     website: v.optional(v.string()),
+    notificationPreferences: v.optional(
+      v.object({
+        email: v.boolean(),
+        push: v.boolean(),
+        inApp: v.boolean(),
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -216,6 +240,9 @@ export const updateUserProfile = mutation({
       twitter: args.twitter,
       website: args.website,
       lastActive: now,
+      ...(args.notificationPreferences
+        ? { notificationPreferences: args.notificationPreferences }
+        : {}),
     } as any;
     if (existing) {
       await ctx.db.patch(existing._id, profilePatch);
@@ -231,6 +258,11 @@ export const updateUserProfile = mutation({
       totalSales: 0,
       totalPurchases: 0,
       joinedAt: now,
+      notificationPreferences: args.notificationPreferences ?? {
+        email: true,
+        push: true,
+        inApp: true,
+      },
     });
   },
 });
