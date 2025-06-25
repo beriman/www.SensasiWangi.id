@@ -108,7 +108,7 @@ function MarketplaceSellContent() {
   // Auto-create user if not exists
   useEffect(() => {
     if (user && !userData) {
-      createOrUpdateUser();
+      createOrUpdateUser({});
     }
   }, [user, userData, createOrUpdateUser]);
 

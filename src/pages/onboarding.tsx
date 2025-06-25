@@ -33,7 +33,10 @@ export default function Onboarding() {
       location,
     });
     if (user) {
-      await user.update({ fullName: displayName });
+      const parts = displayName.trim().split(" ");
+      const firstName = parts.shift() || "";
+      const lastName = parts.join(" ");
+      await user.update({ firstName, lastName });
     }
     navigate("/dashboard");
   };
