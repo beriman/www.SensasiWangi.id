@@ -3,6 +3,28 @@ import { mutation, query, action } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { createVirtualAccount } from "../src/utils/bri";
 
+const DEFAULT_PREFS = {
+  badge: true,
+  like: true,
+  comment: true,
+  product: true,
+  order: true,
+};
+
+async function allowNotification(
+  ctx: any,
+  userId: Id<"users">,
+  type: string,
+) {
+  const settings = await ctx.db
+    .query("userSettings")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .unique();
+  const prefs = settings?.notificationPreferences ?? DEFAULT_PREFS;
+  const key = type as keyof typeof DEFAULT_PREFS;
+  return prefs[key] ?? true;
+}
+
 // Query untuk mendapatkan semua produk dengan pagination
 export const getProducts = query({
   args: {
@@ -277,14 +299,16 @@ export const createProduct = mutation({
     });
 
     // Create notification for successful product creation
-    await ctx.db.insert("notifications", {
-      userId: user._id,
-      type: "product",
-      message: `Produk "${args.title}" berhasil dipublikasikan di marketplace`,
-      url: `/marketplace/product/${productId}`,
-      read: false,
-      createdAt: now,
-    });
+    if (await allowNotification(ctx, user._id, "product")) {
+      await ctx.db.insert("notifications", {
+        userId: user._id,
+        type: "product",
+        message: `Produk "${args.title}" berhasil dipublikasikan di marketplace`,
+        url: `/marketplace/product/${productId}`,
+        read: false,
+        createdAt: now,
+      });
+    }
 
     return productId;
   },
@@ -594,22 +618,26 @@ export const verifyOrderPayment = mutation({
 
     const now = Date.now();
     const message = `Pembayaran untuk order ${order.productTitle} telah diverifikasi`;
-    await ctx.db.insert("notifications", {
-      userId: order.buyerId,
-      type: "order",
-      message,
-      url: `/marketplace/order/${order._id}`,
-      read: false,
-      createdAt: now,
-    });
-    await ctx.db.insert("notifications", {
-      userId: order.sellerId,
-      type: "order",
-      message,
-      url: `/marketplace/order/${order._id}`,
-      read: false,
-      createdAt: now,
-    });
+    if (await allowNotification(ctx, order.buyerId, "order")) {
+      await ctx.db.insert("notifications", {
+        userId: order.buyerId,
+        type: "order",
+        message,
+        url: `/marketplace/order/${order._id}`,
+        read: false,
+        createdAt: now,
+      });
+    }
+    if (await allowNotification(ctx, order.sellerId, "order")) {
+      await ctx.db.insert("notifications", {
+        userId: order.sellerId,
+        type: "order",
+        message,
+        url: `/marketplace/order/${order._id}`,
+        read: false,
+        createdAt: now,
+      });
+    }
   },
 });
 
@@ -640,22 +668,26 @@ export const updateOrderStatus = mutation({
           ? `Pesanan ${order.productTitle} telah selesai`
           : `Status pesanan ${order.productTitle} diperbarui menjadi ${args.status}`;
 
-    await ctx.db.insert("notifications", {
-      userId: order.buyerId,
-      type: "order",
-      message: statusMessage,
-      url: `/marketplace/order/${order._id}`,
-      read: false,
-      createdAt: now,
-    });
-    await ctx.db.insert("notifications", {
-      userId: order.sellerId,
-      type: "order",
-      message: statusMessage,
-      url: `/marketplace/order/${order._id}`,
-      read: false,
-      createdAt: now,
-    });
+    if (await allowNotification(ctx, order.buyerId, "order")) {
+      await ctx.db.insert("notifications", {
+        userId: order.buyerId,
+        type: "order",
+        message: statusMessage,
+        url: `/marketplace/order/${order._id}`,
+        read: false,
+        createdAt: now,
+      });
+    }
+    if (await allowNotification(ctx, order.sellerId, "order")) {
+      await ctx.db.insert("notifications", {
+        userId: order.sellerId,
+        type: "order",
+        message: statusMessage,
+        url: `/marketplace/order/${order._id}`,
+        read: false,
+        createdAt: now,
+      });
+    }
   },
 });
 

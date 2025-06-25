@@ -6,6 +6,28 @@ import { Id } from "./_generated/dataModel";
 const HOT_LIKES_THRESHOLD = 10;
 const HOT_VIEWS_THRESHOLD = 100;
 
+const DEFAULT_PREFS = {
+  badge: true,
+  like: true,
+  comment: true,
+  product: true,
+  order: true,
+};
+
+async function allowNotification(
+  ctx: any,
+  userId: Id<"users">,
+  type: string,
+) {
+  const settings = await ctx.db
+    .query("userSettings")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .unique();
+  const prefs = settings?.notificationPreferences ?? DEFAULT_PREFS;
+  const key = type as keyof typeof DEFAULT_PREFS;
+  return prefs[key] ?? true;
+}
+
 // Query untuk mendapatkan semua topik dengan pagination
 export const getTopics = query({
   args: {
@@ -393,13 +415,15 @@ export const createTopic = mutation({
     // Buat notifikasi untuk badge baru
     if (newBadges.length > oldBadgeCount) {
       const newBadge = newBadges[newBadges.length - 1];
-      await ctx.db.insert("notifications", {
-        userId: user._id,
-        type: "badge",
-        message: `Selamat! Anda mendapatkan badge "${newBadge}" karena membuat topik baru`,
-        read: false,
-        createdAt: Date.now(),
-      });
+      if (await allowNotification(ctx, user._id, "badge")) {
+        await ctx.db.insert("notifications", {
+          userId: user._id,
+          type: "badge",
+          message: `Selamat! Anda mendapatkan badge "${newBadge}" karena membuat topik baru`,
+          read: false,
+          createdAt: Date.now(),
+        });
+      }
     }
 
     // Update category count setelah topic dibuat
@@ -458,14 +482,16 @@ export const toggleTopicLike = mutation({
 
       // Buat notifikasi untuk pemilik topik (jika bukan like sendiri)
       if (topic.authorId !== user._id) {
-        await ctx.db.insert("notifications", {
-          userId: topic.authorId,
-          type: "like",
-          message: `${user.name || "Anonymous"} menyukai topik Anda "${topic.title}"`,
-          url: `/forum?topic=${topic._id}`,
-          read: false,
-          createdAt: Date.now(),
-        });
+        if (await allowNotification(ctx, topic.authorId, "like")) {
+          await ctx.db.insert("notifications", {
+            userId: topic.authorId,
+            type: "like",
+            message: `${user.name || "Anonymous"} menyukai topik Anda "${topic.title}"`,
+            url: `/forum?topic=${topic._id}`,
+            read: false,
+            createdAt: Date.now(),
+          });
+        }
       }
     }
 
@@ -623,24 +649,28 @@ export const createComment = mutation({
     // Buat notifikasi untuk badge baru
     if (newBadges.length > oldBadgeCount) {
       const newBadge = newBadges[newBadges.length - 1];
-      await ctx.db.insert("notifications", {
-        userId: user._id,
-        type: "badge",
-        message: `Selamat! Anda mendapatkan badge "${newBadge}" karena aktif berkomentar`,
-        read: false,
-        createdAt: Date.now(),
-      });
+      if (await allowNotification(ctx, user._id, "badge")) {
+        await ctx.db.insert("notifications", {
+          userId: user._id,
+          type: "badge",
+          message: `Selamat! Anda mendapatkan badge "${newBadge}" karena aktif berkomentar`,
+          read: false,
+          createdAt: Date.now(),
+        });
+      }
     }
 
     if (topic && topic.authorId !== user._id) {
-      await ctx.db.insert("notifications", {
-        userId: topic.authorId,
-        type: "comment",
-        message: `${user.name || "Anonymous"} mengomentari topik Anda "${topic.title}"`,
-        url: `/forum?topic=${topic._id}`,
-        read: false,
-        createdAt: now,
-      });
+      if (await allowNotification(ctx, topic.authorId, "comment")) {
+        await ctx.db.insert("notifications", {
+          userId: topic.authorId,
+          type: "comment",
+          message: `${user.name || "Anonymous"} mengomentari topik Anda "${topic.title}"`,
+          url: `/forum?topic=${topic._id}`,
+          read: false,
+          createdAt: now,
+        });
+      }
     }
 
     return commentId;
