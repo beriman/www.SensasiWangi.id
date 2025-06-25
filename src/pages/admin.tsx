@@ -88,6 +88,8 @@ function AdminContent() {
   const allUsers = useQuery(api.users.getAllUsers);
   const forumStats = useQuery(api.forum.getForumStats);
   const systemHealth = useQuery(api.admin.getSystemHealth);
+  const platformAnalytics = useQuery(api.admin.getPlatformAnalytics);
+  const pendingReports = useQuery(api.admin.getPendingReports);
 
   const verifyPayment = useMutation(api.marketplace.verifyOrderPayment);
   const updateStatus = useMutation(api.marketplace.updateOrderStatus);
@@ -101,63 +103,20 @@ function AdminContent() {
 
   // Data statistik real-time
   const stats = {
-    totalUsers: allUsers?.length || 0,
-    totalPosts: forumStats?.totalPosts || 0,
-    pendingReports: 12, // Mock data - bisa diganti dengan query real
+    totalUsers: platformAnalytics?.userCount || 0,
+    totalPosts:
+      (platformAnalytics?.topicCount || 0) +
+      (platformAnalytics?.commentCount || 0),
+    pendingReports: platformAnalytics?.pendingReports || 0,
     activeDiscussions: forumStats?.activeToday || 0,
     systemUptime: systemHealth?.uptime || "99.9%",
-    memoryUsage: systemHealth?.memoryUsage || "45%",
-    diskUsage: systemHealth?.diskUsage || "67%",
-    activeConnections: systemHealth?.activeConnections || 234,
+    memoryUsage: systemHealth?.memoryUsage || "0%",
+    diskUsage: systemHealth?.diskUsage || "N/A",
+    activeConnections: systemHealth?.activeConnections || 0,
   };
 
-  const recentReports = [
-    {
-      id: 1,
-      type: "Spam",
-      content: "Posting berulang tentang produk...",
-      reporter: "user123",
-      status: "pending",
-    },
-    {
-      id: 2,
-      type: "Konten Tidak Pantas",
-      content: "Komentar yang menyinggung...",
-      reporter: "user456",
-      status: "pending",
-    },
-    {
-      id: 3,
-      type: "Penipuan",
-      content: "Penjualan produk palsu...",
-      reporter: "user789",
-      status: "resolved",
-    },
-  ];
+  const recentReports = pendingReports || [];
 
-  const recentUsers = [
-    {
-      id: 1,
-      name: "Ahmad Rizki",
-      email: "ahmad@email.com",
-      joinDate: "2024-01-15",
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Sari Dewi",
-      email: "sari@email.com",
-      joinDate: "2024-01-14",
-      status: "active",
-    },
-    {
-      id: 3,
-      name: "Budi Santoso",
-      email: "budi@email.com",
-      joinDate: "2024-01-13",
-      status: "suspended",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-[#F5F5F7]">
