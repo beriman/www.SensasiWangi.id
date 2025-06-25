@@ -47,6 +47,7 @@ import {
   Grid,
   List,
   Bookmark,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -77,12 +78,16 @@ const SORT_OPTIONS = [
   { value: "liked", label: "Paling Disukai" },
 ];
 
+type CartItem = { id: string; title: string; price: number };
+
 function ProductCard({
   product,
   viewMode = "grid",
+  onAddToCart,
 }: {
   product: any;
   viewMode?: "grid" | "list";
+  onAddToCart?: (item: CartItem) => void;
 }) {
   const { user } = useUser();
   const navigate = useNavigate();
@@ -123,6 +128,15 @@ function ProductCard({
     if (user) {
       toggleBookmark({ itemId: product._id, type: "product" });
     }
+  };
+
+  const handleAdd = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onAddToCart?.({
+      id: product._id,
+      title: product.title,
+      price: product.price,
+    });
   };
 
 
@@ -276,6 +290,9 @@ function ProductCard({
                 )}
               </div>
             </div>
+            <Button size="sm" className="mt-2" onClick={handleAdd}>
+              <ShoppingCart className="h-4 w-4 mr-2" />Tambah
+            </Button>
           </div>
         </div>
       </Card>
@@ -373,25 +390,28 @@ function ProductCard({
               <MapPin className="h-3 w-3" />
               <span>{product.location}</span>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
-                <Eye className="h-3 w-3" />
-                <span>{product.views}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Heart className="h-3 w-3" />
-                <span>{product.likes}</span>
-              </div>
-              {product.sambatCount > 0 && (
-                <div className="flex items-center gap-1">
-                  <MessageCircle className="h-3 w-3" />
-                  <span>{product.sambatCount}</span>
-                </div>
-              )}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <Eye className="h-3 w-3" />
+              <span>{product.views}</span>
             </div>
+            <div className="flex items-center gap-1">
+              <Heart className="h-3 w-3" />
+              <span>{product.likes}</span>
+            </div>
+            {product.sambatCount > 0 && (
+              <div className="flex items-center gap-1">
+                <MessageCircle className="h-3 w-3" />
+                <span>{product.sambatCount}</span>
+              </div>
+            )}
           </div>
         </div>
-      </CardContent>
+        <Button size="sm" className="mt-2 w-full" onClick={handleAdd}>
+          <ShoppingCart className="h-4 w-4 mr-2" />Tambah
+        </Button>
+      </div>
+    </CardContent>
     </Card>
   );
 }
@@ -681,6 +701,76 @@ function SambatDialog({ product }: { product: any }) {
   );
 }
 
+function CartDialog({
+  cart,
+  onRemove,
+  onCheckout,
+}: {
+  cart: CartItem[];
+  onRemove: (id: string) => void;
+  onCheckout: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(price);
+  const total = cart.reduce((sum, i) => sum + i.price, 0);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="fixed bottom-6 right-6 rounded-full neumorphic-button p-4">
+          <ShoppingCart className="h-5 w-5" />
+          {cart.length > 0 && (
+            <span className="ml-2 text-sm">{cart.length}</span>
+          )}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="neumorphic-card border-0 max-w-md">
+        <DialogHeader>
+          <DialogTitle>Keranjang</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          {cart.map((item) => (
+            <div
+              key={item.id}
+              className="flex items-center justify-between"
+            >
+              <span className="flex-1 mr-2 line-clamp-1">{item.title}</span>
+              <span className="text-sm">{formatPrice(item.price)}</span>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => onRemove(item.id)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          {cart.length === 0 && (
+            <p className="text-center text-sm text-[#718096]">Keranjang kosong</p>
+          )}
+          <div className="flex justify-between font-semibold border-t pt-2">
+            <span>Total</span>
+            <span>{formatPrice(total)}</span>
+          </div>
+          <Button
+            onClick={() => {
+              setOpen(false);
+              onCheckout();
+            }}
+            disabled={cart.length === 0}
+          >
+            Checkout
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function Marketplace() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -692,6 +782,31 @@ export default function Marketplace() {
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showSambatProducts, setShowSambatProducts] = useState(false);
+  const [cart, setCart] = useState<CartItem[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("marketplaceCart");
+    if (stored) {
+      setCart(JSON.parse(stored));
+    }
+  }, []);
+
+  const addToCart = (item: CartItem) => {
+    setCart((prev) => {
+      if (prev.some((p) => p.id === item.id)) return prev;
+      const updated = [...prev, item];
+      localStorage.setItem("marketplaceCart", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const removeFromCart = (id: string) => {
+    setCart((prev) => {
+      const updated = prev.filter((p) => p.id !== id);
+      localStorage.setItem("marketplaceCart", JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   const products = useQuery(api.marketplace.getProducts, {
     paginationOpts: { numItems: 20, cursor: null },
@@ -937,6 +1052,7 @@ export default function Marketplace() {
                     key={product._id}
                     product={product}
                     viewMode={viewMode}
+                    onAddToCart={addToCart}
                   />
                 ))}
               </div>
@@ -1034,7 +1150,11 @@ export default function Marketplace() {
           </div>
         </div>
       </main>
-
+      <CartDialog
+        cart={cart}
+        onRemove={removeFromCart}
+        onCheckout={() => navigate("/marketplace/checkout")}
+      />
       <Footer />
     </div>
   );
