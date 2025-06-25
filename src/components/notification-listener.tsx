@@ -45,13 +45,14 @@ export default function NotificationListener() {
   );
 
   const notifications = useQuery(
-    api.notifications.getNotifications,
+    api.notifications.subscription,
     currentUser ? { userId: currentUser._id } : "skip",
   );
 
   const markRead = useMutation(api.notifications.markNotificationRead);
   const seenIds = useRef(new Set<string>());
   const [lastNotificationCount, setLastNotificationCount] = useState(0);
+  const unreadCount = notifications?.filter((n) => !n.read).length || 0;
 
   useEffect(() => {
     if (!notifications) return;
@@ -111,5 +112,13 @@ export default function NotificationListener() {
     }
   }, [notifications, lastNotificationCount]);
 
-  return null;
+  return (
+    <div className="fixed bottom-4 right-4 z-50 pointer-events-none text-xs">
+      {unreadCount > 0 && (
+        <div className="bg-red-500 text-white rounded-full px-2 py-1">
+          {unreadCount}
+        </div>
+      )}
+    </div>
+  );
 }

@@ -112,11 +112,11 @@ export const createOrUpdateUser = mutation({
         const profilePatch: any = { lastActive: Date.now() };
         if (args.location) profilePatch.location = args.location;
         if (args.interests) profilePatch.interests = args.interests;
-        if (existingProfile) {
-          await ctx.db.patch(existingProfile._id, profilePatch);
-        } else {
-          await ctx.db.insert("userProfiles", {
-            userId: existingUser._id,
+      if (existingProfile) {
+        await ctx.db.patch(existingProfile._id, profilePatch);
+      } else {
+        await ctx.db.insert("userProfiles", {
+          userId: existingUser._id,
             bio: undefined,
             location: args.location,
             interests: args.interests ?? [],
@@ -132,12 +132,28 @@ export const createOrUpdateUser = mutation({
             totalSales: 0,
             totalPurchases: 0,
             joinedAt: Date.now(),
-            lastActive: Date.now(),
-          });
-        }
+          lastActive: Date.now(),
+        });
       }
-      return await ctx.db.get(existingUser._id);
     }
+    const existingSettings = await ctx.db
+      .query("userSettings")
+      .withIndex("by_user", (q) => q.eq("userId", existingUser._id))
+      .unique();
+    if (!existingSettings) {
+      await ctx.db.insert("userSettings", {
+        userId: existingUser._id,
+        notificationPreferences: {
+          badge: true,
+          like: true,
+          comment: true,
+          product: true,
+          order: true,
+        },
+      });
+    }
+    return await ctx.db.get(existingUser._id);
+  }
 
     // Create new user
     const userId = await ctx.db.insert("users", {
@@ -172,6 +188,17 @@ export const createOrUpdateUser = mutation({
       totalPurchases: 0,
       joinedAt: Date.now(),
       lastActive: Date.now(),
+    });
+
+    await ctx.db.insert("userSettings", {
+      userId,
+      notificationPreferences: {
+        badge: true,
+        like: true,
+        comment: true,
+        product: true,
+        order: true,
+      },
     });
 
     return await ctx.db.get(userId);

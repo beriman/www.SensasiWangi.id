@@ -526,6 +526,17 @@ export default defineSchema({
     .index("by_read", ["read"])
     .index("by_created_at", ["createdAt"]),
 
+  userSettings: defineTable({
+    userId: v.id("users"),
+    notificationPreferences: v.object({
+      badge: v.boolean(),
+      like: v.boolean(),
+      comment: v.boolean(),
+      product: v.boolean(),
+      order: v.boolean(),
+    }),
+  }).index("by_user", ["userId"]),
+
   // === Courses & Lessons ===
   courses: defineTable({
     title: v.string(),
