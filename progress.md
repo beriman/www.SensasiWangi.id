@@ -6,17 +6,19 @@
 3. Kerangka marketplace
 4. Forum diskusi dasar
 5. Implementasi awal fitur Profile dengan gamifikasi
+6. Integrasi pembayaran BRI (VA dan QRIS)
+7. Pembaruan modul kursus dasar
 
-## Yang Masih Perlu Dibangun
-1. Penyelesaian fitur Profile (UI, event tracking, dll)
-2. Integrasi penuh marketplace dengan pembayaran
-3. Konten kursus lengkap
-4. Notifikasi real-time
+## Sedang Dikerjakan
+1. Penyelesaian fitur Profile (pengembangan UI dan event tracking)
+2. Integrasi penuh marketplace dengan pembayaran (penyempurnaan alur pesanan)
+3. Konten kursus lengkap (penambahan modul lanjutan)
+4. Notifikasi real-time (eksplorasi solusi)
 
 ## Status Saat Ini
-- **Fase**: Pengembangan fitur utama
-- **Progress**: 50% dari rencana awal
-- **Fitur Profile**: Implementasi database selesai, siap untuk pengembangan UI dan logika gamifikasi
+- **Fase**: Pengembangan lanjutan
+- **Progress**: 70% dari rencana awal
+- **Fitur Profile**: Database siap, UI dan gamifikasi masih dikembangkan
 
 ## Masalah yang Diketahui
 1. Performa loading halaman kursus perlu dioptimasi
@@ -26,3 +28,8 @@
 - Awalnya menggunakan Firebase, beralih ke Convex untuk real-time capabilities
 - UI library beralih dari Material UI ke shadcn/ui untuk fleksibilitas lebih
 - Fitur gamifikasi diintegrasikan langsung dengan aktivitas pengguna
+
+## Changelog
+- Menambahkan integrasi pembayaran BRI
+- Memperbarui modul kursus dasar
+- Membuat bagian "Sedang Dikerjakan" untuk item tersisa
