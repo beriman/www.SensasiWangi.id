@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query, action } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { createVirtualAccount } from "../src/utils/bri";
 
 // Query untuk mendapatkan semua produk dengan pagination
 export const getProducts = query({
@@ -475,9 +476,20 @@ export const createOrder = mutation({
     const discountedPrice = product.price - product.price * discountRate;
     const totalAmount = discountedPrice + args.shippingCost;
 
-    // Generate virtual account number (simulasi)
-    const vaNumber = `8808${Date.now().toString().slice(-8)}`;
-    const paymentExpiry = now + 24 * 60 * 60 * 1000; // 24 jam
+    let vaNumber = "";
+    let paymentExpiry = now + 24 * 60 * 60 * 1000;
+    try {
+      const va = await createVirtualAccount(
+        `${now}`,
+        totalAmount,
+        user.name || "Pembeli",
+      );
+      vaNumber = va.virtualAccount;
+      paymentExpiry = new Date(va.expiredDate).getTime();
+    } catch (err) {
+      console.error("Failed to create BRI VA", err);
+      vaNumber = `8808${Date.now().toString().slice(-8)}`;
+    }
 
     const orderId = await ctx.db.insert("orders", {
       productId: args.productId,
