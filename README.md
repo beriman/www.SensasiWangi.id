@@ -78,3 +78,35 @@ CONVEX_URL=<your_convex_url> npx ts-node scripts/seed.ts
 ```
 
 The command calls `api.marketplace.initializeSampleData` to insert starter brands, perfumers and fragrances for local testing.
+
+## Third-Party Services Setup
+
+### BRI Payments
+
+Configure the following environment variables to enable Bank BRI virtual account and QRIS payments:
+
+```bash
+BRI_BASE_URL=https://sandbox.partner.api.bri.co.id
+BRI_CLIENT_ID=<your_client_id>
+BRI_CLIENT_SECRET=<your_client_secret>
+BRI_INSTITUTION_CODE=<institution_code>
+BRI_BRIVA_NO=<briva_number>
+```
+
+### Cloudinary
+
+Image uploads rely on Cloudinary. Set these variables in your `.env`:
+
+```bash
+CLOUDINARY_CLOUD_NAME=<cloud_name>
+CLOUDINARY_UPLOAD_PRESET=<upload_preset>
+```
+
+### Email Service
+
+Transactional emails are sent via your preferred provider. Define at least:
+
+```bash
+EMAIL_FROM=<no-reply@example.com>
+RESEND_API_KEY=<your_api_key>
+```
