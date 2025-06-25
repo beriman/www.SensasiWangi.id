@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
@@ -26,6 +26,8 @@ const SHIPPING_METHODS = [
   "Ninja Express",
 ];
 
+type CartItem = { id: string; title: string; price: number };
+
 export default function MarketplaceCheckout() {
   const { user } = useUser();
   const [params] = useSearchParams();
@@ -36,6 +38,9 @@ export default function MarketplaceCheckout() {
     api.marketplace.getProductById,
     productId ? { productId: productId as any } : "skip",
   );
+
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const calculateCost = useAction(api.marketplace.calculateShippingCost);
 
   const createOrder = useMutation(api.marketplace.createOrder);
   const generateUploadUrl = useMutation(api.marketplace.generateUploadUrl);
@@ -54,9 +59,49 @@ export default function MarketplaceCheckout() {
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [shippingCost, setShippingCost] = useState(0);
+
+  useEffect(() => {
+    if (productId) {
+      if (product) {
+        setCart([{ id: product._id, title: product.title, price: product.price }]);
+      }
+    } else {
+      const stored = localStorage.getItem("marketplaceCart");
+      if (stored) setCart(JSON.parse(stored));
+    }
+  }, [productId, product]);
+
+  useEffect(() => {
+    const loadCost = async () => {
+      if (!shippingMethod || !shippingAddress.city || cart.length === 0) return;
+      try {
+        const cost = await calculateCost({
+          origin: shippingAddress.city,
+          destination: shippingAddress.city,
+          courier: shippingMethod,
+          weight: cart.length * 1000,
+        });
+        setShippingCost(cost);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadCost();
+  }, [shippingMethod, shippingAddress.city, cart]);
+
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(price);
+
+  const subtotal = cart.reduce((s, i) => s + i.price, 0);
+  const totalAmount = subtotal + shippingCost;
 
   if (productId && product === undefined) return <div>Loading...</div>;
-  if (!productId || product === null) return <div>Produk tidak ditemukan</div>;
+  if (productId && product === null) return <div>Produk tidak ditemukan</div>;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,17 +111,23 @@ export default function MarketplaceCheckout() {
     }
     setIsSubmitting(true);
     try {
-      const id = await createOrder({
-        productId: productId as any,
-        shippingAddress,
-        origin: shippingAddress.city,
-        destination: shippingAddress.city,
-        shippingMethod,
-        shippingCost: 0,
-        paymentMethod: "transfer",
-        notes: notes.trim() || undefined,
-      });
-      setOrderId(id as any);
+      const ids = [] as string[];
+      for (const item of cart) {
+        const id = await createOrder({
+          productId: item.id as any,
+          shippingAddress,
+          origin: shippingAddress.city,
+          destination: shippingAddress.city,
+          shippingMethod,
+          shippingCost,
+          paymentMethod: "transfer",
+          notes: notes.trim() || undefined,
+        });
+        ids.push(id as any);
+      }
+      setOrderId(ids[0] as any);
+      localStorage.removeItem("marketplaceCart");
+      setCart([]);
     } catch (err: any) {
       alert(err.message || "Gagal membuat order");
     } finally {
@@ -109,6 +160,23 @@ export default function MarketplaceCheckout() {
         <h1 className="text-2xl font-semibold mb-6">Checkout</h1>
         {!orderId ? (
           <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
+            <div className="space-y-2">
+              {cart.map((item) => (
+                <div key={item.id} className="flex justify-between text-sm">
+                  <span>{item.title}</span>
+                  <span>{formatPrice(item.price)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between text-sm">
+                <span>Ongkir</span>
+                <span>{formatPrice(shippingCost)}</span>
+              </div>
+              <div className="flex justify-between font-semibold border-t pt-2">
+                <span>Total</span>
+                <span>{formatPrice(totalAmount)}</span>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label className="text-sm text-[#718096]">Nama Lengkap</Label>
@@ -214,7 +282,8 @@ export default function MarketplaceCheckout() {
           <div className="space-y-4 max-w-lg">
             <p>
               Order berhasil dibuat. Silakan transfer total pembayaran ke nomor
-              virtual account berikut dan unggah bukti transfer Anda.
+              virtual account masing-masing order atau gunakan QRIS. Setelah
+              membayar, unggah bukti pembayaran Anda.
             </p>
             <Input
               type="file"
