@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Navbar } from "@/components/navbar";
@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { uploadImage } from "@/utils/cloudinary";
 import { Progress } from "@/components/ui/progress";
 import {
   Upload,
@@ -104,6 +105,7 @@ function MarketplaceSellContent() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState(1);
   const [showTips, setShowTips] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-create user if not exists
   useEffect(() => {
@@ -128,6 +130,22 @@ function MarketplaceSellContent() {
         ...prev,
         images: [...prev.images, url.trim()],
       }));
+    }
+  };
+
+  const handleImageFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const url = await uploadImage(file, "products");
+      setImageUrls((prev) => [...prev, url]);
+      setFormData((prev) => ({ ...prev, images: [...prev.images, url] }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -681,6 +699,20 @@ function MarketplaceSellContent() {
                           Foto Produk (Opsional)
                         </Label>
                         <div className="space-y-4">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            ref={fileInputRef}
+                            onChange={handleImageFileChange}
+                            className="hidden"
+                          />
+                          <Button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="w-full neumorphic-button text-[#2d3748] bg-transparent border-0 shadow-none"
+                          >
+                            <Upload className="h-4 w-4 mr-2" /> Upload Gambar
+                          </Button>
                           <Button
                             type="button"
                             onClick={handleImageUrlAdd}

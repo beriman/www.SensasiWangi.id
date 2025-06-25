@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { uploadImage } from "@/utils/cloudinary";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -107,9 +108,12 @@ function ProfileContent() {
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && user) {
-      // @ts-ignore
-      await user.setProfileImage({ file });
+    if (!file || !userData) return;
+    try {
+      const url = await uploadImage(file, "avatars");
+      await updateProfile({ avatar: url });
+    } catch (err) {
+      console.error(err);
     }
   };
   const averageRating =
@@ -189,7 +193,7 @@ function ProfileContent() {
                   <div className="relative w-24 h-24 mx-auto mb-4">
                     <Avatar className="w-24 h-24 mx-auto neumorphic-button border-0">
                       <AvatarImage
-                        src={user?.imageUrl}
+                        src={userProfile?.profile?.avatar || user?.imageUrl}
                         alt={user?.fullName || "User"}
                       />
                       <AvatarFallback className="text-2xl font-semibold text-[#2d3748] bg-gradient-to-br from-[#e0e5ec] to-[#ffffff]">
