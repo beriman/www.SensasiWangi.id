@@ -10,6 +10,7 @@ if (!convexUrl) {
 
 const convex = new ConvexHttpClient(convexUrl);
 const app = express();
+app.use(express.json());
 const port = process.env.PORT || 3000;
 
 app.get('/api/brands', async (req, res) => {
@@ -66,6 +67,23 @@ app.get('/api/stats', async (req, res) => {
     const stats = await convex.query(api.marketplace.getDatabaseStats, {});
     res.json(stats);
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/bri/callback', async (req, res) => {
+  try {
+    const { orderId, status } = req.body || {};
+    if (!orderId || !status) {
+      return res.status(400).json({ error: 'Invalid payload' });
+    }
+    await convex.mutation(api.marketplace.updatePaymentStatus, {
+      orderId,
+      paymentStatus: status,
+    });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
