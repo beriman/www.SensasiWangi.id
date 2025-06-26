@@ -32,7 +32,6 @@ export const suspendUser = mutation({
     }
     await ctx.db.patch(args.userId, {
       role: "suspended",
-      suspendedAt: Date.now(),
     });
   },
 });
@@ -107,7 +106,7 @@ export const backupDatabase = mutation({
     const blob = new Blob([JSON.stringify(backup, null, 2)], {
       type: "application/json",
     });
-    const storageId = await ctx.storage.store(blob);
+    const storageId = await (ctx.storage as any).store(blob);
     return storageId;
   },
 });

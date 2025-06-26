@@ -196,7 +196,7 @@ export default function Kursus() {
   });
 
   // Sort courses
-  const sortedCourses = [...filteredCourses].sort((a, b) => {
+  const sortedCourses = [...filteredCourses].sort((a: any, b: any) => {
     switch (sortBy) {
       case "popular":
         return b.students - a.students;
