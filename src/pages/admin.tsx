@@ -89,7 +89,7 @@ function AdminContent() {
   const forumStats = useQuery(api.forum.getForumStats);
   const systemHealth = useQuery(api.admin.getSystemHealth);
   const platformAnalytics = useQuery(api.admin.getPlatformAnalytics);
-  const pendingReports = useQuery(api.admin.getPendingReports);
+  const pendingReports = useQuery(api.forum.getTopReports);
 
   const verifyPayment = useMutation(api.marketplace.verifyOrderPayment);
   const updateStatus = useMutation(api.marketplace.updateOrderStatus);
@@ -108,7 +108,7 @@ function AdminContent() {
     totalPosts:
       (platformAnalytics?.topicCount || 0) +
       (platformAnalytics?.commentCount || 0),
-    pendingReports: platformAnalytics?.pendingReports || 0,
+    pendingReports: pendingReports?.length || 0,
     activeDiscussions: forumStats?.activeToday || 0,
     systemUptime: systemHealth?.uptime || "99.9%",
     memoryUsage: systemHealth?.memoryUsage || "0%",
@@ -365,7 +365,7 @@ function AdminContent() {
                       </TableHead>
                       <TableHead className="text-[#1D1D1F]">Konten</TableHead>
                       <TableHead className="text-[#1D1D1F]">Pelapor</TableHead>
-                      <TableHead className="text-[#1D1D1F]">Status</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Suara</TableHead>
                       <TableHead className="text-[#1D1D1F]">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -381,23 +381,8 @@ function AdminContent() {
                         <TableCell className="text-[#86868B]">
                           {report.reporter}
                         </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              report.status === "pending"
-                                ? "destructive"
-                                : "default"
-                            }
-                            className={
-                              report.status === "pending"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-green-100 text-green-800"
-                            }
-                          >
-                            {report.status === "pending"
-                              ? "Pending"
-                              : "Selesai"}
-                          </Badge>
+                        <TableCell className="text-center text-[#1D1D1F]">
+                          {report.votes}
                         </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
@@ -408,24 +393,6 @@ function AdminContent() {
                               <Eye className="w-3 h-3 mr-1" />
                               Lihat
                             </Button>
-                            {report.status === "pending" && (
-                              <>
-                                <Button
-                                  size="sm"
-                                  className="neumorphic-button-sm h-8 px-3 text-xs text-green-600"
-                                >
-                                  <CheckCircle className="w-3 h-3 mr-1" />
-                                  Setuju
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  className="neumorphic-button-sm h-8 px-3 text-xs text-red-600"
-                                >
-                                  <XCircle className="w-3 h-3 mr-1" />
-                                  Tolak
-                                </Button>
-                              </>
-                            )}
                           </div>
                         </TableCell>
                       </TableRow>

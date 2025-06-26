@@ -123,6 +123,16 @@ export default defineSchema({
     .index("by_reporter", ["reporterId"])
     .index("by_topic_reporter", ["topicId", "reporterId"]),
 
+  reportVotes: defineTable({
+    reportId: v.id("topicReports"),
+    userId: v.id("users"),
+    value: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_report", ["reportId"])
+    .index("by_user", ["userId"])
+    .index("by_report_user", ["reportId", "userId"]),
+
   products: defineTable({
     title: v.string(),
     description: v.string(),
