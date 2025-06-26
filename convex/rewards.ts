@@ -13,3 +13,20 @@ export const getUserRewards = query({
     return { tier, discount, exclusiveAccess };
   },
 });
+
+export const getTopContributors = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const users = await ctx.db.query("users").collect();
+    users.sort(
+      (a, b) => (b.contributionPoints ?? 0) - (a.contributionPoints ?? 0),
+    );
+    const limit = args.limit ?? 50;
+    return users.slice(0, limit).map((u) => ({
+      _id: u._id,
+      name: u.name,
+      image: u.image,
+      contributionPoints: u.contributionPoints ?? 0,
+    }));
+  },
+});
