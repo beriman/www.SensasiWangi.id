@@ -623,6 +623,15 @@ export default defineSchema({
     .index("by_user_course", ["userId", "courseId"])
     .index("by_user", ["userId"]),
 
+  lessonNotes: defineTable({
+    userId: v.id("users"),
+    lessonId: v.id("lessons"),
+    note: v.string(),
+    updatedAt: v.number(),
+  })
+    .index("by_user_lesson", ["userId", "lessonId"])
+    .index("by_user", ["userId"]),
+
   edits: defineTable({
     docType: v.string(), // "topic" or "comment"
     docId: v.string(),
