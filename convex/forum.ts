@@ -98,6 +98,80 @@ export const getTopics = query({
   },
 });
 
+export const advancedSearchTopics = query({
+  args: {
+    authorId: v.optional(v.id("users")),
+    startDate: v.optional(v.number()),
+    endDate: v.optional(v.number()),
+    tags: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    let q = ctx.db.query("topics");
+    if (args.authorId) {
+      q = q.withIndex("by_author", (qq) => qq.eq("authorId", args.authorId));
+    } else {
+      q = q.withIndex("by_created_at").order("desc");
+    }
+
+    const topics = await q.collect();
+
+    let results = topics;
+    if (args.startDate) {
+      results = results.filter((t) => t.createdAt >= args.startDate!);
+    }
+    if (args.endDate) {
+      results = results.filter((t) => t.createdAt <= args.endDate!);
+    }
+    if (args.tags && args.tags.length > 0) {
+      results = results.filter((t) =>
+        args.tags!.every((tag) => t.tags.includes(tag)),
+      );
+    }
+    return results;
+  },
+});
+
+export const saveSearch = mutation({
+  args: {
+    name: v.string(),
+    filters: v.object({
+      authorId: v.optional(v.id("users")),
+      startDate: v.optional(v.number()),
+      endDate: v.optional(v.number()),
+      tags: v.optional(v.array(v.string())),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    await ctx.db.insert("savedSearches", {
+      userId: user._id,
+      name: args.name,
+      filters: args.filters,
+      createdAt: Date.now(),
+    });
+    return true;
+  },
+});
+
+export const getSavedSearches = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("savedSearches")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .collect();
+  },
+});
+
 // Mutation untuk pin/unpin topik
 export const togglePinTopic = mutation({
   args: { topicId: v.id("topics") },

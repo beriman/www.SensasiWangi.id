@@ -524,6 +524,18 @@ export default defineSchema({
     .index("by_item", ["itemId"])
     .index("by_user_item", ["userId", "itemId"]),
 
+  savedSearches: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    filters: v.object({
+      authorId: v.optional(v.id("users")),
+      startDate: v.optional(v.number()),
+      endDate: v.optional(v.number()),
+      tags: v.optional(v.array(v.string())),
+    }),
+    createdAt: v.number(),
+  }).index("by_user", ["userId"]),
+
   messages: defineTable({
     senderId: v.id("users"),
     recipientId: v.id("users"),
