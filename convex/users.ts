@@ -312,3 +312,69 @@ export const getUserProfile = query({
     };
   },
 });
+
+export const getUserSettings = query({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) return null;
+    return await ctx.db
+      .query("userSettings")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .unique();
+  },
+});
+
+export const updateUserSettings = mutation({
+  args: {
+    notificationPreferences: v.object({
+      badge: v.optional(v.boolean()),
+      like: v.optional(v.boolean()),
+      comment: v.optional(v.boolean()),
+      product: v.optional(v.boolean()),
+      order: v.optional(v.boolean()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const settings = await ctx.db
+      .query("userSettings")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .unique();
+    if (!settings) {
+      const defaultPrefs = {
+        badge: true,
+        like: true,
+        comment: true,
+        product: true,
+        order: true,
+      };
+      const newId = await ctx.db.insert("userSettings", {
+        userId: user._id,
+        notificationPreferences: { ...defaultPrefs, ...args.notificationPreferences },
+      });
+      return newId;
+    }
+    await ctx.db.patch(settings._id, {
+      notificationPreferences: {
+        ...settings.notificationPreferences,
+        ...args.notificationPreferences,
+      },
+    });
+    return settings._id;
+  },
+});
