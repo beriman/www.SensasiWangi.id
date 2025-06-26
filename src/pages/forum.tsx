@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import VideoEmbed, { VideoData } from "@/components/video-embed";
 import ImageEmbed from "@/components/image-embed";
+import AdvancedSearchDialog from "@/components/AdvancedSearchDialog";
 import {
   MessageCircle,
   Users,
@@ -89,6 +90,13 @@ interface Comment {
   updatedAt: number;
 }
 
+interface AdvancedFilters {
+  authorId?: string;
+  startDate?: number;
+  endDate?: number;
+  tags?: string[];
+}
+
 // Icon mapping untuk categories
 const ICON_MAP: { [key: string]: any } = {
   MessageCircle,
@@ -114,6 +122,7 @@ export default function Forum() {
     "newest",
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters | null>(null);
   const [newTopicTags, setNewTopicTags] = useState("");
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [isTopicDetailOpen, setIsTopicDetailOpen] = useState(false);
@@ -131,6 +140,11 @@ export default function Forum() {
       tag: selectedTag === "all" ? undefined : selectedTag,
     },
     { initialNumItems: 10 },
+  );
+
+  const advancedResults = useQuery(
+    api.forum.advancedSearchTopics,
+    advancedFilters ? advancedFilters : "skip",
   );
 
   const pinnedTopics = useQuery(
@@ -161,6 +175,12 @@ export default function Forum() {
   );
   const mergeTopicsMutation = useMutation(api.forum.mergeTopics);
   const moveTopicMutation = useMutation(api.forum.moveTopic);
+  const saveSearchMutation = useMutation(api.forum.saveSearch);
+
+  const savedSearches = useQuery(
+    api.forum.getSavedSearches,
+    currentUser ? { userId: currentUser._id } : "skip",
+  );
 
   const selectedTopicComments = useQuery(
     api.forum.getCommentsByTopic,
@@ -196,6 +216,19 @@ export default function Forum() {
 
   const handleImageAdd = (url: string) => {
     setEmbeddedImages((prev) => [...prev, url]);
+  };
+
+  const handleAdvancedSearch = (filters: AdvancedFilters) => {
+    setAdvancedFilters(filters);
+  };
+
+  const handleSaveSearch = async (name: string, filters: AdvancedFilters) => {
+    try {
+      await saveSearchMutation({ name, filters });
+      toast({ title: "Saved search" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
   };
 
   const handleCreateTopic = async () => {
@@ -524,10 +557,14 @@ export default function Forum() {
     return new Date(timestamp).toLocaleDateString("id-ID");
   };
 
-  const topics = topicsResult?.results || [];
-  const unpinnedTopics = topics.filter((t) => !t.isPinned);
-  const hasMore = topicsResult?.status === "CanLoadMore";
-  const isLoading = topicsResult?.status === "LoadingFirstPage";
+  const topics = advancedFilters
+    ? advancedResults || []
+    : topicsResult?.results || [];
+  const unpinnedTopics = topics.filter((t: any) => !t.isPinned);
+  const hasMore = advancedFilters ? false : topicsResult?.status === "CanLoadMore";
+  const isLoading = advancedFilters
+    ? advancedResults === undefined
+    : topicsResult?.status === "LoadingFirstPage";
   const isLoadingCategories = categories === undefined;
   const isLoadingStats = forumStats === undefined;
 
@@ -715,7 +752,26 @@ export default function Forum() {
                         ✕ {selectedCategory}
                       </Button>
                     )}
+                    <AdvancedSearchDialog
+                      onSearch={handleAdvancedSearch}
+                      onSave={handleSaveSearch}
+                    />
                   </div>
+                  {savedSearches && savedSearches.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {savedSearches.map((s: any) => (
+                        <Button
+                          key={s._id}
+                          variant="outline"
+                          size="sm"
+                          className="neumorphic-button-sm bg-transparent text-[#2d3748] border-0 shadow-none"
+                          onClick={() => handleAdvancedSearch(s.filters)}
+                        >
+                          {s.name}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
