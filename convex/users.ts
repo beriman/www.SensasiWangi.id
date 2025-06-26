@@ -71,6 +71,9 @@ export const createOrUpdateUser = mutation({
       if (existingUser.contributionPoints === undefined) {
         patch.contributionPoints = 0;
       }
+      if (existingUser.weeklyContributionPoints === undefined) {
+        patch.weeklyContributionPoints = 0;
+      }
       if (existingUser.badges === undefined) {
         patch.badges = [];
       }
@@ -162,6 +165,7 @@ export const createOrUpdateUser = mutation({
       tokenIdentifier: identity.subject,
       role: args.role ?? "buyer",
       contributionPoints: 0,
+      weeklyContributionPoints: 0,
       badges: [],
       experiencePoints: 0,
       level: 1,

@@ -3,10 +3,12 @@ import { Footer } from "@/components/footer";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 export default function Leaderboard() {
-  const contributors = useQuery(api.rewards.getTopContributors, {});
+  const [params] = useSearchParams();
+  const period = params.get("period") ?? undefined;
+  const contributors = useQuery(api.rewards.getTopContributors, { period });
 
   const getInitials = (name: string | undefined | null) => {
     if (!name) return "U";

@@ -17,6 +17,7 @@ import type * as admin from "../admin.js";
 import type * as bookmarks from "../bookmarks.js";
 import type * as certificates from "../certificates.js";
 import type * as courses from "../courses.js";
+import type * as crons from "../crons.js";
 import type * as follows from "../follows.js";
 import type * as forum from "../forum.js";
 import type * as marketplace from "../marketplace.js";
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   bookmarks: typeof bookmarks;
   certificates: typeof certificates;
   courses: typeof courses;
+  crons: typeof crons;
   follows: typeof follows;
   forum: typeof forum;
   marketplace: typeof marketplace;
