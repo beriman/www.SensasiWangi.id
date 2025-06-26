@@ -538,6 +538,15 @@ export default defineSchema({
     .index("by_read", ["read"])
     .index("by_created_at", ["createdAt"]),
 
+  follows: defineTable({
+    followerId: v.id("users"),
+    followingId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_follower", ["followerId"])
+    .index("by_following", ["followingId"])
+    .index("by_pair", ["followerId", "followingId"]),
+
   userSettings: defineTable({
     userId: v.id("users"),
     notificationPreferences: v.object({

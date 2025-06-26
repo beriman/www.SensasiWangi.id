@@ -5,12 +5,13 @@ import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { uploadImage } from "@/utils/cloudinary";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import FollowButton from "@/components/follow-button";
 import {
   User,
   Mail,
@@ -22,6 +23,7 @@ import {
   Trophy,
   Star,
   Award,
+  Users,
   Settings,
   Edit3,
   Instagram,
@@ -40,36 +42,54 @@ export default function Profile() {
 }
 
 function ProfileContent() {
+  const { id } = useParams();
   const { user } = useUser();
-  const userData = useQuery(
+  const currentUser = useQuery(
     api.users.getUserByToken,
     user?.id ? { tokenIdentifier: user.id } : "skip",
+  );
+  const profileData = useQuery(
+    api.users.getUserProfile,
+    id
+      ? { userId: id as any }
+      : currentUser
+      ? { userId: currentUser._id }
+      : "skip",
   );
 
   // Query untuk mendapatkan statistik user dari forum
   const userTopics = useQuery(
     api.forum.getTopicsByAuthor,
-    userData ? { authorId: userData._id } : "skip",
+    profileData ? { authorId: profileData.user._id } : "skip",
   );
 
   const userComments = useQuery(
     api.forum.getCommentsByAuthor,
-    userData ? { authorId: userData._id } : "skip",
+    profileData ? { authorId: profileData.user._id } : "skip",
   );
 
   // Komentar terbaru dengan info topik
   const recentComments = useQuery(
     api.forum.getRecentCommentsWithTopic,
-    userData ? { authorId: userData._id, limit: 5 } : "skip",
+    profileData ? { authorId: profileData.user._id, limit: 5 } : "skip",
   );
 
   const userProfile = useQuery(
     api.marketplace.getUserProfile,
-    userData ? { userId: userData._id } : "skip",
+    profileData ? { userId: profileData.user._id } : "skip",
   );
   const userReviews = useQuery(
     api.marketplace.getReviewsByTargetUser,
-    userData ? { userId: userData._id } : "skip",
+    profileData ? { userId: profileData.user._id } : "skip",
+  );
+
+  const followers = useQuery(
+    api.follows.getFollowers,
+    profileData ? { userId: profileData.user._id } : "skip",
+  );
+  const following = useQuery(
+    api.follows.getFollowing,
+    profileData ? { userId: profileData.user._id } : "skip",
   );
 
   const updateProfile = useMutation(api.users.updateUserProfile);
@@ -101,14 +121,17 @@ function ProfileContent() {
     await user.update({ username });
   };
 
+  const isOwnProfile =
+    currentUser && profileData && currentUser._id === profileData.user._id;
+
   const handleBioBlur = async () => {
-    if (!userData) return;
+    if (!isOwnProfile) return;
     await updateProfile({ bio });
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !userData) return;
+    if (!file || !isOwnProfile) return;
     try {
       const url = await uploadImage(file, "avatars");
       await updateProfile({ avatar: url });
@@ -152,10 +175,10 @@ function ProfileContent() {
     0,
   );
 
-  const contributionPoints = userData?.contributionPoints || 0;
+  const contributionPoints = profileData?.user.contributionPoints || 0;
   const level = Math.floor(contributionPoints / 100) + 1;
   const progressPercentage = contributionPoints % 100;
-  const badges = userData?.badges || [];
+  const badges = profileData?.user.badges || [];
 
   const getUserBadge = () => {
     const posts = userTopics?.length || 0;
@@ -193,11 +216,11 @@ function ProfileContent() {
                   <div className="relative w-24 h-24 mx-auto mb-4">
                     <Avatar className="w-24 h-24 mx-auto neumorphic-button border-0">
                       <AvatarImage
-                        src={userProfile?.profile?.avatar || user?.imageUrl}
-                        alt={user?.fullName || "User"}
+                        src={userProfile?.profile?.avatar || profileData?.user.image}
+                        alt={profileData?.user.name || "User"}
                       />
                       <AvatarFallback className="text-2xl font-semibold text-[#2d3748] bg-gradient-to-br from-[#e0e5ec] to-[#ffffff]">
-                        {getInitials(user?.fullName)}
+                        {getInitials(profileData?.user.name)}
                       </AvatarFallback>
                     </Avatar>
                     {editing && (
@@ -218,7 +241,7 @@ function ProfileContent() {
                       </>
                     )}
                   </div>
-                  {editing ? (
+                  {isOwnProfile && editing ? (
                     <Input
                       className="text-center mb-2"
                       value={fullName}
@@ -227,13 +250,13 @@ function ProfileContent() {
                     />
                   ) : (
                     <h2 className="text-2xl font-bold text-[#1D1D1F] mb-2">
-                      {user?.fullName || "Pengguna"}
+                      {profileData?.user.name || "Pengguna"}
                     </h2>
                   )}
                   <p className="text-[#86868B] mb-2">
-                    {user?.primaryEmailAddress?.emailAddress}
+                    {profileData?.user.email}
                   </p>
-                  {editing ? (
+                  {isOwnProfile && editing ? (
                     <Input
                       className="text-center mb-2"
                       value={username}
@@ -245,7 +268,7 @@ function ProfileContent() {
                       <p className="text-[#86868B] mb-2">@{user.username}</p>
                     )
                   )}
-                  {editing ? (
+                  {isOwnProfile && editing ? (
                     <Textarea
                       className="text-center mb-4"
                       value={bio}
@@ -281,30 +304,38 @@ function ProfileContent() {
                 </div>
 
                 <div className="space-y-4">
-                  <Button
-                    className="neumorphic-button w-full bg-transparent text-[#2d3748] font-semibold border-0 shadow-none hover:scale-105 active:scale-95 transition-all"
-                    onClick={() => setEditing((e) => !e)}
-                  >
-                    <Edit3 className="h-4 w-4 mr-2" />
-                    {editing ? "Selesai" : "Edit Profil"}
-                  </Button>
-                  <Link to="/settings">
-                    <Button
-                      variant="outline"
-                      className="neumorphic-button-sm w-full bg-transparent text-[#718096] border-0 shadow-none hover:scale-105 active:scale-95 transition-all"
-                    >
-                      <Settings className="h-4 w-4 mr-2" />
-                      Pengaturan
-                    </Button>
-                  </Link>
-                  <Link to="/collections">
-                    <Button
-                      variant="outline"
-                      className="neumorphic-button-sm w-full mt-2 bg-transparent text-[#718096] border-0 shadow-none hover:scale-105 active:scale-95 transition-all"
-                    >
-                      Koleksi Saya
-                    </Button>
-                  </Link>
+                  {isOwnProfile ? (
+                    <>
+                      <Button
+                        className="neumorphic-button w-full bg-transparent text-[#2d3748] font-semibold border-0 shadow-none hover:scale-105 active:scale-95 transition-all"
+                        onClick={() => setEditing((e) => !e)}
+                      >
+                        <Edit3 className="h-4 w-4 mr-2" />
+                        {editing ? "Selesai" : "Edit Profil"}
+                      </Button>
+                      <Link to="/settings">
+                        <Button
+                          variant="outline"
+                          className="neumorphic-button-sm w-full bg-transparent text-[#718096] border-0 shadow-none hover:scale-105 active:scale-95 transition-all"
+                        >
+                          <Settings className="h-4 w-4 mr-2" />
+                          Pengaturan
+                        </Button>
+                      </Link>
+                      <Link to="/collections">
+                        <Button
+                          variant="outline"
+                          className="neumorphic-button-sm w-full mt-2 bg-transparent text-[#718096] border-0 shadow-none hover:scale-105 active:scale-95 transition-all"
+                        >
+                          Koleksi Saya
+                        </Button>
+                      </Link>
+                    </>
+                  ) : (
+                    profileData && (
+                      <FollowButton userId={profileData.user._id as any} />
+                    )
+                  )}
                 </div>
               </div>
 
@@ -350,6 +381,24 @@ function ProfileContent() {
                     </div>
                     <span className="text-sm font-semibold text-[#1D1D1F]">
                       {averageRating.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-[#667eea]" />
+                      <span className="text-sm text-[#86868B]">Pengikut</span>
+                    </div>
+                    <span className="text-sm font-semibold text-[#1D1D1F]">
+                      {followers?.length || 0}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-[#667eea]" />
+                      <span className="text-sm text-[#86868B]">Mengikuti</span>
+                    </div>
+                    <span className="text-sm font-semibold text-[#1D1D1F]">
+                      {following?.length || 0}
                     </span>
                   </div>
                 </div>

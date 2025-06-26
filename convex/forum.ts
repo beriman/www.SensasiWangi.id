@@ -426,6 +426,28 @@ export const createTopic = mutation({
       }
     }
 
+    // Mention notifications
+    const mentionMatches = args.content.match(/@([A-Za-z0-9_]+)/g) || [];
+    const mentioned = Array.from(new Set(mentionMatches.map((m) => m.slice(1))));
+    for (const name of mentioned) {
+      const target = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("name"), name))
+        .unique();
+      if (target && target._id !== user._id) {
+        if (await allowNotification(ctx, target._id, "comment")) {
+          await ctx.db.insert("notifications", {
+            userId: target._id,
+            type: "mention",
+            message: `${user.name || "Anonymous"} menyebut Anda di topik "${args.title}"`,
+            url: `/forum?topic=${topicId}`,
+            read: false,
+            createdAt: Date.now(),
+          });
+        }
+      }
+    }
+
     // Update category count setelah topic dibuat
     await ctx.scheduler.runAfter(0, "forum:updateCategoryCount" as any, {
       categoryName: args.category,
@@ -657,6 +679,28 @@ export const createComment = mutation({
           read: false,
           createdAt: Date.now(),
         });
+      }
+    }
+
+    // Mention notifications
+    const mentionMatches = args.content.match(/@([A-Za-z0-9_]+)/g) || [];
+    const mentioned = Array.from(new Set(mentionMatches.map((m) => m.slice(1))));
+    for (const name of mentioned) {
+      const target = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("name"), name))
+        .unique();
+      if (target && target._id !== user._id) {
+        if (await allowNotification(ctx, target._id, "comment")) {
+          await ctx.db.insert("notifications", {
+            userId: target._id,
+            type: "mention",
+            message: `${user.name || "Anonymous"} menyebut Anda di komentar`,
+            url: `/forum?topic=${args.topicId}`,
+            read: false,
+            createdAt: now,
+          });
+        }
       }
     }
 
