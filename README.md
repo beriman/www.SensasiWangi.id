@@ -79,6 +79,28 @@ CONVEX_URL=<your_convex_url> npx ts-node scripts/seed.ts
 
 The command calls `api.marketplace.initializeSampleData` to insert starter brands, perfumers and fragrances for local testing.
 
+## Running Tests
+
+Jest is configured for both unit and integration tests located under the `tests/` directory.
+
+- Run all tests:
+
+```bash
+npm test
+```
+
+- Run only unit tests:
+
+```bash
+npm test tests/unit
+```
+
+- Run only integration tests:
+
+```bash
+npm test tests/integration
+```
+
 ## Third-Party Services Setup
 
 ### BRI Payments
@@ -100,6 +122,15 @@ Image uploads rely on Cloudinary. Set these variables in your `.env`:
 ```bash
 CLOUDINARY_CLOUD_NAME=<cloud_name>
 CLOUDINARY_UPLOAD_PRESET=<upload_preset>
+```
+
+### RajaOngkir
+
+For shipping cost calculations we use [RajaOngkir](https://rajaongkir.com/).
+Create a free account and generate an API key from your dashboard, then set:
+
+```bash
+RAJAONGKIR_API_KEY=<your_rajaongkir_key>
 ```
 
 ### Email Service
