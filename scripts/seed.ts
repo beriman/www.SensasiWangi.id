@@ -11,11 +11,15 @@ const client = new ConvexHttpClient(convexUrl);
 
 async function main() {
   try {
-    const result = await client.mutation(
+    const marketplace = await client.mutation(
       api.marketplace.initializeSampleData,
       {},
     );
-    console.log(result);
+    const courses = await client.mutation(
+      api.courses.initializeAdvancedModules,
+      {},
+    );
+    console.log({ marketplace, courses });
   } catch (err: any) {
     console.error("Failed to seed sample data:", err.message);
     process.exit(1);

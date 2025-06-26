@@ -45,3 +45,8 @@ flowchart TD
 - Nilai rata-rata peserta
 - Kepuasan pembelajaran (survey)
 - Rasio rekomendasi kursus
+
+### 7. Modul Lanjutan
+
+Script seed sekarang menambahkan kursus "Advanced Perfumery" lengkap dengan dua
+lesson dan kuis. Modul ini dipakai untuk pengujian fitur progres lanjutan.

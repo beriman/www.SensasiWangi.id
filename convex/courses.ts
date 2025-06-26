@@ -247,3 +247,75 @@ export const getNote = query({
       .unique();
   },
 });
+
+// Seed advanced course modules with lessons and quizzes
+export const initializeAdvancedModules = mutation({
+  handler: async (ctx) => {
+    const now = Date.now();
+
+    const courseId = await ctx.db.insert("courses", {
+      title: "Advanced Perfumery",
+      description: "Pendalaman teknik formulasi parfum lanjutan",
+      category: "perfumery",
+      level: "advanced",
+      image:
+        "https://images.unsplash.com/photo-1512427691650-dbd6a56d1e21?w=400&q=80",
+      instructor: "Dr. Aroma",
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    const lessons = [
+      { title: "Layering Fragrance", videoUrl: "https://example.com/video1.mp4" },
+      { title: "Stability & Safety", videoUrl: "https://example.com/video2.mp4" },
+    ];
+
+    const lessonIds: Id<"lessons">[] = [];
+    for (let i = 0; i < lessons.length; i++) {
+      const id = await ctx.db.insert("lessons", {
+        courseId,
+        title: lessons[i].title,
+        videoUrl: lessons[i].videoUrl,
+        order: i + 1,
+        createdAt: now,
+        updatedAt: now,
+      });
+      lessonIds.push(id);
+    }
+
+    const quizzes = [
+      {
+        lessonIndex: 0,
+        question: "Apa tujuan teknik layering?",
+        options: [
+          "Memadukan aroma menjadi komposisi unik",
+          "Mengurangi biaya produksi",
+          "Menambah kadar alkohol",
+        ],
+        correctOption: 0,
+      },
+      {
+        lessonIndex: 1,
+        question: "Stability test dilakukan untuk?",
+        options: [
+          "Mengetahui ketahanan formula",
+          "Menentukan warna botol",
+          "Meningkatkan marketing",
+        ],
+        correctOption: 0,
+      },
+    ];
+
+    for (const q of quizzes) {
+      await ctx.db.insert("quizzes", {
+        lessonId: lessonIds[q.lessonIndex],
+        question: q.question,
+        options: q.options,
+        correctOption: q.correctOption,
+        createdAt: now,
+      });
+    }
+
+    return { courseId, lessons: lessonIds.length, quizzes: quizzes.length };
+  },
+});
