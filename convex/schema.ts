@@ -673,6 +673,15 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_doc", ["docType", "docId"]),
 
+  pointEvents: defineTable({
+    userId: v.id("users"),
+    activity: v.string(),
+    points: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_time", ["userId", "createdAt"]),
+
   weeklyLeaderboard: defineTable({
     weekStart: v.number(),
     userId: v.id("users"),

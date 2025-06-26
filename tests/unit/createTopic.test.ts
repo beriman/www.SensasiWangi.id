@@ -26,11 +26,13 @@ describe('createTopic', () => {
         insert: jest.fn().mockResolvedValue('t1'),
         patch: jest.fn(),
       },
+      runMutation: jest.fn(),
       scheduler: { runAfter: jest.fn() },
     } as any;
 
     const id = await createTopic._handler(ctx, baseArgs as any);
     expect(id).toBe('t1');
     expect(ctx.db.insert).toHaveBeenCalledWith('topics', expect.any(Object));
+    expect(ctx.runMutation).toHaveBeenCalled();
   });
 });

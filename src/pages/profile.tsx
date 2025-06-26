@@ -68,6 +68,15 @@ function ProfileContent() {
     profileData ? { authorId: profileData.user._id } : "skip",
   );
 
+  const pointStats = useQuery(
+    api.points.getUserStats,
+    profileData ? { userId: profileData.user._id } : "skip",
+  );
+  const pointEvents = useQuery(
+    api.points.getUserPointEvents,
+    profileData ? { userId: profileData.user._id, limit: 5 } : "skip",
+  );
+
   // Komentar terbaru dengan info topik
   const recentComments = useQuery(
     api.forum.getRecentCommentsWithTopic,
@@ -175,10 +184,11 @@ function ProfileContent() {
     0,
   );
 
-  const contributionPoints = profileData?.user.contributionPoints || 0;
-  const level = Math.floor(contributionPoints / 100) + 1;
+  const contributionPoints =
+    pointStats?.contributionPoints ?? profileData?.user.contributionPoints || 0;
+  const level = pointStats?.level ?? Math.floor(contributionPoints / 100) + 1;
   const progressPercentage = contributionPoints % 100;
-  const badges = profileData?.user.badges || [];
+  const badges = pointStats?.badges ?? profileData?.user.badges || [];
 
   const getUserBadge = () => {
     const posts = userTopics?.length || 0;
@@ -463,6 +473,24 @@ function ProfileContent() {
                   )}
                 </div>
               </div>
+
+              {pointEvents && (
+                <div className="neumorphic-card p-6 mt-6">
+                  <h3 className="text-lg font-semibold text-[#1D1D1F] mb-4">
+                    Riwayat Poin
+                  </h3>
+                  <ul className="space-y-2 text-sm">
+                    {pointEvents.map((ev) => (
+                      <li key={ev._id} className="flex justify-between">
+                        <span>{new Date(ev.createdAt).toLocaleDateString()}</span>
+                        <span>
+                          {ev.activity} (+{ev.points})
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* Main Content */}

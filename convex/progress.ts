@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { internal } from "./_generated/api";
 
 export const saveProgress = mutation({
   args: { lessonId: v.id("lessons"), progress: v.number(), completed: v.boolean() },
@@ -26,16 +27,33 @@ export const saveProgress = mutation({
         completed: args.completed,
         updatedAt: Date.now(),
       });
+      if (args.completed && !existing.completed) {
+        await ctx.runMutation(internal.points.recordPointEvent, {
+          userId: user._id,
+          activity: "complete_lesson",
+          points: 5,
+        });
+      }
       return existing._id;
     }
 
-    return await ctx.db.insert("progress", {
+    const id = await ctx.db.insert("progress", {
       userId: user._id,
       lessonId: args.lessonId,
       progress: args.progress,
       completed: args.completed,
       updatedAt: Date.now(),
     });
+
+    if (args.completed) {
+      await ctx.runMutation(internal.points.recordPointEvent, {
+        userId: user._id,
+        activity: "complete_lesson",
+        points: 5,
+      });
+    }
+
+    return id;
   },
 });
 
