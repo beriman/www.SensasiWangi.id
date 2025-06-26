@@ -1101,3 +1101,164 @@ export const updateAllCategoryCounts = mutation({
     return { message: "Semua category counts berhasil diupdate" };
   },
 });
+
+// Mutation untuk memindahkan topik ke kategori lain (hanya admin)
+export const moveTopic = mutation({
+  args: { topicId: v.id("topics"), newCategory: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const admin = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!admin) throw new Error("User tidak ditemukan");
+    if (admin.role !== "admin") throw new Error("Tidak memiliki izin");
+
+    const topic = await ctx.db.get(args.topicId);
+    if (!topic) throw new Error("Topik tidak ditemukan");
+
+    if (topic.category === args.newCategory) return true;
+
+    await ctx.db.insert("edits", {
+      docType: "topic",
+      docId: topic._id,
+      editorId: admin._id,
+      previousTitle: topic.title,
+      previousContent: `category:${topic.category}`,
+      createdAt: Date.now(),
+    });
+
+    await ctx.db.patch(args.topicId, {
+      category: args.newCategory,
+      updatedAt: Date.now(),
+    });
+
+    if (topic.authorId !== admin._id) {
+      await ctx.db.insert("notifications", {
+        userId: topic.authorId,
+        type: "moderation",
+        message: `Topik Anda "${topic.title}" dipindahkan ke kategori ${args.newCategory}`,
+        url: `/forum?topic=${topic._id}`,
+        read: false,
+        createdAt: Date.now(),
+      });
+    }
+
+    await ctx.scheduler.runAfter(0, "forum:updateCategoryCount" as any, {
+      categoryName: topic.category,
+    });
+    await ctx.scheduler.runAfter(0, "forum:updateCategoryCount" as any, {
+      categoryName: args.newCategory,
+    });
+
+    return true;
+  },
+});
+
+// Mutation untuk menggabungkan dua topik (hanya admin)
+export const mergeTopics = mutation({
+  args: { sourceId: v.id("topics"), targetId: v.id("topics") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const admin = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!admin) throw new Error("User tidak ditemukan");
+    if (admin.role !== "admin") throw new Error("Tidak memiliki izin");
+
+    if (args.sourceId === args.targetId) return true;
+
+    const source = await ctx.db.get(args.sourceId);
+    const target = await ctx.db.get(args.targetId);
+    if (!source || !target) throw new Error("Topik tidak ditemukan");
+
+    const comments = await ctx.db
+      .query("comments")
+      .withIndex("by_topic", (q) => q.eq("topicId", args.sourceId))
+      .collect();
+    for (const c of comments) {
+      await ctx.db.patch(c._id, { topicId: args.targetId });
+    }
+
+    const likes = await ctx.db
+      .query("topicLikes")
+      .withIndex("by_topic", (q) => q.eq("topicId", args.sourceId))
+      .collect();
+    let addedLikes = 0;
+    for (const like of likes) {
+      const existing = await ctx.db
+        .query("topicLikes")
+        .withIndex("by_topic_user", (q) =>
+          q.eq("topicId", args.targetId).eq("userId", like.userId),
+        )
+        .unique();
+      if (existing) {
+        await ctx.db.delete(like._id);
+      } else {
+        await ctx.db.patch(like._id, { topicId: args.targetId });
+        addedLikes++;
+      }
+    }
+
+    await ctx.db.patch(args.targetId, {
+      likes: target.likes + addedLikes,
+      views: target.views + source.views,
+      updatedAt: Date.now(),
+    });
+
+    await ctx.db.insert("edits", {
+      docType: "topic",
+      docId: target._id,
+      editorId: admin._id,
+      previousTitle: `[merge] ${source.title}`,
+      previousContent: source.content,
+      createdAt: Date.now(),
+    });
+
+    await ctx.db.insert("edits", {
+      docType: "topic",
+      docId: source._id,
+      editorId: admin._id,
+      previousTitle: source.title,
+      previousContent: "merged into another topic",
+      createdAt: Date.now(),
+    });
+
+    if (source.authorId !== admin._id) {
+      await ctx.db.insert("notifications", {
+        userId: source.authorId,
+        type: "moderation",
+        message: `Topik Anda "${source.title}" digabungkan ke "${target.title}"`,
+        url: `/forum?topic=${args.targetId}`,
+        read: false,
+        createdAt: Date.now(),
+      });
+    }
+    if (target.authorId !== admin._id) {
+      await ctx.db.insert("notifications", {
+        userId: target.authorId,
+        type: "moderation",
+        message: `Topik "${source.title}" digabungkan ke topik Anda`,
+        url: `/forum?topic=${args.targetId}`,
+        read: false,
+        createdAt: Date.now(),
+      });
+    }
+
+    await ctx.db.delete(args.sourceId);
+
+    await ctx.scheduler.runAfter(0, "forum:updateCategoryCount" as any, {
+      categoryName: source.category,
+    });
+    await ctx.scheduler.runAfter(0, "forum:updateCategoryCount" as any, {
+      categoryName: target.category,
+    });
+
+    return true;
+  },
+});
