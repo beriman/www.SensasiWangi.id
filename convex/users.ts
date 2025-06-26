@@ -307,7 +307,7 @@ export const getUserProfile = query({
       .unique();
 
     return {
-      ...user,
+      user,
       profile: profile || null,
     };
   },
