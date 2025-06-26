@@ -49,6 +49,7 @@ function App() {
           <Route path="/forum" element={<Forum />} />
           <Route path="/Forum" element={<Navigate to="/forum" replace />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/u/:id" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/collections" element={<Collections />} />
