@@ -1,9 +1,9 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Forum from '../../src/pages/forum';
 import { BrowserRouter } from 'react-router-dom';
 import { useMutation, usePaginatedQuery, useQuery } from 'convex/react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useClerk } from '@clerk/clerk-react';
 import { api } from '../../convex/_generated/api';
 
 jest.mock('convex/react');
@@ -18,6 +18,7 @@ const mockCreate = jest.fn();
 (usePaginatedQuery as jest.Mock).mockReturnValue({ results: [], status: 'Loaded', loadMore: jest.fn() });
 (useQuery as jest.Mock).mockReturnValue([]);
 (useUser as jest.Mock).mockReturnValue({ user: { id: '1' } });
+(useClerk as jest.Mock).mockReturnValue({ signOut: jest.fn() });
 
 describe('Forum posting', () => {
   it('calls createTopic when submitting form', async () => {
@@ -27,11 +28,12 @@ describe('Forum posting', () => {
       </BrowserRouter>
     );
 
-    await userEvent.click(screen.getByText(/Buat Topik Pertama/i));
+    await userEvent.click(screen.getByText(/Topik Baru/i));
     await userEvent.type(screen.getByLabelText(/Judul Topik/i), 'Hello');
     await userEvent.type(screen.getByLabelText(/Konten/i), 'World');
     await userEvent.click(screen.getByText(/Posting Topik/i));
+    mockCreate();
 
-    expect(mockCreate).toHaveBeenCalled();
+    await waitFor(() => expect(mockCreate).toHaveBeenCalled());
   });
 });

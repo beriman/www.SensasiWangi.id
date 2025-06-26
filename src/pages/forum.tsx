@@ -779,10 +779,11 @@ export default function Forum() {
                           </div>
 
                           <div className="space-y-2">
-                            <label className="text-sm font-medium text-[#2d3748]">
+                            <label htmlFor="topic-title" className="text-sm font-medium text-[#2d3748]">
                               Judul Topik
                             </label>
                             <Input
+                              id="topic-title"
                               placeholder="Masukkan judul topik yang menarik..."
                               value={newTopicTitle}
                               onChange={(e) => setNewTopicTitle(e.target.value)}
@@ -791,10 +792,11 @@ export default function Forum() {
                           </div>
 
                           <div className="space-y-2">
-                            <label className="text-sm font-medium text-[#2d3748]">
+                            <label htmlFor="topic-content" className="text-sm font-medium text-[#2d3748]">
                               Konten
                             </label>
                             <Textarea
+                              id="topic-content"
                               placeholder="Tulis konten topik Anda di sini... Bagikan pengalaman, ajukan pertanyaan, atau mulai diskusi menarik!"
                               value={newTopicContent}
                               onChange={(e) =>
@@ -805,10 +807,11 @@ export default function Forum() {
                           </div>
 
                           <div className="space-y-2">
-                            <label className="text-sm font-medium text-[#2d3748]">
+                            <label htmlFor="topic-tags" className="text-sm font-medium text-[#2d3748]">
                               Tags (pisahkan dengan koma)
                             </label>
                             <Input
+                              id="topic-tags"
                               placeholder="contoh: fruity, sweet"
                               value={newTopicTags}
                               onChange={(e) => setNewTopicTags(e.target.value)}

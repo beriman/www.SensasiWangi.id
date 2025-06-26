@@ -188,8 +188,11 @@ export default function MarketplaceCheckout() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label className="text-sm text-[#718096]">Nama Lengkap</Label>
+                <Label htmlFor="name" className="text-sm text-[#718096]">
+                  Nama Lengkap
+                </Label>
                 <Input
+                  id="name"
                   value={shippingAddress.name}
                   onChange={(e) =>
                     setShippingAddress((p) => ({ ...p, name: e.target.value }))
@@ -198,8 +201,11 @@ export default function MarketplaceCheckout() {
                 />
               </div>
               <div>
-                <Label className="text-sm text-[#718096]">No. Telepon</Label>
+                <Label htmlFor="phone" className="text-sm text-[#718096]">
+                  No. Telepon
+                </Label>
                 <Input
+                  id="phone"
                   value={shippingAddress.phone}
                   onChange={(e) =>
                     setShippingAddress((p) => ({ ...p, phone: e.target.value }))
@@ -209,8 +215,11 @@ export default function MarketplaceCheckout() {
               </div>
             </div>
             <div>
-              <Label className="text-sm text-[#718096]">Alamat Lengkap</Label>
+              <Label htmlFor="address" className="text-sm text-[#718096]">
+                Alamat Lengkap
+              </Label>
               <Textarea
+                id="address"
                 value={shippingAddress.address}
                 onChange={(e) =>
                   setShippingAddress((p) => ({ ...p, address: e.target.value }))
@@ -220,8 +229,11 @@ export default function MarketplaceCheckout() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label className="text-sm text-[#718096]">Kota</Label>
+                <Label htmlFor="city" className="text-sm text-[#718096]">
+                  Kota
+                </Label>
                 <Input
+                  id="city"
                   value={shippingAddress.city}
                   onChange={(e) =>
                     setShippingAddress((p) => ({ ...p, city: e.target.value }))
@@ -230,8 +242,11 @@ export default function MarketplaceCheckout() {
                 />
               </div>
               <div>
-                <Label className="text-sm text-[#718096]">Kode Pos</Label>
+                <Label htmlFor="postalCode" className="text-sm text-[#718096]">
+                  Kode Pos
+                </Label>
                 <Input
+                  id="postalCode"
                   value={shippingAddress.postalCode}
                   onChange={(e) =>
                     setShippingAddress((p) => ({
@@ -243,8 +258,11 @@ export default function MarketplaceCheckout() {
                 />
               </div>
               <div>
-                <Label className="text-sm text-[#718096]">Provinsi</Label>
+                <Label htmlFor="province" className="text-sm text-[#718096]">
+                  Provinsi
+                </Label>
                 <Input
+                  id="province"
                   value={shippingAddress.province}
                   onChange={(e) =>
                     setShippingAddress((p) => ({

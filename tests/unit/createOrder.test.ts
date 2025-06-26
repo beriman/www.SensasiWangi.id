@@ -20,7 +20,7 @@ const baseArgs = {
 describe('createOrder', () => {
   it('throws when unauthenticated', async () => {
     const ctx = { auth: { getUserIdentity: jest.fn().mockResolvedValue(null) } } as any;
-    await expect(createOrder.handler(ctx, baseArgs as any)).rejects.toThrow('Anda harus login');
+    await expect(createOrder._handler(ctx, baseArgs as any)).rejects.toThrow('Anda harus login');
   });
 
   it('throws when product missing', async () => {
@@ -31,6 +31,6 @@ describe('createOrder', () => {
         get: jest.fn().mockResolvedValue(null),
       },
     } as any;
-    await expect(createOrder.handler(ctx, baseArgs as any)).rejects.toThrow('Produk tidak ditemukan');
+    await expect(createOrder._handler(ctx, baseArgs as any)).rejects.toThrow('Produk tidak ditemukan');
   });
 });
