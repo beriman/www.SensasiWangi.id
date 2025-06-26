@@ -5,6 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Star, Share, Instagram, Twitter } from "lucide-react";
+import { Helmet } from "react-helmet";
 
 export default function MarketplaceProduct() {
   const { id } = useParams();
@@ -59,6 +60,13 @@ export default function MarketplaceProduct() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
+      <Helmet>
+        <title>{`${product.title} - Marketplace - Sensasi Wangi`}</title>
+        <meta
+          name="description"
+          content={product.description || "Product details on Sensasi Wangi"}
+        />
+      </Helmet>
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8 space-y-8">
         <div className="flex flex-col md:flex-row gap-8">

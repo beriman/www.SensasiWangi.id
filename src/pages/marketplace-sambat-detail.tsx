@@ -4,6 +4,7 @@ import { api } from "../../convex/_generated/api";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Progress } from "@/components/ui/progress";
+import { Helmet } from "react-helmet";
 
 export default function MarketplaceSambatDetail() {
   const { id } = useParams();
@@ -38,6 +39,13 @@ export default function MarketplaceSambatDetail() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
+      <Helmet>
+        <title>{`${product.title} - Sambat - Sensasi Wangi`}</title>
+        <meta
+          name="description"
+          content={`Join a shared purchase of ${product.title}`}
+        />
+      </Helmet>
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8 space-y-8">
         <div className="flex flex-col md:flex-row gap-8">

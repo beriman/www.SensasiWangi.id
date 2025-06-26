@@ -54,6 +54,7 @@ import { useUser } from "@clerk/clerk-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { LoadingSpinner } from "@/components/loading-spinner";
+import { Helmet } from "react-helmet";
 
 interface Topic {
   _id: Id<"topics">;
@@ -602,6 +603,13 @@ export default function Forum() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
+      <Helmet>
+        <title>Sensasi Wangi - Forum</title>
+        <meta
+          name="description"
+          content="Discuss perfumes and share tips with other enthusiasts"
+        />
+      </Helmet>
       <Navbar />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-12">
@@ -1095,6 +1103,7 @@ export default function Forum() {
                                   Downvote
                                 </button>
                                 <button
+                                  aria-label="Share topic"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     if (navigator.share) {
@@ -1246,6 +1255,7 @@ export default function Forum() {
                                 Downvote
                               </button>
                               <button
+                                aria-label="Bookmark topic"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleBookmarkTopic(topic._id);
@@ -1261,6 +1271,7 @@ export default function Forum() {
                                 <Bookmark className="h-4 w-4" />
                               </button>
                               <button
+                                aria-label="Share topic"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   if (navigator.share) {
