@@ -9,6 +9,7 @@ export default defineSchema({
     tokenIdentifier: v.string(),
     role: v.string(),
     contributionPoints: v.number(),
+    weeklyContributionPoints: v.number(),
     badges: v.array(v.string()),
     experiencePoints: v.number(), // Baru: Poin pengalaman untuk leveling
     level: v.number(),            // Baru: Level pengguna
@@ -671,4 +672,14 @@ export default defineSchema({
     previousContent: v.string(),
     createdAt: v.number(),
   }).index("by_doc", ["docType", "docId"]),
+
+  weeklyLeaderboard: defineTable({
+    weekStart: v.number(),
+    userId: v.id("users"),
+    name: v.optional(v.string()),
+    image: v.optional(v.string()),
+    points: v.number(),
+  })
+    .index("by_week", ["weekStart"])
+    .index("by_week_points", ["weekStart", "points"]),
 });

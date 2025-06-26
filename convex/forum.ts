@@ -483,6 +483,7 @@ export const createTopic = mutation({
 
     await ctx.db.patch(user._id, {
       contributionPoints: newPoints,
+      weeklyContributionPoints: (user.weeklyContributionPoints ?? 0) + 10,
       badges: newBadges,
     });
 
@@ -775,6 +776,7 @@ export const createComment = mutation({
 
     await ctx.db.patch(user._id, {
       contributionPoints: newPoints,
+      weeklyContributionPoints: (user.weeklyContributionPoints ?? 0) + 2,
       badges: newBadges,
     });
 

@@ -302,6 +302,7 @@ export const createProduct = mutation({
     // Award contribution points for creating product
     await ctx.db.patch(user._id, {
       contributionPoints: (user.contributionPoints || 0) + 10,
+      weeklyContributionPoints: (user.weeklyContributionPoints || 0) + 10,
     });
 
     // Create notification for successful product creation
@@ -589,6 +590,7 @@ export const updatePaymentStatus = mutation({
       if (buyer) {
         await ctx.db.patch(buyer._id, {
           contributionPoints: (buyer.contributionPoints ?? 0) + 5,
+          weeklyContributionPoints: (buyer.weeklyContributionPoints ?? 0) + 5,
         });
       }
     }
@@ -793,6 +795,7 @@ export const createReview = mutation({
       reviewCount: newReviewCount,
       badges: Array.from(badges),
       contributionPoints: (user.contributionPoints ?? 0) + 3,
+      weeklyContributionPoints: (user.weeklyContributionPoints ?? 0) + 3,
     });
 
     const sellerProfile = await ctx.db
@@ -827,6 +830,7 @@ export const createReview = mutation({
       await ctx.db.patch(sellerUser._id, {
         badges: Array.from(sellerBadges),
         contributionPoints: (sellerUser.contributionPoints ?? 0) + 5,
+        weeklyContributionPoints: (sellerUser.weeklyContributionPoints ?? 0) + 5,
       });
     }
   },
@@ -2527,3 +2531,30 @@ export const trackShipment = action({
       });
     },
   });
+
+export const expireUnpaidOrders = internalMutation({
+  handler: async (ctx) => {
+    const now = Date.now();
+    const orders = await ctx.db
+      .query("orders")
+      .withIndex("by_payment_status", (q) => q.eq("paymentStatus", "pending"))
+      .collect();
+    for (const order of orders) {
+      if (order.paymentExpiry && order.paymentExpiry < now) {
+        await ctx.db.patch(order._id, {
+          paymentStatus: "failed",
+          orderStatus: "cancelled",
+          updatedAt: now,
+        });
+        const product = await ctx.db.get(order.productId);
+        if (product) {
+          await ctx.db.patch(order.productId, {
+            status: "active",
+            stock: (product.stock || 0) + 1,
+            updatedAt: now,
+          });
+        }
+      }
+    }
+  },
+});
