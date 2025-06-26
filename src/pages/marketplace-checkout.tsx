@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { useUser } from "@clerk/clerk-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import QRCode from "react-qr-code";
 
 const SHIPPING_METHODS = [
   "JNE",
@@ -24,6 +25,11 @@ const SHIPPING_METHODS = [
   "Pos Indonesia",
   "Anteraja",
   "Ninja Express",
+];
+
+const PAYMENT_METHODS = [
+  { value: "transfer", label: "Transfer Bank (BRI VA)" },
+  { value: "qris", label: "QRIS" },
 ];
 
 type CartItem = { id: string; title: string; price: number };
@@ -56,6 +62,8 @@ export default function MarketplaceCheckout() {
     province: "",
   });
   const [shippingMethod, setShippingMethod] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("transfer");
+  const [qrString, setQrString] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,17 +121,18 @@ export default function MarketplaceCheckout() {
     try {
       const ids = [] as string[];
       for (const item of cart) {
-        const id = await createOrder({
+        const res = await createOrder({
           productId: item.id as any,
           shippingAddress,
           origin: shippingAddress.city,
           destination: shippingAddress.city,
           shippingMethod,
           shippingCost,
-          paymentMethod: "transfer",
+          paymentMethod,
           notes: notes.trim() || undefined,
         });
-        ids.push(id as any);
+        ids.push(res.orderId as any);
+        if (paymentMethod === "qris") setQrString(res.qrString || "");
       }
       setOrderId(ids[0] as any);
       localStorage.removeItem("marketplaceCart");
@@ -266,6 +275,23 @@ export default function MarketplaceCheckout() {
             </div>
             <div>
               <Label className="text-[#2d3748] font-medium mb-2 block">
+                Metode Pembayaran
+              </Label>
+              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                <SelectTrigger className="neumorphic-input border-0">
+                  <SelectValue placeholder="Pilih metode" />
+                </SelectTrigger>
+                <SelectContent className="neumorphic-card border-0">
+                  {PAYMENT_METHODS.map((m) => (
+                    <SelectItem key={m.value} value={m.value}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-[#2d3748] font-medium mb-2 block">
                 Catatan (Opsional)
               </Label>
               <Textarea
@@ -280,11 +306,18 @@ export default function MarketplaceCheckout() {
           </form>
         ) : (
           <div className="space-y-4 max-w-lg">
-            <p>
-              Order berhasil dibuat. Silakan transfer total pembayaran ke nomor
-              virtual account masing-masing order atau gunakan QRIS. Setelah
-              membayar, unggah bukti pembayaran Anda.
-            </p>
+            {paymentMethod === "qris" && qrString ? (
+              <div className="space-y-2">
+                <p>Scan QR berikut untuk membayar:</p>
+                <QRCode value={qrString} />
+              </div>
+            ) : (
+              <p>
+                Order berhasil dibuat. Silakan transfer total pembayaran ke
+                nomor virtual account masing-masing order. Setelah membayar,
+                unggah bukti pembayaran Anda.
+              </p>
+            )}
             <Input
               type="file"
               onChange={(e) => setFile(e.target.files?.[0] || null)}

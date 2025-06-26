@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query, action } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
-import { createVirtualAccount } from "../src/utils/bri";
+import { createVirtualAccount, createQris } from "../src/utils/bri";
 
 const DEFAULT_PREFS = {
   badge: true,
@@ -501,18 +501,28 @@ export const createOrder = mutation({
     const totalAmount = discountedPrice + args.shippingCost;
 
     let vaNumber = "";
+    let qrString = "";
     let paymentExpiry = now + 24 * 60 * 60 * 1000;
-    try {
-      const va = await createVirtualAccount(
-        `${now}`,
-        totalAmount,
-        user.name || "Pembeli",
-      );
-      vaNumber = va.virtualAccount;
-      paymentExpiry = new Date(va.expiredDate).getTime();
-    } catch (err) {
-      console.error("Failed to create BRI VA", err);
-      vaNumber = `8808${Date.now().toString().slice(-8)}`;
+    if (args.paymentMethod === "qris") {
+      try {
+        const qris = await createQris(`${now}`, totalAmount);
+        qrString = qris.qrString;
+      } catch (err) {
+        console.error("Failed to create BRI QRIS", err);
+      }
+    } else {
+      try {
+        const va = await createVirtualAccount(
+          `${now}`,
+          totalAmount,
+          user.name || "Pembeli",
+        );
+        vaNumber = va.virtualAccount;
+        paymentExpiry = new Date(va.expiredDate).getTime();
+      } catch (err) {
+        console.error("Failed to create BRI VA", err);
+        vaNumber = `8808${Date.now().toString().slice(-8)}`;
+      }
     }
 
     const orderId = await ctx.db.insert("orders", {
@@ -546,7 +556,7 @@ export const createOrder = mutation({
       updatedAt: now,
     });
 
-    return orderId;
+    return { orderId, qrString };
   },
 });
 
