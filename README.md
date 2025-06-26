@@ -71,13 +71,13 @@ _Versi dokumen: 1.1.0 (Updated: Juni 2025)_
 
 ## Development Seeds
 
-Populate your Convex deployment with sample marketplace data using:
+Populate your Convex deployment with sample marketplace and course data using:
 
 ```bash
 CONVEX_URL=<your_convex_url> npx ts-node scripts/seed.ts
 ```
 
-The command calls `api.marketplace.initializeSampleData` to insert starter brands, perfumers and fragrances for local testing.
+The command now calls both `api.marketplace.initializeSampleData` and `api.courses.initializeAdvancedModules` to insert starter marketplace records and an advanced course with lessons and quizzes.
 
 ## Running Tests
 
