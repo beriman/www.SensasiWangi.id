@@ -12,7 +12,7 @@ const baseArgs = {
 describe('createTopic', () => {
   it('throws when unauthenticated', async () => {
     const ctx = { auth: { getUserIdentity: jest.fn().mockResolvedValue(null) } } as any;
-    await expect(createTopic.handler(ctx, baseArgs as any)).rejects.toThrow('Anda harus login');
+    await expect(createTopic._handler(ctx, baseArgs as any)).rejects.toThrow('Anda harus login');
   });
 
   it('inserts topic for valid user', async () => {
@@ -29,7 +29,7 @@ describe('createTopic', () => {
       scheduler: { runAfter: jest.fn() },
     } as any;
 
-    const id = await createTopic.handler(ctx, baseArgs as any);
+    const id = await createTopic._handler(ctx, baseArgs as any);
     expect(id).toBe('t1');
     expect(ctx.db.insert).toHaveBeenCalledWith('topics', expect.any(Object));
   });
