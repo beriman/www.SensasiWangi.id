@@ -560,6 +560,15 @@ export default defineSchema({
     .index("by_read", ["read"])
     .index("by_created_at", ["createdAt"]),
 
+  pushSubscriptions: defineTable({
+    userId: v.id("users"),
+    endpoint: v.string(),
+    keys: v.object({
+      p256dh: v.string(),
+      auth: v.string(),
+    }),
+  }).index("by_user", ["userId"]),
+
   follows: defineTable({
     followerId: v.id("users"),
     followingId: v.id("users"),
