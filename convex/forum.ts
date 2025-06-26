@@ -263,6 +263,82 @@ export const reportTopic = mutation({
   },
 });
 
+// Mutation untuk memberikan vote pada laporan
+export const voteReport = mutation({
+  args: { reportId: v.id("topicReports"), value: v.union(v.literal(1), v.literal(-1)) },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login untuk vote");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    const report = await ctx.db.get(args.reportId);
+    if (!report) throw new Error("Laporan tidak ditemukan");
+
+    const existing = await ctx.db
+      .query("reportVotes")
+      .withIndex("by_report_user", (q) =>
+        q.eq("reportId", args.reportId).eq("userId", user._id),
+      )
+      .unique();
+
+    if (!existing) {
+      await ctx.db.insert("reportVotes", {
+        reportId: args.reportId,
+        userId: user._id,
+        value: args.value,
+        createdAt: Date.now(),
+      });
+    } else if (existing.value === args.value) {
+      await ctx.db.delete(existing._id);
+    } else {
+      await ctx.db.patch(existing._id, { value: args.value });
+    }
+
+    const votes = await ctx.db
+      .query("reportVotes")
+      .withIndex("by_report", (q) => q.eq("reportId", args.reportId))
+      .collect();
+    return votes.reduce((sum, v) => sum + v.value, 0);
+  },
+});
+
+// Query untuk mendapatkan laporan dengan vote terbanyak
+export const getTopReports = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const [reports, votes, topics, users] = await Promise.all([
+      ctx.db.query("topicReports").collect(),
+      ctx.db.query("reportVotes").collect(),
+      ctx.db.query("topics").collect(),
+      ctx.db.query("users").collect(),
+    ]);
+
+    const voteMap = new Map<string, number>();
+    for (const v of votes) {
+      voteMap.set(v.reportId, (voteMap.get(v.reportId) ?? 0) + v.value);
+    }
+    const topicMap = new Map(topics.map((t) => [t._id, t.title]));
+    const userMap = new Map(users.map((u) => [u._id, u.name]));
+
+    const queue = reports.map((r) => ({
+      id: r._id,
+      topicTitle: topicMap.get(r.topicId) ?? "",
+      reporter: userMap.get(r.reporterId) ?? "Unknown",
+      reason: r.reason,
+      votes: voteMap.get(r._id) ?? 0,
+      createdAt: r.createdAt,
+    }));
+
+    queue.sort((a, b) => b.votes - a.votes);
+    return queue.slice(0, args.limit ?? queue.length);
+  },
+});
+
 // Mutation untuk menandai topik sebagai solved
 export const markTopicSolved = mutation({
   args: { topicId: v.id("topics"), commentId: v.id("comments") },
