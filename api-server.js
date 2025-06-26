@@ -88,6 +88,23 @@ app.post('/api/bri/callback', async (req, res) => {
   }
 });
 
+app.post('/api/bri/qris-callback', async (req, res) => {
+  try {
+    const { orderId, status } = req.body || {};
+    if (!orderId || !status) {
+      return res.status(400).json({ error: 'Invalid payload' });
+    }
+    await convex.mutation(api.marketplace.updatePaymentStatus, {
+      orderId,
+      paymentStatus: status,
+    });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(port, () => {
   console.log(`API server listening on port ${port}`);
 });
