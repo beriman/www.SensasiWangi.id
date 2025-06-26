@@ -1,6 +1,7 @@
 import express from 'express';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from './convex/_generated/api.js';
+import { createBriWebhookHandler } from './bri-webhook.js';
 
 const convexUrl = process.env.CONVEX_URL;
 if (!convexUrl) {
@@ -105,6 +106,14 @@ app.post('/api/bri/qris-callback', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`API server listening on port ${port}`);
-});
+export const briWebhookHandler = createBriWebhookHandler(convex);
+
+app.post('/api/bri/webhook', briWebhookHandler);
+
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    console.log(`API server listening on port ${port}`);
+  });
+}
+
+export default app;

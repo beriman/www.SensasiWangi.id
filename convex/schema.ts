@@ -682,6 +682,14 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_user_time", ["userId", "createdAt"]),
 
+  briWebhookEvents: defineTable({
+    eventType: v.string(),
+    orderId: v.optional(v.id("orders")),
+    rawBody: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_order", ["orderId"]),
+
   weeklyLeaderboard: defineTable({
     weekStart: v.number(),
     userId: v.id("users"),
