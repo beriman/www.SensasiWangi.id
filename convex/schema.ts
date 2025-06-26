@@ -514,6 +514,18 @@ export default defineSchema({
     .index("by_item", ["itemId"])
     .index("by_user_item", ["userId", "itemId"]),
 
+  messages: defineTable({
+    senderId: v.id("users"),
+    recipientId: v.id("users"),
+    content: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_sender", ["senderId"])
+    .index("by_recipient", ["recipientId"])
+    .index("by_conversation", ["senderId", "recipientId"])
+    .index("by_created_at", ["createdAt"]),
+
   notifications: defineTable({
     userId: v.id("users"),
     type: v.string(),
