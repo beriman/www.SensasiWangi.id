@@ -305,6 +305,12 @@ export const createProduct = mutation({
       weeklyContributionPoints: (user.weeklyContributionPoints || 0) + 10,
     });
 
+    await ctx.runMutation(internal.points.recordPointEvent, {
+      userId: user._id,
+      activity: "create_product",
+      points: 10,
+    });
+
     // Create notification for successful product creation
     if (await allowNotification(ctx, user._id, "product")) {
       await ctx.db.insert("notifications", {

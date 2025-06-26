@@ -1,5 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
 import {
   Trophy,
   Star,
@@ -12,6 +15,7 @@ import {
 } from "lucide-react";
 
 interface UserStatsProps {
+  userId?: Id<"users">;
   level?: number;
   contributionPoints?: number;
   postsCount?: number;
@@ -24,6 +28,7 @@ interface UserStatsProps {
 }
 
 export function UserStats({
+  userId,
   level = 1,
   contributionPoints = 0,
   postsCount = 0,
@@ -34,6 +39,13 @@ export function UserStats({
   weeklyGoal = 100,
   weeklyProgress = 0,
 }: UserStatsProps) {
+  const stats = useQuery(api.points.getUserStats, userId ? { userId } : "skip");
+  if (stats) {
+    level = stats.level;
+    contributionPoints = stats.contributionPoints;
+    badges = stats.badges;
+  }
+
   const progressPercentage = Math.min((weeklyProgress / weeklyGoal) * 100, 100);
 
   const getLevelColor = (level: number) => {

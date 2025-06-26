@@ -23,6 +23,7 @@ import type * as forum from "../forum.js";
 import type * as marketplace from "../marketplace.js";
 import type * as messages from "../messages.js";
 import type * as notifications from "../notifications.js";
+import type * as points from "../points.js";
 import type * as progress from "../progress.js";
 import type * as rewards from "../rewards.js";
 import type * as search from "../search.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   marketplace: typeof marketplace;
   messages: typeof messages;
   notifications: typeof notifications;
+  points: typeof points;
   progress: typeof progress;
   rewards: typeof rewards;
   search: typeof search;

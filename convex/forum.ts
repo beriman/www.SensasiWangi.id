@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { internal } from "./_generated/api";
 
 // Threshold untuk menandai topik sebagai "hot"
 const HOT_LIKES_THRESHOLD = 10;
@@ -487,6 +488,12 @@ export const createTopic = mutation({
       badges: newBadges,
     });
 
+    await ctx.runMutation(internal.points.recordPointEvent, {
+      userId: user._id,
+      activity: "create_topic",
+      points: 10,
+    });
+
     // Buat notifikasi untuk badge baru
     if (newBadges.length > oldBadgeCount) {
       const newBadge = newBadges[newBadges.length - 1];
@@ -778,6 +785,12 @@ export const createComment = mutation({
       contributionPoints: newPoints,
       weeklyContributionPoints: (user.weeklyContributionPoints ?? 0) + 2,
       badges: newBadges,
+    });
+
+    await ctx.runMutation(internal.points.recordPointEvent, {
+      userId: user._id,
+      activity: "create_comment",
+      points: 2,
     });
 
     // Buat notifikasi untuk badge baru
