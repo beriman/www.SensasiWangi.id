@@ -87,7 +87,11 @@ const ImageEmbed = ({ onImageAdd, className = "" }: ImageEmbedProps) => {
                     <X className="h-3 w-3" />
                   </Button>
                 </div>
-                <img src={url} alt="embed" className="w-full rounded-lg" />
+                <img
+                  src={url}
+                  alt="Embedded image preview"
+                  className="w-full rounded-lg"
+                />
               </CardContent>
             </Card>
           ))}

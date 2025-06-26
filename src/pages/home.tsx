@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Helmet } from "react-helmet";
 
 const FEATURES = [
   {
@@ -80,6 +81,13 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
+      <Helmet>
+        <title>Sensasi Wangi - Home</title>
+        <meta
+          name="description"
+          content="Discover fragrances and join the Sensasi Wangi community"
+        />
+      </Helmet>
       <Navbar />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-24">
