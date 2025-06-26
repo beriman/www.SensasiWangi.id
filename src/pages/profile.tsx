@@ -185,10 +185,10 @@ function ProfileContent() {
   );
 
   const contributionPoints =
-    pointStats?.contributionPoints ?? profileData?.user.contributionPoints || 0;
+    pointStats?.contributionPoints ?? profileData?.user.contributionPoints ?? 0;
   const level = pointStats?.level ?? Math.floor(contributionPoints / 100) + 1;
   const progressPercentage = contributionPoints % 100;
-  const badges = pointStats?.badges ?? profileData?.user.badges || [];
+  const badges = pointStats?.badges ?? profileData?.user.badges ?? [];
 
   const getUserBadge = () => {
     const posts = userTopics?.length || 0;
