@@ -159,6 +159,8 @@ export default function Forum() {
   const updateAllCategoryCountsMutation = useMutation(
     api.forum.updateAllCategoryCounts,
   );
+  const mergeTopicsMutation = useMutation(api.forum.mergeTopics);
+  const moveTopicMutation = useMutation(api.forum.moveTopic);
 
   const selectedTopicComments = useQuery(
     api.forum.getCommentsByTopic,
@@ -388,6 +390,32 @@ export default function Forum() {
       }
     } catch (error) {
       console.error("Error toggling lock:", error);
+    }
+  };
+
+  const handleMoveTopic = async () => {
+    if (!currentUser || currentUser.role !== "admin" || !selectedTopic) return;
+    const newCat = prompt("Kategori baru");
+    if (!newCat) return;
+    try {
+      await moveTopicMutation({ topicId: selectedTopic._id, newCategory: newCat } as any);
+      setSelectedTopic({ ...selectedTopic, category: newCat });
+      toast({ title: "Topik dipindahkan" });
+    } catch (err) {
+      console.error("Error moving topic", err);
+    }
+  };
+
+  const handleMergeTopic = async () => {
+    if (!currentUser || currentUser.role !== "admin" || !selectedTopic) return;
+    const targetId = prompt("ID topik tujuan");
+    if (!targetId) return;
+    try {
+      await mergeTopicsMutation({ sourceId: selectedTopic._id, targetId: targetId as any } as any);
+      toast({ title: "Topik digabung" });
+      setIsTopicDetailOpen(false);
+    } catch (err) {
+      console.error("Error merging topics", err);
     }
   };
 
@@ -1387,6 +1415,24 @@ export default function Forum() {
                                 {selectedTopic.isLocked ? "Unlock" : "Lock"}
                               </Button>
                             )}
+                          {currentUser && currentUser.role === "admin" && (
+                            <>
+                              <Button
+                                onClick={handleMoveTopic}
+                                variant="outline"
+                                className="neumorphic-button-sm"
+                              >
+                                Move
+                              </Button>
+                              <Button
+                                onClick={handleMergeTopic}
+                                variant="outline"
+                                className="neumorphic-button-sm"
+                              >
+                                Merge
+                              </Button>
+                            </>
+                          )}
                         </div>
 
                         {/* Comments Section Placeholder */}
