@@ -106,14 +106,14 @@ export const advancedSearchTopics = query({
     tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    let q = ctx.db.query("topics");
-    if (args.authorId) {
-      q = q.withIndex("by_author", (qq) => qq.eq("authorId", args.authorId));
-    } else {
-      q = q.withIndex("by_created_at").order("desc");
-    }
+    const queryBuilder = args.authorId
+      ? ctx
+          .db
+          .query("topics")
+          .withIndex("by_author", (qq) => qq.eq("authorId", args.authorId))
+      : ctx.db.query("topics").withIndex("by_created_at").order("desc");
 
-    const topics = await q.collect();
+    const topics = await queryBuilder.collect();
 
     let results = topics;
     if (args.startDate) {
