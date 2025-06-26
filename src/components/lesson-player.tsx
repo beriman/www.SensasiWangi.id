@@ -10,7 +10,7 @@ interface LessonPlayerProps {
 export default function LessonPlayer({ lessonId }: LessonPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const lesson = useQuery(api.courses.getLesson, { lessonId });
-  const userProgress = useQuery(api.progress.getProgress, { lessonId });
+  const userProgress: any = useQuery(api.progress.getProgress, { lessonId });
   const save = useMutation(api.progress.saveProgress);
 
   useEffect(() => {

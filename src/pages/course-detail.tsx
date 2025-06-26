@@ -15,11 +15,11 @@ export default function CourseDetail() {
     api.courses.getLessons,
     id ? { courseId: id as any } : "skip"
   );
-  const progress = useQuery(
+  const progress: any = useQuery(
     api.progress.getCourseProgress,
     id ? { courseId: id as any } : "skip"
   );
-  const certificate = useQuery(
+  const certificate: any = useQuery(
     api.certificates.getCertificate,
     id ? { courseId: id as any } : "skip"
   );
