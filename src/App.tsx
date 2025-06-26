@@ -30,6 +30,7 @@ import OrderReviewPage from "./pages/order-review";
 import OrderDetail from "./pages/order-detail";
 import MarketplaceCheckout from "./pages/marketplace-checkout";
 import Messages from "./pages/messages";
+import Leaderboard from "./pages/leaderboard";
 
 import Settings from "./pages/settings";
 import { Toaster } from "@/components/ui/toaster";
@@ -54,6 +55,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/collections" element={<Collections />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route
             path="/marketplace/product/:id"

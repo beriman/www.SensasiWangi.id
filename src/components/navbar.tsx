@@ -146,6 +146,25 @@ export function Navbar() {
               </svg>
               Database
             </Link>
+            <Link
+              to="/leaderboard"
+              className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
+            >
+              <svg
+                className="w-4 h-4 mr-1.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M12 8l3 8H9l3-8z"
+                />
+              </svg>
+              Leaderboard
+            </Link>
             <Button
               onClick={handleDashboard}
               className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
@@ -288,6 +307,27 @@ export function Navbar() {
                     Database
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    to="/leaderboard"
+                    className="flex items-center px-2 py-2 text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg transition-colors"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M12 8l3 8H9l3-8z"
+                      />
+                    </svg>
+                    Leaderboard
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleDashboard}>
                   <div className="flex items-center px-2 py-2 text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg transition-colors">
                     <svg
@@ -397,6 +437,12 @@ export function Navbar() {
                         className="neumorphic-button-sm w-full text-left"
                       >
                         Database
+                      </Link>
+                      <Link
+                        to="/leaderboard"
+                        className="neumorphic-button-sm w-full text-left"
+                      >
+                        Leaderboard
                       </Link>
                       <Button
                         onClick={handleDashboard}
