@@ -457,6 +457,42 @@ export const createTopic = mutation({
   },
 });
 
+// Mutation untuk mengedit topik
+export const editTopic = mutation({
+  args: { topicId: v.id("topics"), title: v.string(), content: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    const topic = await ctx.db.get(args.topicId);
+    if (!topic) throw new Error("Topik tidak ditemukan");
+    if (topic.authorId !== user._id) throw new Error("Bukan pemilik topik");
+
+    await ctx.db.insert("edits", {
+      docType: "topic",
+      docId: topic._id,
+      editorId: user._id,
+      previousTitle: topic.title,
+      previousContent: topic.content,
+      createdAt: Date.now(),
+    });
+
+    await ctx.db.patch(args.topicId, {
+      title: args.title,
+      content: args.content,
+      updatedAt: Date.now(),
+    });
+
+    return true;
+  },
+});
+
 // Mutation untuk like/unlike topik
 export const toggleTopicLike = mutation({
   args: { topicId: v.id("topics") },
@@ -721,6 +757,40 @@ export const createComment = mutation({
   },
 });
 
+// Mutation untuk mengedit komentar
+export const editComment = mutation({
+  args: { commentId: v.id("comments"), content: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    const comment = await ctx.db.get(args.commentId);
+    if (!comment) throw new Error("Komentar tidak ditemukan");
+    if (comment.authorId !== user._id) throw new Error("Bukan pemilik komentar");
+
+    await ctx.db.insert("edits", {
+      docType: "comment",
+      docId: comment._id,
+      editorId: user._id,
+      previousContent: comment.content,
+      createdAt: Date.now(),
+    });
+
+    await ctx.db.patch(args.commentId, {
+      content: args.content,
+      updatedAt: Date.now(),
+    });
+
+    return true;
+  },
+});
+
 // Mutation untuk upvote/downvote komentar
 export const toggleCommentVote = mutation({
   args: {
@@ -841,6 +911,20 @@ export const getAllTags = query({
       }
     }
     return Array.from(tagSet);
+  },
+});
+
+// Query untuk mendapatkan riwayat edit
+export const getEditHistory = query({
+  args: { docType: v.string(), docId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("edits")
+      .withIndex("by_doc", (q) =>
+        q.eq("docType", args.docType).eq("docId", args.docId),
+      )
+      .order("desc")
+      .collect();
   },
 });
 
