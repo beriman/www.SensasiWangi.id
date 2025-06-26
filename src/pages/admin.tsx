@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
@@ -93,6 +93,7 @@ function AdminContent() {
 
   const verifyPayment = useMutation(api.marketplace.verifyOrderPayment);
   const updateStatus = useMutation(api.marketplace.updateOrderStatus);
+  const trackShipment = useAction(api.marketplace.trackShipment);
   const updateUserRole = useMutation(api.users.updateUserRole);
   const suspendUser = useMutation(api.admin.suspendUser);
   const deleteUser = useMutation(api.admin.deleteUser);
@@ -1078,18 +1079,29 @@ function AdminContent() {
                                   </Button>
                                 )}
                                 {order.orderStatus === "shipped" && (
-                                  <Button
-                                    size="sm"
-                                    className="neumorphic-button-sm h-8 px-3 text-xs"
-                                    onClick={async () => {
-                                      await updateStatus({
-                                        orderId: order._id,
-                                        status: "delivered",
-                                      });
-                                    }}
-                                  >
-                                    Selesai
-                                  </Button>
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      className="neumorphic-button-sm h-8 px-3 text-xs"
+                                      onClick={async () => {
+                                        await trackShipment({ orderId: order._id });
+                                      }}
+                                    >
+                                      Refresh
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      className="neumorphic-button-sm h-8 px-3 text-xs"
+                                      onClick={async () => {
+                                        await updateStatus({
+                                          orderId: order._id,
+                                          status: "delivered",
+                                        });
+                                      }}
+                                    >
+                                      Selesai
+                                    </Button>
+                                  </>
                                 )}
                               </div>
                             </TableCell>

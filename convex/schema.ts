@@ -217,6 +217,16 @@ export default defineSchema({
     .index("by_order_status", ["orderStatus"])
     .index("by_created_at", ["createdAt"]),
 
+  orderTracking: defineTable({
+    orderId: v.id("orders"),
+    manifestCode: v.optional(v.string()),
+    description: v.string(),
+    cityName: v.optional(v.string()),
+    manifestDate: v.string(),
+    manifestTime: v.string(),
+    createdAt: v.number(),
+  }).index("by_order", ["orderId"]),
+
   reviews: defineTable({
     orderId: v.id("orders"),
     productId: v.id("products"),

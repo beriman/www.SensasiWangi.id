@@ -1,5 +1,10 @@
 import { v } from "convex/values";
-import { mutation, query, action } from "./_generated/server";
+import {
+  mutation,
+  query,
+  action,
+  internalMutation,
+} from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { createVirtualAccount, createQris } from "../src/utils/bri";
 
@@ -2430,5 +2435,93 @@ export const calculateShippingCost = action({
     } catch (_) {
       throw new Error("Invalid response from RajaOngkir");
     }
+  },
+});
+
+export const addOrderTrackingEvent = internalMutation({
+  args: {
+    orderId: v.id("orders"),
+    manifestCode: v.optional(v.string()),
+    description: v.string(),
+    cityName: v.optional(v.string()),
+    manifestDate: v.string(),
+    manifestTime: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("orderTracking", {
+      orderId: args.orderId,
+      manifestCode: args.manifestCode,
+      description: args.description,
+      cityName: args.cityName,
+      manifestDate: args.manifestDate,
+      manifestTime: args.manifestTime,
+      createdAt: Date.now(),
+    });
+  },
+});
+
+export const getOrderTracking = query({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("orderTracking")
+      .withIndex("by_order", (q) => q.eq("orderId", args.orderId))
+      .order("desc")
+      .collect();
+  },
+});
+
+export const trackShipment = action({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) throw new Error("Order tidak ditemukan");
+    if (!order.trackingNumber)
+      throw new Error("Order belum memiliki nomor resi");
+    const key = process.env.RAJAONGKIR_API_KEY;
+    if (!key) throw new Error("Missing RajaOngkir API key");
+    const res = await fetch("https://pro.rajaongkir.com/api/waybill", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", key },
+      body: JSON.stringify({
+        waybill: order.trackingNumber,
+        courier: order.shippingMethod,
+      }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Failed to fetch tracking: ${res.status} ${text}`);
+    }
+    const data = await res.json();
+    const manifest = data?.rajaongkir?.result?.manifest ?? [];
+    const existing = await ctx.db
+      .query("orderTracking")
+      .withIndex("by_order", (q) => q.eq("orderId", args.orderId))
+      .collect();
+    const keys = new Set(
+      existing.map(
+        (e) => `${e.manifestDate}-${e.manifestTime}-${e.description}`,
+      ),
+    );
+    for (const m of manifest) {
+      const unique = `${m.manifest_date}-${m.manifest_time}-${m.manifest_description}`;
+      if (!keys.has(unique)) {
+        await ctx.db.insert("orderTracking", {
+          orderId: args.orderId,
+          manifestCode: m.manifest_code ?? "",
+          description: m.manifest_description ?? "",
+          cityName: m.city_name ?? "",
+          manifestDate: m.manifest_date ?? "",
+          manifestTime: m.manifest_time ?? "",
+          createdAt: Date.now(),
+        });
+        keys.add(unique);
+      }
+    }
+    return await ctx.db
+      .query("orderTracking")
+      .withIndex("by_order", (q) => q.eq("orderId", args.orderId))
+      .order("desc")
+      .collect();
   },
 });

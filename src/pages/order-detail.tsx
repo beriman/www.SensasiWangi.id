@@ -26,6 +26,10 @@ function OrderDetailContent() {
     api.marketplace.getOrderById,
     orderId ? { orderId: orderId as any } : "skip",
   );
+  const tracking = useQuery(
+    api.marketplace.getOrderTracking,
+    order && order.trackingNumber ? { orderId: order._id } : "skip",
+  );
   if (order === undefined || currentUser === undefined) return <div>Loading...</div>;
   if (order === null) return <div>Order tidak ditemukan</div>;
   if (currentUser && currentUser._id !== order.buyerId && currentUser._id !== order.sellerId) {
@@ -72,6 +76,24 @@ function OrderDetailContent() {
             {order.trackingNumber && <p>Resi: {order.trackingNumber}</p>}
           </CardContent>
         </Card>
+
+        {order.trackingNumber && tracking && (
+          <Card className="neumorphic-card border-0">
+            <CardHeader>
+              <CardTitle>Riwayat Pengiriman</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm space-y-1">
+              <ul className="space-y-1">
+                {tracking.map((t: any, idx: number) => (
+                  <li key={idx}>
+                    {t.manifestDate} {t.manifestTime} - {t.description}
+                    {t.cityName ? ` (${t.cityName})` : ""}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
 
         {order.paymentProofUrl && (
           <Card className="neumorphic-card border-0">
