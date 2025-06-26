@@ -115,6 +115,10 @@ BRI_INSTITUTION_CODE=<institution_code>
 BRI_BRIVA_NO=<briva_number>
 ```
 
+After registering, configure the callback URL in your BRI dashboard to point to
+`/api/bri/webhook`. Successful payment notifications will automatically verify
+orders and every webhook payload is stored for auditing.
+
 ### Cloudinary
 
 Image uploads rely on Cloudinary. Set these variables in your `.env`:
