@@ -258,6 +258,7 @@ export const initializeAdvancedModules = mutation({
       description: "Pendalaman teknik formulasi parfum lanjutan",
       category: "perfumery",
       level: "advanced",
+      price: 0,
       image:
         "https://images.unsplash.com/photo-1512427691650-dbd6a56d1e21?w=400&q=80",
       instructor: "Dr. Aroma",
