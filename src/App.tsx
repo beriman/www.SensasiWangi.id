@@ -29,6 +29,7 @@ import ResetPassword from "./pages/reset-password";
 import OrderReviewPage from "./pages/order-review";
 import OrderDetail from "./pages/order-detail";
 import MarketplaceCheckout from "./pages/marketplace-checkout";
+import Messages from "./pages/messages";
 
 import Settings from "./pages/settings";
 import { Toaster } from "@/components/ui/toaster";
@@ -49,6 +50,7 @@ function App() {
           <Route path="/Forum" element={<Navigate to="/forum" replace />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/messages" element={<Messages />} />
           <Route path="/collections" element={<Collections />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route
