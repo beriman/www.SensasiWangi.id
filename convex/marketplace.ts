@@ -5,6 +5,7 @@ import {
   action,
   internalMutation,
 } from "./_generated/server";
+import { api, internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import { createVirtualAccount, createQris } from "../src/utils/bri";
 
@@ -2474,7 +2475,9 @@ export const getOrderTracking = query({
 export const trackShipment = action({
   args: { orderId: v.id("orders") },
   handler: async (ctx, args) => {
-    const order = await ctx.db.get(args.orderId);
+    const order = await ctx.runQuery(api.marketplace.getOrderById, {
+      orderId: args.orderId,
+    });
     if (!order) throw new Error("Order tidak ditemukan");
     if (!order.trackingNumber)
       throw new Error("Order belum memiliki nomor resi");
@@ -2494,10 +2497,9 @@ export const trackShipment = action({
     }
     const data = await res.json();
     const manifest = data?.rajaongkir?.result?.manifest ?? [];
-    const existing = await ctx.db
-      .query("orderTracking")
-      .withIndex("by_order", (q) => q.eq("orderId", args.orderId))
-      .collect();
+    const existing = await ctx.runQuery(api.marketplace.getOrderTracking, {
+      orderId: args.orderId,
+    });
     const keys = new Set(
       existing.map(
         (e) => `${e.manifestDate}-${e.manifestTime}-${e.description}`,
@@ -2505,23 +2507,23 @@ export const trackShipment = action({
     );
     for (const m of manifest) {
       const unique = `${m.manifest_date}-${m.manifest_time}-${m.manifest_description}`;
-      if (!keys.has(unique)) {
-        await ctx.db.insert("orderTracking", {
-          orderId: args.orderId,
-          manifestCode: m.manifest_code ?? "",
-          description: m.manifest_description ?? "",
-          cityName: m.city_name ?? "",
-          manifestDate: m.manifest_date ?? "",
-          manifestTime: m.manifest_time ?? "",
-          createdAt: Date.now(),
-        });
-        keys.add(unique);
+        if (!keys.has(unique)) {
+          await ctx.runMutation(
+            internal.marketplace.addOrderTrackingEvent,
+            {
+              orderId: args.orderId,
+              manifestCode: m.manifest_code ?? "",
+              description: m.manifest_description ?? "",
+              cityName: m.city_name ?? "",
+              manifestDate: m.manifest_date ?? "",
+              manifestTime: m.manifest_time ?? "",
+            },
+          );
+          keys.add(unique);
+        }
       }
-    }
-    return await ctx.db
-      .query("orderTracking")
-      .withIndex("by_order", (q) => q.eq("orderId", args.orderId))
-      .order("desc")
-      .collect();
-  },
-});
+      return await ctx.runQuery(api.marketplace.getOrderTracking, {
+        orderId: args.orderId,
+      });
+    },
+  });
