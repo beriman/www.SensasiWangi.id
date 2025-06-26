@@ -177,6 +177,11 @@ export default function Forum() {
   const moveTopicMutation = useMutation(api.forum.moveTopic);
   const saveSearchMutation = useMutation(api.forum.saveSearch);
 
+  const currentUser = useQuery(
+    api.users.getUserByToken,
+    user ? { tokenIdentifier: user.id } : "skip",
+  );
+
   const savedSearches = useQuery(
     api.forum.getSavedSearches,
     currentUser ? { userId: currentUser._id } : "skip",
@@ -193,10 +198,6 @@ export default function Forum() {
     }
   }, [selectedTopicComments]);
 
-  const currentUser = useQuery(
-    api.users.getUserByToken,
-    user ? { tokenIdentifier: user.id } : "skip",
-  );
 
   const userBookmarks = useQuery(
     api.bookmarks.getBookmarksByUser,

@@ -50,9 +50,39 @@ export default function NotificationListener() {
   );
 
   const markRead = useMutation(api.notifications.markNotificationRead);
+  const saveSubscription = useMutation(api.notifications.saveSubscription);
   const seenIds = useRef(new Set<string>());
   const [lastNotificationCount, setLastNotificationCount] = useState(0);
   const unreadCount = notifications?.filter((n) => !n.read).length || 0;
+
+  useEffect(() => {
+    if (!currentUser) return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    const register = async () => {
+      const registration = await navigator.serviceWorker.ready;
+      let permission = Notification.permission;
+      if (permission === 'default') {
+        permission = await Notification.requestPermission();
+      }
+      if (permission !== 'granted') return;
+
+      try {
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
+        });
+        await saveSubscription({
+          userId: currentUser._id,
+          subscription: subscription.toJSON(),
+        });
+      } catch (err) {
+        console.error('Failed to subscribe push', err);
+      }
+    };
+
+    register();
+  }, [currentUser, saveSubscription]);
 
   useEffect(() => {
     if (!notifications) return;
