@@ -34,6 +34,7 @@ import Messages from "./pages/messages";
 import Settings from "./pages/settings";
 import { Toaster } from "@/components/ui/toaster";
 import NotificationListener from "@/components/notification-listener";
+import OfflineBanner from "@/components/offline-banner";
 import NotFound from "./pages/not-found";
 
 function App() {
@@ -89,6 +90,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
         {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
+        <OfflineBanner />
         <NotificationListener />
         <Toaster />
       </>

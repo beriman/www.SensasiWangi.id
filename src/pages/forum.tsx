@@ -330,6 +330,12 @@ export default function Forum() {
       toast({
         title: bookmarked ? "Ditambahkan ke koleksi" : "Dihapus dari koleksi",
       });
+      if (bookmarked && navigator.serviceWorker?.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: "CACHE_URLS",
+          urls: [`/forum?topic=${topicId}`],
+        });
+      }
     } catch (error) {
       console.error("Error toggling bookmark:", error);
       toast({
