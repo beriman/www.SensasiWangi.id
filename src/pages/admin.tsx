@@ -102,6 +102,9 @@ function AdminContent() {
   const clearCache = useMutation(api.admin.clearSystemCache);
   const backupDatabase = useMutation(api.admin.backupDatabase);
   const initializeCategories = useMutation(api.forum.initializeCategories);
+  const briWebhookEvents = useQuery(api.webhooks.listBriWebhookEvents, {
+    limit: 20,
+  });
 
   // Data statistik real-time
   const stats = {
@@ -180,6 +183,13 @@ function AdminContent() {
             >
               <CheckCircle className="w-4 h-4 mr-2" />
               Pesanan
+            </TabsTrigger>
+            <TabsTrigger
+              value="bri-events"
+              className="neumorphic-button-sm data-[state=active]:bg-white data-[state=active]:shadow-inner text-[#1D1D1F]"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              BRI Events
             </TabsTrigger>
             <TabsTrigger
               value="system"
@@ -345,6 +355,7 @@ function AdminContent() {
               </Card>
             </div>
           </TabsContent>
+
 
           <TabsContent value="moderation" className="space-y-6">
             <Card className="neumorphic-card border-0">
@@ -1123,6 +1134,41 @@ function AdminContent() {
                                   </>
                                 )}
                               </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="bri-events" className="space-y-6">
+            <Card className="neumorphic-card border-0">
+              <CardHeader>
+                <CardTitle className="text-[#1D1D1F]">BRI Webhook Events</CardTitle>
+                <CardDescription className="text-[#86868B]">
+                  Log of recent callbacks from BRI
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[#1D1D1F]">Event</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Timestamp</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {!briWebhookEvents
+                      ? null
+                      : briWebhookEvents.map((ev: any) => (
+                          <TableRow key={ev._id}>
+                            <TableCell className="text-[#86868B]">
+                              {ev.eventType}
+                            </TableCell>
+                            <TableCell className="text-[#86868B]">
+                              {new Date(ev.createdAt).toLocaleString("id-ID")}
                             </TableCell>
                           </TableRow>
                         ))}

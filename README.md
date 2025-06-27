@@ -117,7 +117,8 @@ BRI_BRIVA_NO=<briva_number>
 
 After registering, configure the callback URL in your BRI dashboard to point to
 `/api/bri/webhook`. Successful payment notifications will automatically verify
-orders and every webhook payload is stored for auditing.
+orders and every webhook payload is stored for auditing. Recent webhook events
+can be monitored from the admin panel under the **BRI Events** tab.
 
 ### Cloudinary
 
