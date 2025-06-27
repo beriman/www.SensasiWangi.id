@@ -53,7 +53,7 @@ import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { useUser } from "@clerk/clerk-react";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { Helmet } from "react-helmet";
@@ -597,6 +597,25 @@ export default function Forum() {
     return new Date(timestamp).toLocaleDateString("id-ID");
   };
 
+  const highlightText = (text: string, query: string) => {
+    if (!query) return text;
+    const terms = (query.match(/(?:AND|OR|NOT)|[^\s]+/gi) || [])
+      .filter((t) => !/^(AND|OR|NOT)$/i.test(t))
+      .map((t) => t.toLowerCase());
+    if (terms.length === 0) return text;
+    const escaped = terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    const regex = new RegExp(`(${escaped.join("|")})`, "gi");
+    return text.split(regex).map((part, i) =>
+      terms.includes(part.toLowerCase()) ? (
+        <mark key={i} className="bg-yellow-200">
+          {part}
+        </mark>
+      ) : (
+        part
+      ),
+    );
+  };
+
   const topics = advancedFilters
     ? advancedResults || []
     : topicsResult?.results || [];
@@ -1087,14 +1106,14 @@ export default function Forum() {
                                   )}
                                 </div>
                                 <CardTitle className="text-lg font-semibold text-[#2d3748] hover:text-[#667eea] transition-colors">
-                                  {topic.title}
+                                  {highlightText(topic.title, searchQuery)}
                                 </CardTitle>
                                 <CardDescription className="text-sm text-[#718096] mt-1">
                                   oleh {topic.authorName} •{" "}
                                   {formatDateString(topic.createdAt)}
                                 </CardDescription>
                                 <p className="text-sm text-[#718096] mt-2 line-clamp-2">
-                                  {topic.content.substring(0, 150)}...
+                                  {highlightText(topic.content.substring(0, 150), searchQuery)}...
                                 </p>
                               </div>
                             </div>
@@ -1239,14 +1258,14 @@ export default function Forum() {
                                 )}
                               </div>
                               <CardTitle className="text-lg font-semibold text-[#2d3748] hover:text-[#667eea] transition-colors">
-                                {topic.title}
+                                {highlightText(topic.title, searchQuery)}
                               </CardTitle>
                               <CardDescription className="text-sm text-[#718096] mt-1">
                                 oleh {topic.authorName} •{" "}
                                 {formatDateString(topic.createdAt)}
                               </CardDescription>
                               <p className="text-sm text-[#718096] mt-2 line-clamp-2">
-                                {topic.content.substring(0, 150)}...
+                                {highlightText(topic.content.substring(0, 150), searchQuery)}...
                               </p>
                             </div>
                           </div>
