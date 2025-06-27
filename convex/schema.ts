@@ -17,6 +17,8 @@ export default defineSchema({
     createdAt: v.number(),
     reviewCount: v.number(),
     helpfulCount: v.number(),
+    warnings: v.number(),
+    bannedUntil: v.number(),
   }).index("by_token", ["tokenIdentifier"]),
 
   categories: defineTable({
