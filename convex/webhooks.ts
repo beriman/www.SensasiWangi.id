@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 export const logBriEvent = mutation({
@@ -14,5 +14,16 @@ export const logBriEvent = mutation({
       rawBody: args.rawBody,
       createdAt: Date.now(),
     });
+  },
+});
+
+export const listBriWebhookEvents = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 20;
+    return await ctx.db
+      .query("briWebhookEvents")
+      .order("desc")
+      .take(limit);
   },
 });
