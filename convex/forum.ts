@@ -1,7 +1,10 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
+import ForumNotificationEmail from "../src/emails/ForumNotificationEmail";
+import { sendEmail } from "../src/utils/email";
+import * as React from "react";
 
 // Threshold untuk menandai topik sebagai "hot"
 const HOT_LIKES_THRESHOLD = 10;
@@ -437,6 +440,19 @@ export const hasUserLikedTopic = query({
   },
 });
 
+export const isUserSubscribed = query({
+  args: { topicId: v.id("topics"), userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const sub = await ctx.db
+      .query("topicSubscriptions")
+      .withIndex("by_topic_user", (q) =>
+        q.eq("topicId", args.topicId).eq("userId", args.userId),
+      )
+      .unique();
+    return !!sub;
+  },
+});
+
 // Query untuk mendapatkan topik berdasarkan author
 export const getTopicsByAuthor = query({
   args: { authorId: v.id("users") },
@@ -724,6 +740,60 @@ export const toggleTopicLike = mutation({
   },
 });
 
+export const subscribeTopic = mutation({
+  args: { topicId: v.id("topics") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    const existing = await ctx.db
+      .query("topicSubscriptions")
+      .withIndex("by_topic_user", (q) =>
+        q.eq("topicId", args.topicId).eq("userId", user._id),
+      )
+      .unique();
+    if (existing) return false;
+
+    await ctx.db.insert("topicSubscriptions", {
+      topicId: args.topicId,
+      userId: user._id,
+      createdAt: Date.now(),
+    });
+    return true;
+  },
+});
+
+export const unsubscribeTopic = mutation({
+  args: { topicId: v.id("topics") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    const existing = await ctx.db
+      .query("topicSubscriptions")
+      .withIndex("by_topic_user", (q) =>
+        q.eq("topicId", args.topicId).eq("userId", user._id),
+      )
+      .unique();
+    if (!existing) return false;
+
+    await ctx.db.delete(existing._id);
+    return true;
+  },
+});
+
 // Mutation untuk upvote/downvote topik
 export const toggleTopicVote = mutation({
   args: {
@@ -917,6 +987,10 @@ export const createComment = mutation({
         });
       }
     }
+
+    await ctx.scheduler.runAfter(0, internal.forum.sendReplyNotifications, {
+      commentId,
+    });
 
     return commentId;
   },
@@ -1425,5 +1499,33 @@ export const mergeTopics = mutation({
     });
 
     return true;
+  },
+});
+
+export const sendReplyNotifications = internalMutation({
+  args: { commentId: v.id("comments") },
+  handler: async (ctx, args) => {
+    const comment = await ctx.db.get(args.commentId);
+    if (!comment) return;
+    const topic = await ctx.db.get(comment.topicId);
+    if (!topic) return;
+    const subs = await ctx.db
+      .query("topicSubscriptions")
+      .withIndex("by_topic", (q) => q.eq("topicId", comment.topicId))
+      .collect();
+    for (const sub of subs) {
+      if (sub.userId === comment.authorId) continue;
+      const user = await ctx.db.get(sub.userId);
+      if (!user?.email) continue;
+      await sendEmail({
+        to: user.email,
+        subject: `Balasan baru di ${topic.title}`,
+        react: React.createElement(ForumNotificationEmail, {
+          topic: topic.title,
+          message: `${comment.authorName} membalas topik`,
+          url: `/forum?topic=${topic._id}`,
+        }),
+      });
+    }
   },
 });
