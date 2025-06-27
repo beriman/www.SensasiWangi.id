@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Forum from '../../src/pages/forum';
 import { BrowserRouter } from 'react-router-dom';
-import { usePaginatedQuery, useQuery } from 'convex/react';
+import { usePaginatedQuery, useQuery, useMutation } from 'convex/react';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { api } from '../../convex/_generated/api';
 
@@ -34,6 +34,7 @@ const topic = {
   status: 'Loaded',
   loadMore: jest.fn(),
 }));
+(useMutation as jest.Mock).mockReturnValue(jest.fn());
 (useQuery as jest.Mock).mockReturnValue([]);
 (useUser as jest.Mock).mockReturnValue({ user: { id: '1' } });
 (useClerk as jest.Mock).mockReturnValue({ signOut: jest.fn() });

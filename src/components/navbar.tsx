@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Menu, ChevronDown, Bell } from "lucide-react";
+import { NAV_ITEMS } from "../constants/menu";
 
 export function Navbar() {
   const navigate = useNavigate();
@@ -70,101 +71,16 @@ export function Navbar() {
 
           {/* Desktop Menu - Horizontal */}
           <div className="hidden md:flex flex-1 justify-center items-center space-x-6">
-            <Link
-              to="/forum"
-              className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
-            >
-              <svg
-                className="w-4 h-4 mr-1.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            {NAV_ITEMS.map(({ label, to, icon: Icon }) => (
+              <Link
+                key={to}
+                to={to}
+                className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H9l-4 4z"
-                />
-              </svg>
-              Forum
-            </Link>
-            <Link
-              to="/marketplace"
-              className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
-            >
-              <svg
-                className="w-4 h-4 mr-1.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M16 11V7a4 4 0 00-8 0v4M8 11v6h8v-6M8 11H6a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2h-2"
-                />
-              </svg>
-              Marketplace
-            </Link>
-            <Link
-              to="/kursus"
-              className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
-            >
-              <svg
-                className="w-4 h-4 mr-1.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-              Kursus
-            </Link>
-            <Link
-              to="/database"
-              className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
-            >
-              <svg
-                className="w-4 h-4 mr-1.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
-                />
-              </svg>
-              Database
-            </Link>
-            <Link
-              to="/leaderboard"
-              className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
-            >
-              <svg
-                className="w-4 h-4 mr-1.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M12 8l3 8H9l3-8z"
-                />
-              </svg>
-              Leaderboard
-            </Link>
+                <Icon className="w-4 h-4 mr-1.5" />
+                {label}
+              </Link>
+            ))}
             <Button
               onClick={handleDashboard}
               className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
@@ -223,111 +139,17 @@ export function Navbar() {
                   Navigasi
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-[#E5E5E7]" />
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/forum"
-                    className="flex items-center px-2 py-2 text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg transition-colors"
-                  >
-                    <svg
-                      className="w-4 h-4 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                {NAV_ITEMS.map(({ label, to, icon: Icon }) => (
+                  <DropdownMenuItem asChild key={to}>
+                    <Link
+                      to={to}
+                      className="flex items-center px-2 py-2 text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg transition-colors"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H9l-4 4z"
-                      />
-                    </svg>
-                    Forum
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/marketplace"
-                    className="flex items-center px-2 py-2 text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg transition-colors"
-                  >
-                    <svg
-                      className="w-4 h-4 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M16 11V7a4 4 0 00-8 0v4M8 11v6h8v-6M8 11H6a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2h-2"
-                      />
-                    </svg>
-                    Marketplace
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/kursus"
-                    className="flex items-center px-2 py-2 text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg transition-colors"
-                  >
-                    <svg
-                      className="w-4 h-4 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                      />
-                    </svg>
-                    Kursus
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/database"
-                    className="flex items-center px-2 py-2 text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg transition-colors"
-                  >
-                    <svg
-                      className="w-4 h-4 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
-                      />
-                    </svg>
-                    Database
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/leaderboard"
-                    className="flex items-center px-2 py-2 text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg transition-colors"
-                  >
-                    <svg
-                      className="w-4 h-4 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M12 8l3 8H9l3-8z"
-                      />
-                    </svg>
-                    Leaderboard
-                  </Link>
-                </DropdownMenuItem>
+                      <Icon className="w-4 h-4 mr-2" />
+                      {label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
                 <DropdownMenuItem onClick={handleDashboard}>
                   <div className="flex items-center px-2 py-2 text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg transition-colors">
                     <svg
@@ -414,36 +236,11 @@ export function Navbar() {
                       side="left"
                       className="pt-10 flex flex-col space-y-4 neumorphic-bg"
                     >
-                      <Link
-                        to="/forum"
-                        className="neumorphic-button-sm w-full text-left"
-                      >
-                        Forum
-                      </Link>
-                      <Link
-                        to="/marketplace"
-                        className="neumorphic-button-sm w-full text-left"
-                      >
-                        Marketplace
-                      </Link>
-                      <Link
-                        to="/kursus"
-                        className="neumorphic-button-sm w-full text-left"
-                      >
-                        Kursus
-                      </Link>
-                      <Link
-                        to="/database"
-                        className="neumorphic-button-sm w-full text-left"
-                      >
-                        Database
-                      </Link>
-                      <Link
-                        to="/leaderboard"
-                        className="neumorphic-button-sm w-full text-left"
-                      >
-                        Leaderboard
-                      </Link>
+                      {NAV_ITEMS.map(({ label, to }) => (
+                        <Link key={to} to={to} className="neumorphic-button-sm w-full text-left">
+                          {label}
+                        </Link>
+                      ))}
                       <Button
                         onClick={handleDashboard}
                         className="neumorphic-button-sm w-full text-left"
