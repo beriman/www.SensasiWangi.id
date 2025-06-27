@@ -15,6 +15,43 @@ const DEFAULT_PREFS = {
   order: true,
 };
 
+export function evaluateBooleanExpression(queryStr: string, text: string): boolean {
+  const tokens = queryStr.match(/(?:AND|OR|NOT)|[^\s]+/gi) ?? [];
+  const precedence: Record<string, number> = { OR: 1, AND: 2, NOT: 3 };
+  const output: string[] = [];
+  const stack: string[] = [];
+
+  for (const raw of tokens) {
+    const token = raw.toUpperCase();
+    if (token in precedence) {
+      while (stack.length && precedence[stack[stack.length - 1]] >= precedence[token]) {
+        output.push(stack.pop()!);
+      }
+      stack.push(token);
+    } else {
+      output.push(raw.toLowerCase());
+    }
+  }
+  while (stack.length) output.push(stack.pop()!);
+
+  const evalStack: boolean[] = [];
+  for (const t of output) {
+    if (t === 'AND' || t === 'OR' || t === 'NOT') {
+      if (t === 'NOT') {
+        const a = evalStack.pop() ?? false;
+        evalStack.push(!a);
+      } else {
+        const b = evalStack.pop() ?? false;
+        const a = evalStack.pop() ?? false;
+        evalStack.push(t === 'AND' ? a && b : a || b);
+      }
+    } else {
+      evalStack.push(text.includes(t));
+    }
+  }
+  return evalStack.pop() ?? false;
+}
+
 async function allowNotification(
   ctx: any,
   userId: Id<"users">,
@@ -76,12 +113,13 @@ export const getTopics = query({
     let filteredPage = topics.page;
 
     if (args.searchQuery) {
-      const lower = args.searchQuery.toLowerCase();
-      filteredPage = filteredPage.filter(
-        (topic) =>
-          topic.tags.some((t) => t.toLowerCase().includes(lower)) ||
-          topic.title.toLowerCase().includes(lower) ||
-          topic.content.toLowerCase().includes(lower),
+      filteredPage = filteredPage.filter((topic) =>
+        evaluateBooleanExpression(
+          args.searchQuery!,
+          `${topic.title.toLowerCase()} ${topic.content.toLowerCase()} ${topic.tags
+            .join(" ")
+            .toLowerCase()}`,
+        ),
       );
     }
 
