@@ -1,6 +1,4 @@
 import { SignIn, useUser } from "@clerk/clerk-react";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Navigate } from "react-router-dom";
 
 export default function Login() {
@@ -12,7 +10,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow flex items-center justify-center">
         <SignIn
           path="/login"
@@ -26,7 +23,6 @@ export default function Login() {
           </a>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

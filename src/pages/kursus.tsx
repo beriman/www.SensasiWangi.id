@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -213,7 +211,6 @@ export default function Kursus() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
 
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8">
@@ -449,7 +446,6 @@ export default function Kursus() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

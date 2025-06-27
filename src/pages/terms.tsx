@@ -1,5 +1,3 @@
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   FileText,
@@ -13,7 +11,6 @@ import {
 export default function Terms() {
   return (
     <div className="min-h-screen bg-[#F5F5F7]">
-      <Navbar />
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
@@ -316,7 +313,6 @@ export default function Terms() {
         </div>
       </div>
 
-      <Footer />
     </div>
   );
 }

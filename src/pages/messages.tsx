@@ -3,8 +3,6 @@ import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ProtectedRoute from "@/components/wrappers/ProtectedRoute";
@@ -51,7 +49,6 @@ function MessagesContent() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8 space-y-4">
         <div className="h-96 overflow-y-auto space-y-2 border rounded p-2">
           {messages &&
@@ -77,7 +74,6 @@ function MessagesContent() {
           <Button onClick={handleSend}>Kirim</Button>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

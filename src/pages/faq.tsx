@@ -1,5 +1,3 @@
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 
 export default function FAQ() {
   const faqs = [
@@ -23,7 +21,6 @@ export default function FAQ() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-16 space-y-6">
         <h1 className="text-3xl font-bold text-center mb-8">FAQ</h1>
         {faqs.map((f, idx) => (
@@ -33,7 +30,6 @@ export default function FAQ() {
           </div>
         ))}
       </main>
-      <Footer />
     </div>
   );
 }

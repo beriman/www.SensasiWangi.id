@@ -1,5 +1,3 @@
-import { Footer } from "@/components/footer";
-import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -667,7 +665,6 @@ export default function Forum() {
           content="Discuss perfumes and share tips with other enthusiasts"
         />
       </Helmet>
-      <Navbar />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-12">
           {/* Header */}
@@ -1697,7 +1694,6 @@ export default function Forum() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

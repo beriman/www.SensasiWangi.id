@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import {
   Card,
   CardContent,
@@ -124,7 +122,6 @@ function AdminContent() {
 
   return (
     <div className="min-h-screen bg-[#F5F5F7]">
-      <Navbar />
 
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
@@ -1434,7 +1431,6 @@ function AdminContent() {
         </Tabs>
       </div>
 
-      <Footer />
     </div>
   );
 }

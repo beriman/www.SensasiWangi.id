@@ -1,12 +1,9 @@
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Eye, Lock, Users, Database, Mail } from "lucide-react";
 
 export default function Privacy() {
   return (
     <div className="min-h-screen bg-[#F5F5F7]">
-      <Navbar />
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
@@ -217,7 +214,6 @@ export default function Privacy() {
         </div>
       </div>
 
-      <Footer />
     </div>
   );
 }

@@ -1,8 +1,6 @@
 import { useUser } from "@clerk/clerk-react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,7 +35,6 @@ export default function OrderReviewPage() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-16">
         <h1 className="text-2xl font-semibold mb-6">Berikan Ulasan</h1>
         <form onSubmit={onSubmit} className="space-y-4 max-w-lg">
@@ -56,7 +53,6 @@ export default function OrderReviewPage() {
           <Button type="submit">Kirim</Button>
         </form>
       </main>
-      <Footer />
     </div>
   );
 }

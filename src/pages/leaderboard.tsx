@@ -1,5 +1,3 @@
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,7 +20,6 @@ export default function Leaderboard() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-16">
         <h1 className="text-3xl font-bold text-center mb-8">Leaderboard</h1>
         {!contributors ? (
@@ -53,7 +50,6 @@ export default function Leaderboard() {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 }

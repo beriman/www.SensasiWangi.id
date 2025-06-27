@@ -1,8 +1,6 @@
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +40,6 @@ function MyShopContent() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-16 space-y-12">
         <section>
           <h1 className="text-3xl font-bold mb-4">Produk Saya</h1>
@@ -110,7 +107,6 @@ function MyShopContent() {
           )}
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

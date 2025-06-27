@@ -1,5 +1,3 @@
-import { Footer } from "@/components/footer";
-import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/clerk-react";
 import { Authenticated, Unauthenticated } from "convex/react";
@@ -88,7 +86,6 @@ function App() {
           content="Discover fragrances and join the Sensasi Wangi community"
         />
       </Helmet>
-      <Navbar />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-24">
           {/* Hero Section */}
@@ -289,7 +286,6 @@ function App() {
           {/* CTA Section */}
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

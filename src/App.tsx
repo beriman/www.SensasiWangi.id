@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Route, Routes, useRoutes, Navigate } from "react-router-dom";
 import routes from "tempo-routes";
+import MainLayout from "./layouts/MainLayout";
 import Dashboard from "./pages/dashboard";
 import Home from "./pages/home";
 import Forum from "./pages/forum";
@@ -43,52 +44,53 @@ function App() {
     <Suspense fallback={<p>Loading...</p>}>
       <>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/forum" element={<Forum />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/u/:id" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/collections" element={<Collections />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route
+              path="/marketplace/product/:id"
+              element={<MarketplaceProduct />}
+            />
+            <Route path="/marketplace/sell" element={<MarketplaceSell />} />
+            <Route path="/marketplace/my-shop" element={<MyShop />} />
+            <Route path="/marketplace/sambat" element={<MarketplaceSambat />} />
+            <Route
+              path="/marketplace/sambat/:id"
+              element={<MarketplaceSambatDetail />}
+            />
+            <Route
+              path="/marketplace/sambat/create"
+              element={<MarketplaceSambatCreate />}
+            />
+            <Route
+              path="/marketplace/checkout"
+              element={<MarketplaceCheckout />}
+            />
+            <Route path="/marketplace/order/:orderId" element={<OrderDetail />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/kursus" element={<Kursus />} />
+            <Route path="/kursus/:id" element={<CourseDetail />} />
+            <Route path="/lesson/:id" element={<LessonPage />} />
+            <Route path="/database" element={<Database />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/polling" element={<Polling />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/order/:orderId/review" element={<OrderReviewPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/forum" element={<Forum />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/u/:id" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/collections" element={<Collections />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route
-            path="/marketplace/product/:id"
-            element={<MarketplaceProduct />}
-          />
-          <Route path="/marketplace/sell" element={<MarketplaceSell />} />
-          <Route path="/marketplace/my-shop" element={<MyShop />} />
-          <Route path="/marketplace/sambat" element={<MarketplaceSambat />} />
-          <Route
-            path="/marketplace/sambat/:id"
-            element={<MarketplaceSambatDetail />}
-          />
-          <Route
-            path="/marketplace/sambat/create"
-            element={<MarketplaceSambatCreate />}
-          />
-          <Route
-            path="/marketplace/checkout"
-            element={<MarketplaceCheckout />}
-          />
-
-          <Route path="/marketplace/order/:orderId" element={<OrderDetail />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/kursus" element={<Kursus />} />
-          <Route path="/kursus/:id" element={<CourseDetail />} />
-          <Route path="/lesson/:id" element={<LessonPage />} />
-          <Route path="/database" element={<Database />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/polling" element={<Polling />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/order/:orderId/review" element={<OrderReviewPage />} />
-          <Route path="*" element={<NotFound />} />
         </Routes>
         {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
         <OfflineBanner />

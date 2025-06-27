@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -237,7 +235,6 @@ export default function MarketplaceSambatCreate() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
 
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8">
@@ -793,7 +790,6 @@ export default function MarketplaceSambatCreate() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

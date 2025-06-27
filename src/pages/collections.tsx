@@ -1,5 +1,3 @@
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
@@ -28,7 +26,6 @@ function CollectionsContent() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-16 space-y-6">
         <h1 className="text-3xl font-bold text-center mb-8">Koleksi Saya</h1>
         {!bookmarks || bookmarks.length === 0 ? (
@@ -59,7 +56,6 @@ function CollectionsContent() {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 }
