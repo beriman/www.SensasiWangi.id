@@ -95,6 +95,15 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_comment_user", ["commentId", "userId"]),
 
+  topicSubscriptions: defineTable({
+    topicId: v.id("topics"),
+    userId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_topic", ["topicId"])
+    .index("by_user", ["userId"])
+    .index("by_topic_user", ["topicId", "userId"]),
+
   topicVotes: defineTable({
     topicId: v.id("topics"),
     userId: v.id("users"),

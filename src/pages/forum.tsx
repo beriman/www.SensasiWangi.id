@@ -44,6 +44,8 @@ import {
   Share,
   BarChart2,
   Bookmark,
+  Bell,
+  BellOff,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { usePaginatedQuery, useMutation, useQuery } from "convex/react";
@@ -168,6 +170,8 @@ export default function Forum() {
   const incrementViewsMutation = useMutation(api.forum.incrementTopicViews);
   const createCommentMutation = useMutation(api.forum.createComment);
   const toggleCommentVoteMutation = useMutation(api.forum.toggleCommentVote);
+  const subscribeTopicMutation = useMutation(api.forum.subscribeTopic);
+  const unsubscribeTopicMutation = useMutation(api.forum.unsubscribeTopic);
   const initializeCategoriesMutation = useMutation(
     api.forum.initializeCategories,
   );
@@ -207,6 +211,13 @@ export default function Forum() {
 
   const userLikedTopics = useQuery(
     api.forum.hasUserLikedTopic,
+    selectedTopic && currentUser
+      ? { topicId: selectedTopic._id, userId: currentUser._id }
+      : "skip",
+  );
+
+  const isSubscribed = useQuery(
+    api.forum.isUserSubscribed,
     selectedTopic && currentUser
       ? { topicId: selectedTopic._id, userId: currentUser._id }
       : "skip",
@@ -380,6 +391,33 @@ export default function Forum() {
         description: "Gagal mengubah bookmark.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleSubscribe = async (topicId: Id<"topics">) => {
+    if (!user) {
+      toast({
+        title: "Login diperlukan",
+        description: "Anda harus login untuk berlangganan!",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      await subscribeTopicMutation({ topicId });
+      toast({ title: "Berlangganan" });
+    } catch (err) {
+      console.error("Error subscribe", err);
+    }
+  };
+
+  const handleUnsubscribe = async (topicId: Id<"topics">) => {
+    if (!user) return;
+    try {
+      await unsubscribeTopicMutation({ topicId });
+      toast({ title: "Berhenti langganan" });
+    } catch (err) {
+      console.error("Error unsubscribe", err);
     }
   };
 
@@ -1437,6 +1475,23 @@ export default function Forum() {
                           >
                             <Bookmark className="h-5 w-5" />
                             <span>Koleksi</span>
+                          </button>
+                          <button
+                            onClick={() =>
+                              isSubscribed
+                                ? handleUnsubscribe(selectedTopic._id)
+                                : handleSubscribe(selectedTopic._id)
+                            }
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-[#718096]"
+                          >
+                            {isSubscribed ? (
+                              <BellOff className="h-5 w-5" />
+                            ) : (
+                              <Bell className="h-5 w-5" />
+                            )}
+                            <span>
+                              {isSubscribed ? "Unsubscribe" : "Subscribe"}
+                            </span>
                           </button>
                           <button
                             onClick={() => {
