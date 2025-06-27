@@ -97,6 +97,9 @@ function AdminContent() {
   const updateUserRole = useMutation(api.users.updateUserRole);
   const suspendUser = useMutation(api.admin.suspendUser);
   const deleteUser = useMutation(api.admin.deleteUser);
+  const issueWarning = useMutation(api.admin.issueWarning);
+  const tempBanUser = useMutation(api.admin.tempBanUser);
+  const permBanUser = useMutation(api.admin.permBanUser);
   const broadcastMessage = useMutation(api.admin.broadcastSystemMessage);
   const clearCache = useMutation(api.admin.clearSystemCache);
   const backupDatabase = useMutation(api.admin.backupDatabase);
@@ -421,6 +424,8 @@ function AdminContent() {
                       <TableHead className="text-[#1D1D1F]">Email</TableHead>
                       <TableHead className="text-[#1D1D1F]">Role</TableHead>
                       <TableHead className="text-[#1D1D1F]">Poin</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Peringatan</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Banned Sampai</TableHead>
                       <TableHead className="text-[#1D1D1F]">
                         Bergabung
                       </TableHead>
@@ -454,6 +459,18 @@ function AdminContent() {
                         </TableCell>
                         <TableCell className="text-[#86868B]">
                           {user.contributionPoints || 0}
+                        </TableCell>
+                        <TableCell className="text-[#86868B]">
+                          {user.warnings || 0}
+                        </TableCell>
+                        <TableCell className="text-[#86868B]">
+                          {user.bannedUntil
+                            ? user.bannedUntil === -1
+                              ? "Permanent"
+                              : new Date(user.bannedUntil).toLocaleDateString(
+                                  "id-ID",
+                                )
+                            : "-"}
                         </TableCell>
                         <TableCell className="text-[#86868B]">
                           {user.createdAt
@@ -526,6 +543,44 @@ function AdminContent() {
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
+                            <Button
+                              size="sm"
+                              className="neumorphic-button-sm h-8 px-3 text-xs text-yellow-600"
+                              onClick={async () => {
+                                await issueWarning({ userId: user._id });
+                              }}
+                            >
+                              <AlertTriangle className="w-3 h-3 mr-1" />
+                              Warning
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="neumorphic-button-sm h-8 px-3 text-xs text-orange-600"
+                              onClick={async () => {
+                                const days = parseInt(
+                                  prompt('Ban berapa hari?') || '0',
+                                  10,
+                                );
+                                if (days > 0) {
+                                  await tempBanUser({ userId: user._id, days });
+                                }
+                              }}
+                            >
+                              <Ban className="w-3 h-3 mr-1" />
+                              Temp Ban
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="neumorphic-button-sm h-8 px-3 text-xs text-red-800"
+                              onClick={async () => {
+                                if (confirm('Ban permanen?')) {
+                                  await permBanUser({ userId: user._id });
+                                }
+                              }}
+                            >
+                              <XCircle className="w-3 h-3 mr-1" />
+                              Ban
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>

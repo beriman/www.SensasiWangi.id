@@ -36,6 +36,57 @@ export const suspendUser = mutation({
   },
 });
 
+export const issueWarning = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+    const adminUser = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!adminUser || adminUser.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("User not found");
+    await ctx.db.patch(args.userId, { warnings: (user.warnings ?? 0) + 1 });
+  },
+});
+
+export const tempBanUser = mutation({
+  args: { userId: v.id("users"), days: v.number() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+    const adminUser = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!adminUser || adminUser.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    const until = Date.now() + args.days * 86400000;
+    await ctx.db.patch(args.userId, { bannedUntil: until, role: "banned" });
+  },
+});
+
+export const permBanUser = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+    const adminUser = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!adminUser || adminUser.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+    await ctx.db.patch(args.userId, { bannedUntil: -1, role: "banned" });
+  },
+});
+
 export const deleteUser = mutation({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {

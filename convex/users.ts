@@ -95,6 +95,12 @@ export const createOrUpdateUser = mutation({
       if (existingUser.helpfulCount === undefined) {
         patch.helpfulCount = 0;
       }
+      if (existingUser.warnings === undefined) {
+        patch.warnings = 0;
+      }
+      if (existingUser.bannedUntil === undefined) {
+        patch.bannedUntil = 0;
+      }
       if (Object.keys(patch).length > 0) {
         await ctx.db.patch(existingUser._id, patch);
       }
@@ -173,6 +179,8 @@ export const createOrUpdateUser = mutation({
       createdAt: Date.now(),
       reviewCount: 0,
       helpfulCount: 0,
+      warnings: 0,
+      bannedUntil: 0,
     });
     await ctx.db.insert("userProfiles", {
       userId,
