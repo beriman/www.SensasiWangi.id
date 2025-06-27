@@ -1,8 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Star, Share, Instagram, Twitter } from "lucide-react";
 import { Helmet } from "react-helmet";
@@ -67,7 +65,6 @@ export default function MarketplaceProduct() {
           content={product.description || "Product details on Sensasi Wangi"}
         />
       </Helmet>
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8 space-y-8">
         <div className="flex flex-col md:flex-row gap-8">
           <img
@@ -155,7 +152,6 @@ export default function MarketplaceProduct() {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 }

@@ -1,8 +1,6 @@
 import { useUser } from "@clerk/clerk-react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Footer } from "@/components/footer";
-import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useParams } from "react-router-dom";
@@ -201,7 +199,6 @@ function ProfileContent() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-16">
           {/* Header Section */}
@@ -783,7 +780,6 @@ function ProfileContent() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

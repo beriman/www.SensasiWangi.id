@@ -1,5 +1,3 @@
-import { Footer } from "@/components/footer";
-import { Navbar } from "@/components/navbar";
 import {
   Card,
   CardContent,
@@ -119,7 +117,6 @@ export default function Database() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-12">
           {/* Header */}
@@ -747,7 +744,6 @@ export default function Database() {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

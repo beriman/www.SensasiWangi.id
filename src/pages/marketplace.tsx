@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -832,7 +830,6 @@ export default function Marketplace() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
 
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8">
@@ -1155,7 +1152,6 @@ export default function Marketplace() {
         onRemove={removeFromCart}
         onCheckout={() => navigate("/marketplace/checkout")}
       />
-      <Footer />
     </div>
   );
 }

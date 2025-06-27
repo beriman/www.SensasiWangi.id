@@ -1,8 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUser } from "@clerk/clerk-react";
 import ProtectedRoute from "@/components/wrappers/ProtectedRoute";
@@ -47,7 +45,6 @@ function OrderDetailContent() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-16 space-y-6">
         <h1 className="text-2xl font-semibold mb-4">Detail Order</h1>
         <Card className="neumorphic-card border-0">
@@ -110,7 +107,6 @@ function OrderDetailContent() {
           </Card>
         )}
       </main>
-      <Footer />
     </div>
   );
 }

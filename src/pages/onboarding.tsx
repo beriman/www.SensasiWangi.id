@@ -1,5 +1,3 @@
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "convex/react";
@@ -43,7 +41,6 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-16">
         {step === 0 && (
           <div className="space-y-4 max-w-md mx-auto">
@@ -116,7 +113,6 @@ export default function Onboarding() {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 }

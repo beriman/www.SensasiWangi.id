@@ -1,8 +1,6 @@
 import { useUser } from "@clerk/clerk-react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -53,7 +51,6 @@ function SettingsContent() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8 space-y-4">
         <h1 className="text-2xl font-bold">Pengaturan Privasi & Sosial</h1>
         <div className="space-y-2">
@@ -123,7 +120,6 @@ function SettingsContent() {
         </div>
         <Button onClick={handleSave}>Simpan</Button>
       </main>
-      <Footer />
     </div>
   );
 }

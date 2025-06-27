@@ -1,8 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 
 export default function CourseDetail() {
@@ -39,7 +37,6 @@ export default function CourseDetail() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8 space-y-4">
         <h1 className="text-2xl font-bold">{course.title}</h1>
         <p className="text-gray-600">{course.description}</p>
@@ -76,7 +73,6 @@ export default function CourseDetail() {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 }

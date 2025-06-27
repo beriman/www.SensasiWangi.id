@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -164,7 +162,6 @@ export default function MarketplaceCheckout() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-16">
         <h1 className="text-2xl font-semibold mb-6">Checkout</h1>
         {!orderId ? (
@@ -346,7 +343,6 @@ export default function MarketplaceCheckout() {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 }

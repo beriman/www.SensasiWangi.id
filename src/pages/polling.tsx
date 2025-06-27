@@ -1,5 +1,3 @@
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart2 } from "lucide-react";
@@ -28,7 +26,6 @@ export default function Polling() {
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] flex flex-col">
-      <Navbar />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-xl mx-auto space-y-6">
@@ -74,7 +71,6 @@ export default function Polling() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

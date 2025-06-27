@@ -2,8 +2,6 @@ import { useParams } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import LessonPlayer from "@/components/lesson-player";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
@@ -56,7 +54,6 @@ export default function LessonPage() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="flex gap-6">
           <div className="flex-1 space-y-6">
@@ -102,7 +99,6 @@ export default function LessonPage() {
           </aside>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
