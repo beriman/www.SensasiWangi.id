@@ -1077,7 +1077,7 @@ function AdminContent() {
                                   size="sm"
                                   className="neumorphic-button-sm h-8 px-3 text-xs"
                                   onClick={() =>
-                                    navigate(`/marketplace/order/${order._id}`)
+                                    navigate(`/marketplace/lapak/orders/${order._id}`)
                                   }
                                 >
                                   Lihat Detail

@@ -217,7 +217,7 @@ function MyShopContent() {
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => navigate(`/marketplace/order/${o._id}`)}
+                      onClick={() => navigate(`/marketplace/lapak/orders/${o._id}`)}
                     >
                       Lihat Detail
                     </Button>

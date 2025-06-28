@@ -293,12 +293,14 @@ function MarketplaceConsoleContent() {
                     ))}
                     {userOrders.length > 3 && (
                       <div className="text-center pt-4">
-                        <Button
-                          variant="outline"
-                          className="neumorphic-button-sm bg-transparent text-[#718096] border-0 shadow-none"
-                        >
-                          Lihat Semua Pesanan ({userOrders.length})
-                        </Button>
+                        <Link to="/marketplace/lapak/orders">
+                          <Button
+                            variant="outline"
+                            className="neumorphic-button-sm bg-transparent text-[#718096] border-0 shadow-none"
+                          >
+                            Lihat Semua Pesanan ({userOrders.length})
+                          </Button>
+                        </Link>
                       </div>
                     )}
                   </div>
