@@ -49,13 +49,19 @@ function MarketplaceConsoleContent() {
     userData ? { userId: userData._id, type: "seller" } : "skip",
   );
 
-  const totalRevenue =
-    userSales?.reduce((sum, sale) => sum + sale.totalAmount, 0) || 0;
-  const activeProducts =
-    userProducts?.filter((p) => p.status === "active").length || 0;
-  const soldProducts = userSales?.length || 0;
-  const totalViews =
-    userProducts?.reduce((sum, p) => sum + (p.views || 0), 0) || 0;
+  const sellerAnalytics = useQuery(
+    api.marketplace.getSellerAnalytics,
+    userData ? { sellerId: userData._id } : "skip",
+  );
+
+  const totalRevenue = sellerAnalytics?.totalRevenue ?? 0;
+  const thisMonthRevenue = sellerAnalytics?.thisMonthRevenue ?? 0;
+  const activeProducts = sellerAnalytics?.activeProducts ?? 0;
+  const soldProducts = sellerAnalytics?.soldProducts ?? 0;
+  const totalViews = sellerAnalytics?.totalViews ?? 0;
+  const avgViews = Math.round(
+    totalViews / (sellerAnalytics?.totalProducts || 1),
+  );
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
@@ -84,7 +90,7 @@ function MarketplaceConsoleContent() {
           </div>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
             <div className="neumorphic-card p-6 text-center">
               <div className="neumorphic-card-inset w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Package className="h-6 w-6 text-[#667eea]" />
@@ -116,6 +122,20 @@ function MarketplaceConsoleContent() {
                 }).format(totalRevenue)}
               </div>
               <div className="text-sm text-[#86868B]">Total Pendapatan</div>
+            </div>
+            <div className="neumorphic-card p-6 text-center">
+              <div className="neumorphic-card-inset w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="h-6 w-6 text-[#667eea]" />
+              </div>
+              <div className="text-2xl font-bold text-[#1D1D1F] mb-1">
+                {new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  notation: "compact",
+                  maximumFractionDigits: 1,
+                }).format(thisMonthRevenue)}
+              </div>
+              <div className="text-sm text-[#86868B]">Pendapatan Bulan Ini</div>
             </div>
             <div className="neumorphic-card p-6 text-center">
               <div className="neumorphic-card-inset w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -302,22 +322,21 @@ function MarketplaceConsoleContent() {
                     <TrendingUp className="h-6 w-6 text-green-600" />
                   </div>
                   <div className="text-2xl font-bold text-[#1D1D1F] mb-1">
-                    +12%
+                    {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                      notation: "compact",
+                      maximumFractionDigits: 1,
+                    }).format(thisMonthRevenue)}
                   </div>
-                  <div className="text-sm text-[#86868B]">
-                    Penjualan Bulan Ini
-                  </div>
-                  <div className="flex items-center justify-center gap-1 text-xs text-green-600 mt-1">
-                    <ArrowUpRight className="h-3 w-3" />
-                    Naik dari bulan lalu
-                  </div>
+                  <div className="text-sm text-[#86868B]">Pendapatan Bulan Ini</div>
                 </div>
                 <div className="text-center">
                   <div className="neumorphic-card-inset w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Eye className="h-6 w-6 text-[#667eea]" />
                   </div>
                   <div className="text-2xl font-bold text-[#1D1D1F] mb-1">
-                    {Math.round(totalViews / (userProducts?.length || 1))}
+                    {avgViews}
                   </div>
                   <div className="text-sm text-[#86868B]">
                     Rata-rata Views per Produk
@@ -328,13 +347,9 @@ function MarketplaceConsoleContent() {
                     <Star className="h-6 w-6 text-yellow-500" />
                   </div>
                   <div className="text-2xl font-bold text-[#1D1D1F] mb-1">
-                    4.8
+                    {sellerAnalytics?.averageRating ?? 0}
                   </div>
                   <div className="text-sm text-[#86868B]">Rating Rata-rata</div>
-                  <div className="flex items-center justify-center gap-1 text-xs text-green-600 mt-1">
-                    <ArrowUpRight className="h-3 w-3" />
-                    Meningkat 0.2 poin
-                  </div>
                 </div>
               </div>
             </CardContent>
