@@ -34,7 +34,7 @@ import {
   Lightbulb,
   TrendingUp,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 
 const CATEGORIES = [
@@ -74,7 +74,14 @@ export default function MarketplaceSell() {
 function MarketplaceSellContent() {
   const { user } = useUser();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const productId = searchParams.get("productId");
+  const productData = useQuery(
+    api.marketplace.getProductById,
+    productId ? { productId: productId as any } : "skip",
+  );
   const createProduct = useMutation(api.marketplace.createProduct);
+  const updateProduct = useMutation(api.marketplace.updateProduct);
   const userData = useQuery(
     api.users.getUserByToken,
     user?.id ? { tokenIdentifier: user.id } : "skip",
@@ -111,6 +118,29 @@ function MarketplaceSellContent() {
       createOrUpdateUser({});
     }
   }, [user, userData, createOrUpdateUser]);
+
+  // Load product data when editing
+  useEffect(() => {
+    if (productId && productData) {
+      setFormData({
+        title: productData.title,
+        brand: productData.brand,
+        category: productData.category,
+        condition: productData.condition,
+        description: productData.description,
+        price: String(productData.price),
+        stock: String(productData.stock ?? 0),
+        originalPrice: productData.originalPrice ? String(productData.originalPrice) : "",
+        size: productData.size,
+        location: productData.location,
+        shippingMethods: productData.shippingOptions,
+        tags: productData.tags,
+        isNegotiable: productData.isNegotiable,
+        images: productData.images,
+      });
+      setImageUrls(productData.images);
+    }
+  }, [productId, productData]);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -203,35 +233,59 @@ function MarketplaceSellContent() {
     setIsSubmitting(true);
 
     try {
-      const productId = await createProduct({
-        title: formData.title.trim(),
-        brand: formData.brand.trim(),
-        category: formData.category,
-        condition: formData.condition,
-        description: formData.description.trim(),
-        price: parseInt(formData.price),
-        stock: parseInt(formData.stock),
-        originalPrice: formData.originalPrice
-          ? parseInt(formData.originalPrice)
-          : undefined,
-        location: formData.location.trim(),
-        size: formData.size,
-        shippingOptions: formData.shippingMethods,
-        tags: formData.tags,
-        isNegotiable: formData.isNegotiable,
-        images: formData.images,
-      });
+      if (productId) {
+        await updateProduct({
+          productId: productId as any,
+          title: formData.title.trim(),
+          brand: formData.brand.trim(),
+          category: formData.category,
+          condition: formData.condition,
+          description: formData.description.trim(),
+          price: parseInt(formData.price),
+          stock: parseInt(formData.stock),
+          originalPrice: formData.originalPrice
+            ? parseInt(formData.originalPrice)
+            : undefined,
+          location: formData.location.trim(),
+          size: formData.size,
+          shippingOptions: formData.shippingMethods,
+          tags: formData.tags,
+          isNegotiable: formData.isNegotiable,
+          images: formData.images,
+        });
+        alert("Produk berhasil diperbarui");
+        navigate(`/marketplace/product/${productId}`);
+      } else {
+        const newId = await createProduct({
+          title: formData.title.trim(),
+          brand: formData.brand.trim(),
+          category: formData.category,
+          condition: formData.condition,
+          description: formData.description.trim(),
+          price: parseInt(formData.price),
+          stock: parseInt(formData.stock),
+          originalPrice: formData.originalPrice
+            ? parseInt(formData.originalPrice)
+            : undefined,
+          location: formData.location.trim(),
+          size: formData.size,
+          shippingOptions: formData.shippingMethods,
+          tags: formData.tags,
+          isNegotiable: formData.isNegotiable,
+          images: formData.images,
+        });
 
-      // Show success message with next steps
-      alert(
-        "🎉 Produk berhasil ditambahkan!\n\n" +
-          "Langkah selanjutnya:\n" +
-          "• Produk Anda akan muncul di marketplace\n" +
-          "• Pantau performa di dashboard\n" +
-          "• Kelola pesanan yang masuk",
-      );
+        // Show success message with next steps
+        alert(
+          "🎉 Produk berhasil ditambahkan!\n\n" +
+            "Langkah selanjutnya:\n" +
+            "• Produk Anda akan muncul di marketplace\n" +
+            "• Pantau performa di dashboard\n" +
+            "• Kelola pesanan yang masuk",
+        );
 
-      navigate(`/marketplace/product/${productId}`);
+        navigate(`/marketplace/product/${newId}`);
+      }
     } catch (error) {
       console.error("Error creating product:", error);
       alert("Terjadi kesalahan saat menambahkan produk. Silakan coba lagi.");
@@ -269,7 +323,7 @@ function MarketplaceSellContent() {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-[#2d3748] mb-4">
-              Jual Produk Parfum
+              {productId ? "Edit Produk" : "Jual Produk Parfum"}
             </h1>
             <p className="text-lg text-[#718096] mb-8">
               Jual parfum Anda dengan mudah dan aman di marketplace kami
