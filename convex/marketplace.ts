@@ -327,6 +327,76 @@ export const createProduct = mutation({
   },
 });
 
+// Mutation untuk memperbarui produk yang sudah ada
+export const updateProduct = mutation({
+  args: {
+    productId: v.id("products"),
+    title: v.optional(v.string()),
+    description: v.optional(v.string()),
+    price: v.optional(v.number()),
+    originalPrice: v.optional(v.number()),
+    category: v.optional(v.string()),
+    condition: v.optional(v.string()),
+    brand: v.optional(v.string()),
+    size: v.optional(v.string()),
+    images: v.optional(v.array(v.string())),
+    location: v.optional(v.string()),
+    shippingOptions: v.optional(v.array(v.string())),
+    tags: v.optional(v.array(v.string())),
+    isNegotiable: v.optional(v.boolean()),
+    stock: v.optional(v.number()),
+    status: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Anda harus login untuk mengedit produk");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+
+    if (!user) {
+      throw new Error("User tidak ditemukan");
+    }
+
+    const product = await ctx.db.get(args.productId);
+    if (!product) {
+      throw new Error("Produk tidak ditemukan");
+    }
+
+    if (product.sellerId !== user._id) {
+      throw new Error("Anda bukan pemilik produk ini");
+    }
+
+    const updateData: any = {};
+    if (args.title !== undefined) updateData.title = args.title;
+    if (args.description !== undefined) updateData.description = args.description;
+    if (args.price !== undefined) updateData.price = args.price;
+    if (args.originalPrice !== undefined) updateData.originalPrice = args.originalPrice;
+    if (args.category !== undefined) updateData.category = args.category;
+    if (args.condition !== undefined) updateData.condition = args.condition;
+    if (args.brand !== undefined) updateData.brand = args.brand;
+    if (args.size !== undefined) updateData.size = args.size;
+    if (args.images !== undefined) updateData.images = args.images;
+    if (args.location !== undefined) updateData.location = args.location;
+    if (args.shippingOptions !== undefined) updateData.shippingOptions = args.shippingOptions;
+    if (args.tags !== undefined) updateData.tags = args.tags;
+    if (args.isNegotiable !== undefined) updateData.isNegotiable = args.isNegotiable;
+    if (args.stock !== undefined) updateData.stock = args.stock;
+    if (args.status !== undefined) updateData.status = args.status;
+
+    await ctx.db.patch(args.productId, {
+      ...updateData,
+      updatedAt: Date.now(),
+    });
+
+    return true;
+  },
+});
+
 // Mutation untuk like/unlike produk
 export const toggleProductLike = mutation({
   args: { productId: v.id("products") },
