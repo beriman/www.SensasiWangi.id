@@ -74,7 +74,7 @@ function MarketplaceConsoleContent() {
                   performa produk Anda
                 </p>
               </div>
-              <Link to="/marketplace/sell">
+              <Link to="/marketplace/add">
                 <Button className="neumorphic-button bg-transparent text-[#2d3748] font-semibold border-0 shadow-none hover:scale-105 active:scale-95 transition-all">
                   <Plus className="h-4 w-4 mr-2" />
                   Jual Produk Baru
@@ -144,7 +144,7 @@ function MarketplaceConsoleContent() {
                     <p className="text-[#86868B] mb-4">
                       Anda belum memiliki produk untuk dijual
                     </p>
-                    <Link to="/marketplace/sell">
+                    <Link to="/marketplace/add">
                       <Button className="neumorphic-button bg-transparent text-[#2d3748] font-semibold border-0 shadow-none">
                         Mulai Jual Produk
                       </Button>
@@ -194,7 +194,7 @@ function MarketplaceConsoleContent() {
                     ))}
                     {userProducts.length > 3 && (
                       <div className="text-center pt-4">
-                        <Link to="/marketplace/my-shop">
+                        <Link to="/marketplace/lapak">
                           <Button
                             variant="outline"
                             className="neumorphic-button-sm bg-transparent text-[#718096] border-0 shadow-none"
@@ -342,13 +342,13 @@ function MarketplaceConsoleContent() {
 
           {/* Quick Actions */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link to="/marketplace/sell">
+            <Link to="/marketplace/add">
               <Button className="neumorphic-button w-full bg-transparent text-[#2d3748] font-semibold border-0 shadow-none hover:scale-105 active:scale-95 transition-all">
                 <Plus className="h-4 w-4 mr-2" />
                 Tambah Produk Baru
               </Button>
             </Link>
-            <Link to="/marketplace/my-shop">
+            <Link to="/marketplace/lapak">
               <Button
                 variant="outline"
                 className="neumorphic-button-sm w-full bg-transparent text-[#718096] border-0 shadow-none hover:scale-105 active:scale-95 transition-all"

@@ -77,7 +77,7 @@ function MyShopContent() {
                     <Button
                       size="sm"
                       onClick={() =>
-                        navigate(`/marketplace/sell?productId=${p._id}`)
+                        navigate(`/marketplace/add?productId=${p._id}`)
                       }
                     >
                       Edit
