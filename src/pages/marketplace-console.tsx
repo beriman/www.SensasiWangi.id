@@ -237,13 +237,13 @@ function MarketplaceConsoleContent() {
                             <div className="flex items-center gap-2 mb-2">
                               <Badge
                                 variant={
-                                  order.orderStatus === "delivered"
+                                  order.orderStatus === "delivered" || order.orderStatus === "finished"
                                     ? "default"
                                     : "secondary"
                                 }
                                 className="text-xs"
                               >
-                                {order.orderStatus === "delivered"
+                                {order.orderStatus === "delivered" || order.orderStatus === "finished"
                                   ? "Selesai"
                                   : order.orderStatus === "pending"
                                     ? "Pending"

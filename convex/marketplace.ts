@@ -625,6 +625,7 @@ export const createOrder = mutation({
       paymentMethod: args.paymentMethod,
       paymentStatus: "pending",
       orderStatus: "pending",
+      payoutStatus: "pending",
       virtualAccountNumber: vaNumber,
       paymentExpiry,
       notes: args.notes,
@@ -690,7 +691,10 @@ export const getPendingOrders = query({
   handler: async (ctx) => {
     const orders = await ctx.db.query("orders").collect();
     return orders.filter(
-      (o) => o.orderStatus !== "delivered" && o.orderStatus !== "cancelled",
+      (o) =>
+        o.orderStatus !== "delivered" &&
+        o.orderStatus !== "finished" &&
+        o.orderStatus !== "cancelled",
     );
   },
 });
@@ -785,6 +789,80 @@ export const updateOrderStatus = mutation({
   },
 });
 
+export const releaseSellerPayment = mutation({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+    const admin = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!admin || admin.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+
+    const order = await ctx.db.get(args.orderId);
+    if (!order) {
+      throw new Error("Order tidak ditemukan");
+    }
+    if (order.orderStatus !== "delivered") {
+      throw new Error("Order belum dikonfirmasi selesai");
+    }
+
+    await ctx.db.patch(args.orderId, {
+      orderStatus: "finished",
+      payoutStatus: "sent",
+      updatedAt: Date.now(),
+    });
+
+    const sellerProfile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", order.sellerId))
+      .unique();
+    if (sellerProfile) {
+      await ctx.db.patch(sellerProfile._id, {
+        totalSales: (sellerProfile.totalSales ?? 0) + 1,
+      });
+    }
+
+    const buyerProfile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", order.buyerId))
+      .unique();
+    if (buyerProfile) {
+      await ctx.db.patch(buyerProfile._id, {
+        totalPurchases: (buyerProfile.totalPurchases ?? 0) + 1,
+      });
+    }
+
+    const now = Date.now();
+    const message = `Pembayaran pesanan ${order.productTitle} telah diteruskan ke penjual`;
+    if (await allowNotification(ctx, order.buyerId, "order")) {
+      await ctx.db.insert("notifications", {
+        userId: order.buyerId,
+        type: "order",
+        message,
+        url: `/marketplace/order/${order._id}`,
+        read: false,
+        createdAt: now,
+      });
+    }
+    if (await allowNotification(ctx, order.sellerId, "order")) {
+      await ctx.db.insert("notifications", {
+        userId: order.sellerId,
+        type: "order",
+        message,
+        url: `/marketplace/order/${order._id}`,
+        read: false,
+        createdAt: now,
+      });
+    }
+  },
+});
+
 // Mutation untuk upload bukti pembayaran
 export const uploadPaymentProof = mutation({
   args: {
@@ -835,7 +913,7 @@ export const createReview = mutation({
       throw new Error("Anda bukan pembeli pesanan ini");
     }
 
-    if (order.orderStatus !== "delivered") {
+    if (order.orderStatus !== "delivered" && order.orderStatus !== "finished") {
       throw new Error("Pesanan belum selesai");
     }
 
@@ -920,7 +998,7 @@ export const getMarketplaceStats = query({
     const soldProducts = allProducts.filter((p) => p.status === "sold");
     const allOrders = await ctx.db.query("orders").collect();
     const completedOrders = allOrders.filter(
-      (o) => o.orderStatus === "delivered",
+      (o) => o.orderStatus === "delivered" || o.orderStatus === "finished",
     );
 
     return {
@@ -957,7 +1035,9 @@ export const getSellerAnalytics = query({
       (sum, p) => sum + (p.sambatCount || 0),
       0,
     );
-    const completedOrders = orders.filter((o) => o.orderStatus === "delivered");
+    const completedOrders = orders.filter(
+      (o) => o.orderStatus === "delivered" || o.orderStatus === "finished",
+    );
     const totalRevenue = completedOrders.reduce(
       (sum, o) => sum + o.totalAmount,
       0,
@@ -968,7 +1048,7 @@ export const getSellerAnalytics = query({
     const lastMonth = now - 30 * 24 * 60 * 60 * 1000;
     const thisMonthOrders = orders.filter((o) => o.createdAt > lastMonth);
     const thisMonthRevenue = thisMonthOrders
-      .filter((o) => o.orderStatus === "delivered")
+      .filter((o) => o.orderStatus === "delivered" || o.orderStatus === "finished")
       .reduce((sum, o) => sum + o.totalAmount, 0);
 
     return {
