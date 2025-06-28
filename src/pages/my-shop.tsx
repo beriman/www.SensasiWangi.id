@@ -1,9 +1,17 @@
 import { useUser } from "@clerk/clerk-react";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
 import RoleProtectedRoute from "@/components/wrappers/RoleProtectedRoute";
 
@@ -29,6 +37,13 @@ function MyShopContent() {
   const myOrders = useQuery(
     api.marketplace.getOrdersByUser,
     currentUser ? { userId: currentUser._id, type: "seller" } : "skip",
+  );
+  const updateStatus = useMutation(api.marketplace.updateOrderStatus);
+
+  const incomingOrders = myOrders?.filter(
+    (o: any) =>
+      (o.paymentStatus === "pending" || o.paymentStatus === "paid") &&
+      o.orderStatus !== "delivered",
   );
 
   const formatPrice = (price: number) =>
@@ -70,6 +85,66 @@ function MyShopContent() {
                 </Card>
               ))}
             </div>
+          )}
+        </section>
+        <section>
+          <h2 className="text-3xl font-bold mb-4">Pesanan Masuk</h2>
+          {!incomingOrders || incomingOrders.length === 0 ? (
+            <p className="text-center text-[#86868B]">Tidak ada pesanan masuk.</p>
+          ) : (
+            <Card className="neumorphic-card border-0">
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[#1D1D1F]">Produk</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Pembeli</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Pembayaran</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Status</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {incomingOrders?.map((order: any) => (
+                      <TableRow key={order._id}>
+                        <TableCell className="text-[#1D1D1F]">
+                          {order.productTitle}
+                        </TableCell>
+                        <TableCell className="text-[#86868B]">
+                          {order.buyerName}
+                        </TableCell>
+                        <TableCell className="text-[#86868B]">
+                          {order.paymentStatus}
+                        </TableCell>
+                        <TableCell className="text-[#86868B]">
+                          <Badge variant="secondary" className="text-xs">
+                            {order.orderStatus}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            className="neumorphic-button-sm h-8 px-3 text-xs"
+                            onClick={async () => {
+                              const resi = window.prompt("Nomor Resi");
+                              if (resi) {
+                                await updateStatus({
+                                  orderId: order._id,
+                                  status: "shipped",
+                                  trackingNumber: resi,
+                                });
+                              }
+                            }}
+                          >
+                            Sudah Dikirim
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           )}
         </section>
         <section>
