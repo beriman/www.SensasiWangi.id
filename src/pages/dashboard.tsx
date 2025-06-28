@@ -64,7 +64,7 @@ export default function Dashboard() {
 
   const totalRevenue =
     userSellerOrders
-      ?.filter((o) => o.orderStatus === "delivered")
+      ?.filter((o) => o.orderStatus === "delivered" || o.orderStatus === "finished")
       .reduce((sum, order) => sum + order.totalAmount, 0) || 0;
   const activeProducts =
     userProducts?.filter((p) => p.status === "active").length || 0;
@@ -370,14 +370,14 @@ export default function Dashboard() {
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2">
                                   <Badge
-                                    variant={
-                                      order.orderStatus === "delivered"
+                                  variant={
+                                      order.orderStatus === "delivered" || order.orderStatus === "finished"
                                         ? "default"
                                         : "secondary"
                                     }
-                                    className="text-xs"
+                                  className="text-xs"
                                   >
-                                    {order.orderStatus === "delivered"
+                                    {order.orderStatus === "delivered" || order.orderStatus === "finished"
                                       ? "Selesai"
                                       : order.orderStatus === "pending"
                                         ? "Pending"

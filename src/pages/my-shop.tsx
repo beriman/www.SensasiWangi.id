@@ -43,7 +43,8 @@ function MyShopContent() {
   const incomingOrders = myOrders?.filter(
     (o: any) =>
       (o.paymentStatus === "pending" || o.paymentStatus === "paid") &&
-      o.orderStatus !== "delivered",
+      o.orderStatus !== "delivered" &&
+      o.orderStatus !== "finished",
   );
 
   const formatPrice = (price: number) =>

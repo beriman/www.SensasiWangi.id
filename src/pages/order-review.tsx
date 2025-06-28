@@ -29,7 +29,7 @@ export default function OrderReviewPage() {
     navigate(`/marketplace/product/${order.productId}`);
   });
 
-  if (order.orderStatus !== "delivered") {
+  if (order.orderStatus !== "delivered" && order.orderStatus !== "finished") {
     return <div>Pesanan belum selesai.</div>;
   }
 

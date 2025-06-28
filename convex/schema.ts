@@ -223,7 +223,8 @@ export default defineSchema({
     totalAmount: v.number(),
     paymentMethod: v.string(),
     paymentStatus: v.string(), // "pending", "paid", "failed", "refunded"
-    orderStatus: v.string(), // "pending", "confirmed", "shipped", "delivered", "cancelled"
+    orderStatus: v.string(), // "pending", "confirmed", "shipped", "delivered", "finished", "cancelled"
+    payoutStatus: v.optional(v.string()), // "pending", "sent"
     virtualAccountNumber: v.optional(v.string()),
     paymentExpiry: v.optional(v.number()),
     trackingNumber: v.optional(v.string()),
@@ -237,6 +238,7 @@ export default defineSchema({
     .index("by_product", ["productId"])
     .index("by_payment_status", ["paymentStatus"])
     .index("by_order_status", ["orderStatus"])
+    .index("by_payout_status", ["payoutStatus"])
     .index("by_created_at", ["createdAt"]),
 
   orderTracking: defineTable({

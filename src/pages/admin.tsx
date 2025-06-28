@@ -91,6 +91,7 @@ function AdminContent() {
 
   const verifyPayment = useMutation(api.marketplace.verifyOrderPayment);
   const updateStatus = useMutation(api.marketplace.updateOrderStatus);
+  const releasePayment = useMutation(api.marketplace.releaseSellerPayment);
   const trackShipment = useAction(api.marketplace.trackShipment);
   const updateUserRole = useMutation(api.users.updateUserRole);
   const suspendUser = useMutation(api.admin.suspendUser);
@@ -1040,9 +1041,10 @@ function AdminContent() {
                     <TableRow>
                       <TableHead className="text-[#1D1D1F]">Produk</TableHead>
                       <TableHead className="text-[#1D1D1F]">Pembeli</TableHead>
-                      <TableHead className="text-[#1D1D1F]">
+                    <TableHead className="text-[#1D1D1F]">
                         Pembayaran
                       </TableHead>
+                      <TableHead className="text-[#1D1D1F]">Payout</TableHead>
                       <TableHead className="text-[#1D1D1F]">Status</TableHead>
                       <TableHead className="text-[#1D1D1F]">Aksi</TableHead>
                     </TableRow>
@@ -1060,6 +1062,9 @@ function AdminContent() {
                             </TableCell>
                             <TableCell className="text-[#86868B]">
                               {order.paymentStatus}
+                            </TableCell>
+                            <TableCell className="text-[#86868B]">
+                              {order.payoutStatus ?? "pending"}
                             </TableCell>
                             <TableCell className="text-[#86868B]">
                               <Badge variant="secondary" className="text-xs">
@@ -1132,6 +1137,17 @@ function AdminContent() {
                                       Selesai
                                     </Button>
                                   </>
+                                )}
+                                {order.orderStatus === "delivered" && order.payoutStatus !== "sent" && (
+                                  <Button
+                                    size="sm"
+                                    className="neumorphic-button-sm h-8 px-3 text-xs"
+                                    onClick={async () => {
+                                      await releasePayment({ orderId: order._id });
+                                    }}
+                                  >
+                                    Release Payment
+                                  </Button>
                                 )}
                               </div>
                             </TableCell>
