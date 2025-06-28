@@ -110,6 +110,7 @@ function MarketplaceSellContent() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState(1);
   const [showTips, setShowTips] = useState(true);
+  const [isSambatan, setIsSambatan] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-create user if not exists
@@ -227,6 +228,11 @@ function MarketplaceSellContent() {
     }
 
     if (!validateForm()) {
+      return;
+    }
+
+    if (isSambatan) {
+      navigate("/marketplace/sambat/create");
       return;
     }
 
@@ -662,6 +668,16 @@ function MarketplaceSellContent() {
                             className="text-[#2d3748]"
                           >
                             Harga bisa dinegosiasi
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="sambatan"
+                            checked={isSambatan}
+                            onCheckedChange={(checked) => setIsSambatan(checked)}
+                          />
+                          <Label htmlFor="sambatan" className="text-[#2d3748]">
+                            Ini produk Sambatan
                           </Label>
                         </div>
                       </CardContent>
