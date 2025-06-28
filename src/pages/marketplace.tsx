@@ -927,7 +927,7 @@ export default function Marketplace() {
                 Filter
               </Button>
               <Button
-                onClick={() => navigate("/marketplace/sell")}
+                onClick={() => navigate("/marketplace/add")}
                 className="neumorphic-button text-[#2d3748] bg-transparent border-0 shadow-none"
               >
                 <Plus className="h-4 w-4 mr-2" />

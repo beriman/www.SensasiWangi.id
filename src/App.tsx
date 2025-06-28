@@ -61,6 +61,8 @@ function App() {
             />
             <Route path="/marketplace/sell" element={<MarketplaceSell />} />
             <Route path="/marketplace/my-shop" element={<MyShop />} />
+            <Route path="/marketplace/add" element={<MarketplaceSell />} />
+            <Route path="/marketplace/lapak" element={<MyShop />} />
             <Route path="/marketplace/sambat" element={<MarketplaceSambat />} />
             <Route
               path="/marketplace/sambat/:id"
