@@ -409,12 +409,14 @@ export default function Dashboard() {
                         ))}
                         {userBuyerOrders.length > 3 && (
                           <div className="text-center pt-4">
-                            <Button
-                              variant="outline"
-                              className="neumorphic-button-sm bg-transparent text-[#718096] border-0 shadow-none"
-                            >
-                              Lihat Semua Pesanan ({userBuyerOrders.length})
-                            </Button>
+                            <Link to="/marketplace/lapak/orders">
+                              <Button
+                                variant="outline"
+                                className="neumorphic-button-sm bg-transparent text-[#718096] border-0 shadow-none"
+                              >
+                                Lihat Semua Pesanan ({userBuyerOrders.length})
+                              </Button>
+                            </Link>
                           </div>
                         )}
                       </div>
