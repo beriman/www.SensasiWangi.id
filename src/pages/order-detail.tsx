@@ -1,7 +1,8 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/clerk-react";
 import ProtectedRoute from "@/components/wrappers/ProtectedRoute";
 
@@ -105,6 +106,12 @@ function OrderDetailContent() {
               />
             </CardContent>
           </Card>
+        )}
+
+        {order.orderStatus === "delivered" && (
+          <Link to={`/order/${order._id}/review`}>
+            <Button className="mt-4">Beri Ulasan</Button>
+          </Link>
         )}
       </main>
     </div>
