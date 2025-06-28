@@ -39,6 +39,7 @@ function MyShopContent() {
     currentUser ? { userId: currentUser._id, type: "seller" } : "skip",
   );
   const updateStatus = useMutation(api.marketplace.updateOrderStatus);
+  const updateProduct = useMutation(api.marketplace.updateProduct);
 
   const incomingOrders = myOrders?.filter(
     (o: any) =>
@@ -65,23 +66,67 @@ function MyShopContent() {
             <div className="space-y-4">
               {myProducts.map((p: any) => (
                 <Card key={p._id} className="neumorphic-card border-0">
-                  <CardHeader>
+                  <CardHeader className="flex items-start justify-between">
                     <CardTitle className="text-lg font-semibold">
                       {p.title}
                     </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex items-center justify-between">
-                    <span className="text-sm text-[#1D1D1F]">
-                      {formatPrice(p.price)}
-                    </span>
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        navigate(`/marketplace/add?productId=${p._id}`)
-                      }
+                    <Badge
+                      variant={p.status === "active" ? "default" : "secondary"}
+                      className="text-xs"
                     >
-                      Edit
-                    </Button>
+                      {p.status === "active"
+                        ? "Aktif"
+                        : p.status === "sold"
+                          ? "Habis"
+                          : "Tidak Aktif"}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                      <span className="text-sm text-[#1D1D1F]">
+                        {formatPrice(p.price)}
+                      </span>
+                      <div className="text-xs text-[#86868B]">Stok: {p.stock}</div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          navigate(`/marketplace/add?productId=${p._id}`)
+                        }
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="neumorphic-button-sm h-8 px-3 text-xs"
+                        onClick={async () => {
+                          await updateProduct({
+                            productId: p._id,
+                            status: "sold",
+                            stock: 0,
+                          });
+                        }}
+                      >
+                        Habis
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="neumorphic-button-sm h-8 px-3 text-xs"
+                        onClick={async () => {
+                          const stok = window.prompt("Jumlah stok baru", "1");
+                          if (stok) {
+                            await updateProduct({
+                              productId: p._id,
+                              status: "active",
+                              stock: parseInt(stok),
+                            });
+                          }
+                        }}
+                      >
+                        Restok
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
