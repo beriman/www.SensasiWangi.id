@@ -9,6 +9,12 @@ crons.daily(
   internal.marketplace.expireUnpaidOrders,
 );
 
+crons.daily(
+  "refresh-all-shipments",
+  { hourUTC: 0, minuteUTC: 10 },
+  internal.marketplace.refreshAllShipments,
+);
+
 crons.weekly(
   "update-weekly-leaderboard",
   { dayOfWeek: "monday", hourUTC: 0, minuteUTC: 5 },
