@@ -822,6 +822,51 @@ export const updateOrderStatus = mutation({
   },
 });
 
+export const cancelOrder = mutation({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Anda harus login untuk membatalkan order");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+
+    if (!user) {
+      throw new Error("User tidak ditemukan");
+    }
+
+    const order = await ctx.db.get(args.orderId);
+    if (!order) {
+      throw new Error("Order tidak ditemukan");
+    }
+
+    if (order.buyerId !== user._id) {
+      throw new Error("Anda bukan pembeli order ini");
+    }
+
+    await ctx.db.patch(args.orderId, {
+      orderStatus: "cancelled",
+      paymentStatus: "failed",
+      updatedAt: Date.now(),
+    });
+
+    const product = await ctx.db.get(order.productId);
+    if (product) {
+      await ctx.db.patch(order.productId, {
+        status: "active",
+        stock: (product.stock || 0) + 1,
+        updatedAt: Date.now(),
+      });
+    }
+
+    return true;
+  },
+});
+
 export const releaseSellerPayment = mutation({
   args: { orderId: v.id("orders") },
   handler: async (ctx, args) => {
