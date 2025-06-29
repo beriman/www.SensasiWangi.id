@@ -976,6 +976,14 @@ function MarketplaceSellContent() {
                     >
                       Lihat FAQ
                     </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full neumorphic-button-sm text-[#718096] bg-transparent border-0 mt-2"
+                      onClick={() => window.open("/bantuan", "_blank")}
+                    >
+                      Hubungi Kami
+                    </Button>
                   </CardContent>
                 </Card>
               </div>

@@ -24,6 +24,7 @@ import Privacy from "./pages/privacy";
 import Terms from "./pages/terms";
 import Polling from "./pages/polling";
 import FAQ from "./pages/faq";
+import Help from "./pages/help";
 import Onboarding from "./pages/onboarding";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
@@ -89,6 +90,7 @@ function App() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/polling" element={<Polling />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/bantuan" element={<Help />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/order/:orderId/review" element={<OrderReviewPage />} />
             <Route path="*" element={<NotFound />} />
