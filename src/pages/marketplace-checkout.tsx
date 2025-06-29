@@ -66,6 +66,10 @@ export default function MarketplaceCheckout() {
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [shippingCost, setShippingCost] = useState(0);
+  const order = useQuery(
+    api.marketplace.getOrderById,
+    orderId ? { orderId: orderId as any } : "skip",
+  );
 
   useEffect(() => {
     if (productId) {
@@ -95,6 +99,12 @@ export default function MarketplaceCheckout() {
     };
     loadCost();
   }, [shippingMethod, shippingAddress.city, cart]);
+
+  useEffect(() => {
+    if (order && order.orderStatus === "cancelled") {
+      navigate("/dashboard");
+    }
+  }, [order, navigate]);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("id-ID", {

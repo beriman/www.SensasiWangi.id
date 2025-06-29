@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,11 +25,13 @@ function OrderDetailContent() {
     api.marketplace.getOrderById,
     orderId ? { orderId: orderId as any } : "skip",
   );
+  const cancelOrder = useMutation(api.marketplace.cancelOrder);
   const tracking = useQuery(
     api.marketplace.getOrderTracking,
     order && order.trackingNumber ? { orderId: order._id } : "skip",
   );
   const submitReport = useMutation(api.marketplace.submitOrderReport);
+  const navigate = useNavigate();
   if (order === undefined || currentUser === undefined) return <div>Loading...</div>;
   if (order === null) return <div>Order tidak ditemukan</div>;
   if (currentUser && currentUser._id !== order.buyerId && currentUser._id !== order.sellerId) {
@@ -114,6 +116,21 @@ function OrderDetailContent() {
             <Button className="mt-4">Beri Ulasan</Button>
           </Link>
         )}
+        {currentUser &&
+          currentUser._id === order.buyerId &&
+          order.paymentStatus === "pending" && (
+            <Button
+              className="mt-4"
+              onClick={async () => {
+                if (confirm("Batalkan order ini?")) {
+                  await cancelOrder({ orderId: order._id });
+                  navigate("/dashboard");
+                }
+              }}
+            >
+              Batalkan Order
+            </Button>
+          )}
         {currentUser &&
           currentUser._id === order.sellerId &&
           order.orderStatus === "shipped" &&
