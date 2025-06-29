@@ -4,6 +4,8 @@ import {
   query,
   action,
   internalMutation,
+  internalAction,
+  internalQuery,
 } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
@@ -2805,3 +2807,26 @@ export const expireUnpaidOrders = internalMutation({
     }
   },
 });
+
+export const listShippedOrders = internalQuery({
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("orders")
+      .withIndex("by_order_status", (q) => q.eq("orderStatus", "shipped"))
+      .collect();
+  },
+});
+
+export const refreshAllShipments = internalAction({
+  handler: async (ctx) => {
+    const orders = await ctx.runQuery(internal.marketplace.listShippedOrders, {});
+    for (const order of orders) {
+      try {
+        await ctx.runAction(api.marketplace.trackShipment, { orderId: order._id });
+      } catch (err) {
+        console.error(`Failed to refresh shipment for order ${order._id}`, err);
+      }
+    }
+  },
+});
+
