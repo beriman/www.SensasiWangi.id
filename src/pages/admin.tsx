@@ -88,6 +88,7 @@ function AdminContent() {
   const systemHealth = useQuery(api.admin.getSystemHealth);
   const platformAnalytics = useQuery(api.admin.getPlatformAnalytics);
   const pendingReports = useQuery(api.forum.getTopReports);
+  const orderReports = useQuery(api.marketplace.getOrderReports);
 
   const verifyPayment = useMutation(api.marketplace.verifyOrderPayment);
   const updateStatus = useMutation(api.marketplace.updateOrderStatus);
@@ -99,6 +100,7 @@ function AdminContent() {
   const issueWarning = useMutation(api.admin.issueWarning);
   const tempBanUser = useMutation(api.admin.tempBanUser);
   const permBanUser = useMutation(api.admin.permBanUser);
+  const resolveOrderReport = useMutation(api.marketplace.resolveOrderReport);
   const broadcastMessage = useMutation(api.admin.broadcastSystemMessage);
   const clearCache = useMutation(api.admin.clearSystemCache);
   const backupDatabase = useMutation(api.admin.backupDatabase);
@@ -184,6 +186,13 @@ function AdminContent() {
             >
               <CheckCircle className="w-4 h-4 mr-2" />
               Pesanan
+            </TabsTrigger>
+            <TabsTrigger
+              value="order-reports"
+              className="neumorphic-button-sm data-[state=active]:bg-white data-[state=active]:shadow-inner text-[#1D1D1F]"
+            >
+              <Flag className="w-4 h-4 mr-2" />
+              Order Reports
             </TabsTrigger>
             <TabsTrigger
               value="bri-events"
@@ -411,9 +420,68 @@ function AdminContent() {
                     ))}
                   </TableBody>
                 </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="order-reports" className="space-y-6">
+        <Card className="neumorphic-card border-0">
+          <CardHeader>
+            <CardTitle className="text-[#1D1D1F]">Laporan Pesanan</CardTitle>
+            <CardDescription className="text-[#86868B]">
+              Tinjau dan selesaikan laporan terkait pesanan
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-[#1D1D1F]">Pesanan</TableHead>
+                  <TableHead className="text-[#1D1D1F]">Pelapor</TableHead>
+                  <TableHead className="text-[#1D1D1F]">Alasan</TableHead>
+                  <TableHead className="text-[#1D1D1F]">Status</TableHead>
+                  <TableHead className="text-[#1D1D1F]">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {!orderReports
+                  ? null
+                  : orderReports.map((rep: any) => (
+                      <TableRow key={rep.id}>
+                        <TableCell className="text-[#1D1D1F]">
+                          {rep.orderTitle}
+                        </TableCell>
+                        <TableCell className="text-[#86868B]">
+                          {rep.reporter}
+                        </TableCell>
+                        <TableCell className="text-[#86868B] max-w-xs truncate">
+                          {rep.reason}
+                        </TableCell>
+                        <TableCell className="text-[#86868B]">
+                          <Badge variant="secondary" className="text-xs">
+                            {rep.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {rep.status === "pending" && (
+                            <Button
+                              size="sm"
+                              className="neumorphic-button-sm h-8 px-3 text-xs"
+                              onClick={async () => {
+                                await resolveOrderReport({ reportId: rep.id });
+                              }}
+                            >
+                              Resolve
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
             <Card className="neumorphic-card border-0">
