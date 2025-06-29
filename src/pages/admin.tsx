@@ -109,6 +109,18 @@ function AdminContent() {
     limit: 20,
   });
 
+  const suggestionsData = useQuery(api.marketplace.getSuggestions, {
+    paginationOpts: { numItems: 20, cursor: null },
+  });
+  const suggestionStats = useQuery(api.marketplace.getSuggestionStats);
+
+  const updateSuggestionStatus = useMutation(
+    api.marketplace.updateSuggestionStatus,
+  );
+  const updateSuggestionPriority = useMutation(
+    api.marketplace.updateSuggestionPriority,
+  );
+
   // Data statistik real-time
   const stats = {
     totalUsers: platformAnalytics?.userCount || 0,
@@ -894,7 +906,9 @@ function AdminContent() {
                   <MessageSquare className="h-4 w-4 text-[#86868B]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-[#1D1D1F]">47</div>
+                  <div className="text-2xl font-bold text-[#1D1D1F]">
+                    {suggestionStats?.total ?? 0}
+                  </div>
                   <p className="text-xs text-[#86868B]">+5 minggu ini</p>
                 </CardContent>
               </Card>
@@ -907,8 +921,16 @@ function AdminContent() {
                   <MessageSquare className="h-4 w-4 text-[#86868B]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-[#1D1D1F]">32</div>
-                  <p className="text-xs text-[#86868B]">68% dari total</p>
+                  <div className="text-2xl font-bold text-[#1D1D1F]">
+                    {suggestionStats?.suggestions ?? 0}
+                  </div>
+                  <p className="text-xs text-[#86868B]">
+                    {(
+                      ((suggestionStats?.suggestions ?? 0) /
+                        Math.max(suggestionStats?.total ?? 1, 1)) *
+                      100
+                    ).toFixed(0)}% dari total
+                  </p>
                 </CardContent>
               </Card>
 
@@ -920,8 +942,16 @@ function AdminContent() {
                   <Flag className="h-4 w-4 text-[#86868B]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-[#1D1D1F]">15</div>
-                  <p className="text-xs text-[#86868B]">32% dari total</p>
+                  <div className="text-2xl font-bold text-[#1D1D1F]">
+                    {suggestionStats?.bugReports ?? 0}
+                  </div>
+                  <p className="text-xs text-[#86868B]">
+                    {(
+                      ((suggestionStats?.bugReports ?? 0) /
+                        Math.max(suggestionStats?.total ?? 1, 1)) *
+                      100
+                    ).toFixed(0)}% dari total
+                  </p>
                 </CardContent>
               </Card>
 
@@ -933,7 +963,9 @@ function AdminContent() {
                   <TrendingUp className="h-4 w-4 text-[#86868B]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-[#1D1D1F]">8</div>
+                  <div className="text-2xl font-bold text-[#1D1D1F]">
+                    {suggestionStats?.pending ?? 0}
+                  </div>
                   <p className="text-xs text-[#86868B]">Perlu ditinjau</p>
                 </CardContent>
               </Card>
@@ -964,129 +996,101 @@ function AdminContent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell>
-                        <Badge className="bg-blue-100 text-blue-800">
-                          Saran
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-[#1D1D1F] max-w-xs truncate">
-                        Tambahkan fitur notifikasi real-time
-                      </TableCell>
-                      <TableCell className="text-[#86868B]">
-                        Ahmad Rizki
-                      </TableCell>
-                      <TableCell>
-                        <Badge className="bg-yellow-100 text-yellow-800">
-                          Pending
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className="bg-orange-100 text-orange-800">
-                          High
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-[#86868B]">
-                        2024-01-15
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            className="neumorphic-button-sm h-8 px-3 text-xs"
-                          >
-                            <Eye className="w-3 h-3 mr-1" />
-                            Lihat
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="neumorphic-button-sm h-8 px-3 text-xs text-green-600"
-                          >
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Proses
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <Badge className="bg-red-100 text-red-800">Bug</Badge>
-                      </TableCell>
-                      <TableCell className="text-[#1D1D1F] max-w-xs truncate">
-                        Error saat upload gambar produk
-                      </TableCell>
-                      <TableCell className="text-[#86868B]">
-                        Sari Dewi
-                      </TableCell>
-                      <TableCell>
-                        <Badge className="bg-blue-100 text-blue-800">
-                          In Progress
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className="bg-red-100 text-red-800">
-                          Urgent
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-[#86868B]">
-                        2024-01-14
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            className="neumorphic-button-sm h-8 px-3 text-xs"
-                          >
-                            <Eye className="w-3 h-3 mr-1" />
-                            Lihat
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="neumorphic-button-sm h-8 px-3 text-xs text-green-600"
-                          >
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Selesai
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <Badge className="bg-blue-100 text-blue-800">
-                          Saran
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-[#1D1D1F] max-w-xs truncate">
-                        Perbaiki tampilan mobile
-                      </TableCell>
-                      <TableCell className="text-[#86868B]">
-                        Budi Santoso
-                      </TableCell>
-                      <TableCell>
-                        <Badge className="bg-green-100 text-green-800">
-                          Resolved
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className="bg-gray-100 text-gray-800">
-                          Medium
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-[#86868B]">
-                        2024-01-13
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            className="neumorphic-button-sm h-8 px-3 text-xs"
-                          >
-                            <Eye className="w-3 h-3 mr-1" />
-                            Lihat
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    {!suggestionsData
+                      ? null
+                      : suggestionsData.page.map((s: any) => (
+                          <TableRow key={s._id}>
+                            <TableCell>
+                              <Badge
+                                className={
+                                  s.type === "suggestion"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : "bg-red-100 text-red-800"
+                                }
+                              >
+                                {s.type === "suggestion" ? "Saran" : "Bug"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-[#1D1D1F] max-w-xs truncate">
+                              {s.subject}
+                            </TableCell>
+                            <TableCell className="text-[#86868B]">{s.name}</TableCell>
+                            <TableCell>
+                              <Badge
+                                className={
+                                  s.status === "pending"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : s.status === "in_progress"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : s.status === "resolved"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-gray-100 text-gray-800"
+                                }
+                              >
+                                {s.status.replaceAll("_", " ")}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                className={
+                                  s.priority === "urgent"
+                                    ? "bg-red-100 text-red-800"
+                                    : s.priority === "high"
+                                    ? "bg-orange-100 text-orange-800"
+                                    : s.priority === "medium"
+                                    ? "bg-gray-100 text-gray-800"
+                                    : "bg-gray-100 text-gray-800"
+                                }
+                              >
+                                {s.priority.charAt(0).toUpperCase() +
+                                  s.priority.slice(1)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-[#86868B]">
+                              {new Date(s.createdAt).toISOString().slice(0, 10)}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button
+                                  size="sm"
+                                  className="neumorphic-button-sm h-8 px-3 text-xs"
+                                  onClick={async () => {
+                                    const status = window.prompt(
+                                      "Status (pending/in_progress/resolved/closed)",
+                                      s.status,
+                                    );
+                                    if (status) {
+                                      await updateSuggestionStatus({
+                                        suggestionId: s._id,
+                                        status,
+                                      });
+                                    }
+                                  }}
+                                >
+                                  Update Status
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="neumorphic-button-sm h-8 px-3 text-xs"
+                                  onClick={async () => {
+                                    const priority = window.prompt(
+                                      "Prioritas (low/medium/high/urgent)",
+                                      s.priority,
+                                    );
+                                    if (priority) {
+                                      await updateSuggestionPriority({
+                                        suggestionId: s._id,
+                                        priority,
+                                      });
+                                    }
+                                  }}
+                                >
+                                  Ubah Prioritas
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
                   </TableBody>
                 </Table>
               </CardContent>
