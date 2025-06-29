@@ -318,6 +318,14 @@ export function Footer() {
                   Kontak Support
                 </a>
               </li>
+              <li>
+                <a
+                  href="/bantuan"
+                  className="text-base text-[#86868B] hover:text-[#0066CC] transition-colors"
+                >
+                  Halaman Bantuan
+                </a>
+              </li>
             </ul>
           </div>
           <div className="space-y-4">
