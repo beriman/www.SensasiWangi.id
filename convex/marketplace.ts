@@ -2719,6 +2719,66 @@ export const trackShipment = action({
     },
   });
 
+export const submitOrderReport = mutation({
+  args: { orderId: v.id("orders"), reason: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    await ctx.db.insert("orderReports", {
+      orderId: args.orderId,
+      reporterId: user._id,
+      reason: args.reason,
+      status: "pending",
+      createdAt: Date.now(),
+    });
+
+    return true;
+  },
+});
+
+export const resolveOrderReport = mutation({
+  args: { reportId: v.id("orderReports"), status: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+    const admin = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!admin || admin.role !== "admin") throw new Error("Unauthorized");
+
+    await ctx.db.patch(args.reportId, {
+      status: args.status ?? "resolved",
+    });
+  },
+});
+
+export const getOrderReports = query({
+  handler: async (ctx) => {
+    const [reports, orders, users] = await Promise.all([
+      ctx.db.query("orderReports").collect(),
+      ctx.db.query("orders").collect(),
+      ctx.db.query("users").collect(),
+    ]);
+    const orderMap = new Map(orders.map((o) => [o._id, o.productTitle]));
+    const userMap = new Map(users.map((u) => [u._id, u.name]));
+    return reports.map((r) => ({
+      id: r._id,
+      orderTitle: orderMap.get(r.orderId) ?? "",
+      reporter: userMap.get(r.reporterId) ?? "Unknown",
+      reason: r.reason,
+      status: r.status,
+    }));
+  },
+});
+
 export const expireUnpaidOrders = internalMutation({
   handler: async (ctx) => {
     const now = Date.now();

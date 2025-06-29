@@ -251,6 +251,16 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_order", ["orderId"]),
 
+  orderReports: defineTable({
+    orderId: v.id("orders"),
+    reporterId: v.id("users"),
+    reason: v.string(),
+    status: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_order", ["orderId"])
+    .index("by_reporter", ["reporterId"]),
+
   reviews: defineTable({
     orderId: v.id("orders"),
     productId: v.id("products"),

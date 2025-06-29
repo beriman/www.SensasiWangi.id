@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ function OrderDetailContent() {
     api.marketplace.getOrderTracking,
     order && order.trackingNumber ? { orderId: order._id } : "skip",
   );
+  const submitReport = useMutation(api.marketplace.submitOrderReport);
   if (order === undefined || currentUser === undefined) return <div>Loading...</div>;
   if (order === null) return <div>Order tidak ditemukan</div>;
   if (currentUser && currentUser._id !== order.buyerId && currentUser._id !== order.sellerId) {
@@ -113,6 +114,23 @@ function OrderDetailContent() {
             <Button className="mt-4">Beri Ulasan</Button>
           </Link>
         )}
+        {currentUser &&
+          currentUser._id === order.sellerId &&
+          order.orderStatus === "shipped" &&
+          Date.now() - order.updatedAt > 7 * 24 * 60 * 60 * 1000 && (
+            <Button
+              className="mt-4"
+              onClick={async () => {
+                const reason = window.prompt("Alasan laporan?");
+                if (reason) {
+                  await submitReport({ orderId: order._id, reason });
+                  alert("Laporan dikirim");
+                }
+              }}
+            >
+              Laporkan Masalah
+            </Button>
+          )}
       </main>
     </div>
   );
