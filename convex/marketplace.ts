@@ -397,6 +397,37 @@ export const updateProduct = mutation({
   },
 });
 
+export const deleteProduct = mutation({
+  args: { productId: v.id("products") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Anda harus login untuk menghapus produk");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+
+    if (!user) {
+      throw new Error("User tidak ditemukan");
+    }
+
+    const product = await ctx.db.get(args.productId);
+    if (!product) {
+      throw new Error("Produk tidak ditemukan");
+    }
+
+    if (product.sellerId !== user._id) {
+      throw new Error("Anda bukan pemilik produk ini");
+    }
+
+    await ctx.db.delete(args.productId);
+    return true;
+  },
+});
+
 // Mutation untuk like/unlike produk
 export const toggleProductLike = mutation({
   args: { productId: v.id("products") },
