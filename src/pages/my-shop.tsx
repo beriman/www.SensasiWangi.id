@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
 import RoleProtectedRoute from "@/components/wrappers/RoleProtectedRoute";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function MyShop() {
   return (
@@ -40,6 +41,8 @@ function MyShopContent() {
   );
   const updateStatus = useMutation(api.marketplace.updateOrderStatus);
   const updateProduct = useMutation(api.marketplace.updateProduct);
+  const deleteProductMut = useMutation(api.marketplace.deleteProduct);
+  const { toast } = useToast();
 
   const incomingOrders = myOrders?.filter(
     (o: any) =>
@@ -125,6 +128,18 @@ function MyShopContent() {
                         }}
                       >
                         Restok
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="neumorphic-button-sm h-8 px-3 text-xs"
+                        onClick={async () => {
+                          if (window.confirm("Hapus produk ini?")) {
+                            await deleteProductMut({ productId: p._id });
+                            toast({ title: "Produk dihapus" });
+                          }
+                        }}
+                      >
+                        Hapus
                       </Button>
                     </div>
                   </CardContent>
