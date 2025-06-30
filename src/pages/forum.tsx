@@ -132,6 +132,9 @@ export default function Forum() {
   const [isEditTopicOpen, setIsEditTopicOpen] = useState(false);
   const [editTopicTitle, setEditTopicTitle] = useState("");
   const [editTopicContent, setEditTopicContent] = useState("");
+  const [isEditCommentOpen, setIsEditCommentOpen] = useState(false);
+  const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
+  const [editCommentContent, setEditCommentContent] = useState("");
   const { toast } = useToast();
 
   // Convex queries and mutations
@@ -171,6 +174,7 @@ export default function Forum() {
   const incrementViewsMutation = useMutation(api.forum.incrementTopicViews);
   const editTopicMutation = useMutation(api.forum.editTopic);
   const createCommentMutation = useMutation(api.forum.createComment);
+  const editCommentMutation = useMutation(api.forum.editComment);
   const toggleCommentVoteMutation = useMutation(api.forum.toggleCommentVote);
   const subscribeTopicMutation = useMutation(api.forum.subscribeTopic);
   const unsubscribeTopicMutation = useMutation(api.forum.unsubscribeTopic);
@@ -612,6 +616,38 @@ export default function Forum() {
       toast({ title: "Topik ditandai selesai" });
     } catch (err) {
       console.error("Error marking solved", err);
+    }
+  };
+
+  const handleEditComment = async () => {
+    if (!selectedComment) return;
+    if (!editCommentContent.trim()) {
+      toast({
+        title: "Error",
+        description: "Komentar tidak boleh kosong!",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      await editCommentMutation({
+        commentId: selectedComment._id,
+        content: editCommentContent,
+      } as any);
+      setCommentList((prev) =>
+        prev.map((c) =>
+          c._id === selectedComment._id ? { ...c, content: editCommentContent } : c,
+        ),
+      );
+      setIsEditCommentOpen(false);
+      toast({ title: "Komentar berhasil diperbarui!" });
+    } catch (error: any) {
+      console.error("Error editing comment:", error);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -1697,6 +1733,18 @@ export default function Forum() {
                                         >
                                           Downvote
                                         </button>
+                                        {currentUser && comment.authorId === currentUser._id && (
+                                          <button
+                                            onClick={() => {
+                                              setSelectedComment(comment);
+                                              setEditCommentContent(comment.content);
+                                              setIsEditCommentOpen(true);
+                                            }}
+                                            className="hover:text-blue-600"
+                                          >
+                                            Edit
+                                          </button>
+                                        )}
                                         {currentUser &&
                                           selectedTopic?.authorId === currentUser._id &&
                                           !selectedTopic.solvedCommentId && (
@@ -1744,6 +1792,40 @@ export default function Forum() {
                       </div>
                     </>
                   )}
+                </DialogContent>
+              </Dialog>
+              <Dialog
+                open={isEditCommentOpen}
+                onOpenChange={setIsEditCommentOpen}
+              >
+                <DialogContent className="neumorphic-card border-0 shadow-none max-w-2xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+                  <DialogHeader>
+                    <DialogTitle className="text-[#2d3748]">Edit Komentar</DialogTitle>
+                    <DialogDescription className="text-[#718096]">
+                      Ubah isi komentar Anda.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Textarea
+                    value={editCommentContent}
+                    onChange={(e) => setEditCommentContent(e.target.value)}
+                    className="neumorphic-input border-0 min-h-[120px] resize-none my-4"
+                  />
+                  <DialogFooter className="flex gap-2">
+                    <Button
+                      onClick={() => setIsEditCommentOpen(false)}
+                      variant="outline"
+                      className="neumorphic-button-sm bg-transparent text-[#718096] border-0 shadow-none"
+                    >
+                      Batal
+                    </Button>
+                    <Button
+                      onClick={handleEditComment}
+                      className="neumorphic-button bg-transparent text-[#2d3748] font-semibold border-0 shadow-none"
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Simpan
+                    </Button>
+                  </DialogFooter>
                 </DialogContent>
               </Dialog>
               <Dialog
