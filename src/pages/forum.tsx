@@ -129,6 +129,9 @@ export default function Forum() {
   const [isTopicDetailOpen, setIsTopicDetailOpen] = useState(false);
   const [newCommentContent, setNewCommentContent] = useState("");
   const [commentList, setCommentList] = useState<Comment[]>([]);
+  const [isEditTopicOpen, setIsEditTopicOpen] = useState(false);
+  const [editTopicTitle, setEditTopicTitle] = useState("");
+  const [editTopicContent, setEditTopicContent] = useState("");
   const { toast } = useToast();
 
   // Convex queries and mutations
@@ -166,6 +169,7 @@ export default function Forum() {
   const toggleLockMutation = useMutation(api.forum.toggleLockTopic);
   const markSolvedMutation = useMutation(api.forum.markTopicSolved);
   const incrementViewsMutation = useMutation(api.forum.incrementTopicViews);
+  const editTopicMutation = useMutation(api.forum.editTopic);
   const createCommentMutation = useMutation(api.forum.createComment);
   const toggleCommentVoteMutation = useMutation(api.forum.toggleCommentVote);
   const subscribeTopicMutation = useMutation(api.forum.subscribeTopic);
@@ -490,6 +494,41 @@ export default function Forum() {
     }
   };
 
+  const handleEditTopic = async () => {
+    if (!selectedTopic) return;
+    if (!editTopicTitle.trim() || !editTopicContent.trim()) {
+      toast({
+        title: "Error",
+        description: "Judul dan konten tidak boleh kosong!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await editTopicMutation({
+        topicId: selectedTopic._id,
+        title: editTopicTitle,
+        content: editTopicContent,
+      } as any);
+
+      setSelectedTopic({
+        ...selectedTopic,
+        title: editTopicTitle,
+        content: editTopicContent,
+      });
+      setIsEditTopicOpen(false);
+      toast({ title: "Topik berhasil diperbarui!" });
+    } catch (error: any) {
+      console.error("Error editing topic:", error);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleTopicClick = async (topic: Topic) => {
     // Increment view count
     try {
@@ -499,6 +538,8 @@ export default function Forum() {
     }
 
     setSelectedTopic(topic);
+    setEditTopicTitle(topic.title);
+    setEditTopicContent(topic.content);
     setIsTopicDetailOpen(true);
   };
 
@@ -1525,13 +1566,28 @@ export default function Forum() {
                             }}
                             className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-[#718096]"
                           >
-                            <Share className="h-5 w-5" />
-                            <span>Bagikan</span>
-                          </button>
+                          <Share className="h-5 w-5" />
+                          <span>Bagikan</span>
+                        </button>
 
-                          <div className="flex items-center gap-2 text-[#718096]">
-                            <MessageCircle className="h-5 w-5" />
-                            <span>{commentList.length} Balasan</span>
+                        {currentUser &&
+                          selectedTopic.authorId === currentUser._id && (
+                            <Button
+                              onClick={() => {
+                                setEditTopicTitle(selectedTopic.title);
+                                setEditTopicContent(selectedTopic.content);
+                                setIsEditTopicOpen(true);
+                              }}
+                              variant="outline"
+                              className="neumorphic-button-sm"
+                            >
+                              Edit
+                            </Button>
+                          )}
+
+                        <div className="flex items-center gap-2 text-[#718096]">
+                          <MessageCircle className="h-5 w-5" />
+                          <span>{commentList.length} Balasan</span>
                           </div>
                           {currentUser &&
                             selectedTopic.authorId === currentUser._id && (
@@ -1688,6 +1744,59 @@ export default function Forum() {
                       </div>
                     </>
                   )}
+                </DialogContent>
+              </Dialog>
+              <Dialog
+                open={isEditTopicOpen}
+                onOpenChange={setIsEditTopicOpen}
+              >
+                <DialogContent className="neumorphic-card border-0 shadow-none max-w-2xl max-h-[90vh] overflow-y-auto fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+                  <DialogHeader>
+                    <DialogTitle className="text-[#2d3748]">Edit Topik</DialogTitle>
+                    <DialogDescription className="text-[#718096]">
+                      Ubah judul atau konten topik Anda.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label htmlFor="edit-topic-title" className="text-sm font-medium text-[#2d3748]">
+                        Judul Topik
+                      </label>
+                      <Input
+                        id="edit-topic-title"
+                        value={editTopicTitle}
+                        onChange={(e) => setEditTopicTitle(e.target.value)}
+                        className="neumorphic-input border-0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="edit-topic-content" className="text-sm font-medium text-[#2d3748]">
+                        Konten
+                      </label>
+                      <Textarea
+                        id="edit-topic-content"
+                        value={editTopicContent}
+                        onChange={(e) => setEditTopicContent(e.target.value)}
+                        className="neumorphic-input border-0 min-h-[120px] resize-none"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter className="flex gap-2">
+                    <Button
+                      onClick={() => setIsEditTopicOpen(false)}
+                      variant="outline"
+                      className="neumorphic-button-sm bg-transparent text-[#718096] border-0 shadow-none"
+                    >
+                      Batal
+                    </Button>
+                    <Button
+                      onClick={handleEditTopic}
+                      className="neumorphic-button bg-transparent text-[#2d3748] font-semibold border-0 shadow-none"
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Simpan Perubahan
+                    </Button>
+                  </DialogFooter>
                 </DialogContent>
               </Dialog>
             </div>
