@@ -28,6 +28,7 @@ import {
 import VideoEmbed, { VideoData } from "@/components/video-embed";
 import ImageEmbed from "@/components/image-embed";
 import AdvancedSearchDialog from "@/components/AdvancedSearchDialog";
+import EditHistory from "@/components/EditHistory";
 import {
   MessageCircle,
   Users,
@@ -135,6 +136,7 @@ export default function Forum() {
   const [isEditCommentOpen, setIsEditCommentOpen] = useState(false);
   const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
   const [editCommentContent, setEditCommentContent] = useState("");
+  const [isEditHistoryOpen, setIsEditHistoryOpen] = useState(false);
   const { toast } = useToast();
 
   // Convex queries and mutations
@@ -1620,6 +1622,33 @@ export default function Forum() {
                               Edit
                             </Button>
                           )}
+
+                        <Dialog
+                          open={isEditHistoryOpen}
+                          onOpenChange={setIsEditHistoryOpen}
+                        >
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="neumorphic-button-sm"
+                            >
+                              Riwayat Edit
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="neumorphic-card border-0 shadow-none max-w-2xl max-h-[90vh] overflow-y-auto fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+                            <DialogHeader>
+                              <DialogTitle className="text-[#2d3748]">
+                                Riwayat Edit
+                              </DialogTitle>
+                            </DialogHeader>
+                            {selectedTopic && (
+                              <EditHistory
+                                docType="topic"
+                                docId={selectedTopic._id}
+                              />
+                            )}
+                          </DialogContent>
+                        </Dialog>
 
                         <div className="flex items-center gap-2 text-[#718096]">
                           <MessageCircle className="h-5 w-5" />
