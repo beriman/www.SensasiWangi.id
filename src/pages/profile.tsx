@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useParams } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import FollowersList from "@/components/followers-list";
+import FollowingList from "@/components/following-list";
 import { uploadImage } from "@/utils/cloudinary";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -106,6 +109,8 @@ function ProfileContent() {
   const [bio, setBio] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [showFollowers, setShowFollowers] = useState(false);
+  const [showFollowing, setShowFollowing] = useState(false);
   useEffect(() => {
     setFullName(user?.fullName || "");
     setUsername(user?.username || "");
@@ -395,19 +400,42 @@ function ProfileContent() {
                       <Users className="h-4 w-4 text-[#667eea]" />
                       <span className="text-sm text-[#86868B]">Pengikut</span>
                     </div>
-                    <span className="text-sm font-semibold text-[#1D1D1F]">
-                      {followers?.length || 0}
-                    </span>
+                    <Dialog open={showFollowers} onOpenChange={setShowFollowers}>
+                      <DialogTrigger asChild>
+                        <span className="text-sm font-semibold text-[#1D1D1F] cursor-pointer">
+                          {followers?.length || 0}
+                        </span>
+                      </DialogTrigger>
+                      <DialogContent className="neumorphic-card border-0 max-w-md">
+                        <DialogHeader>
+                          <DialogTitle className="text-[#2d3748]">Pengikut</DialogTitle>
+                        </DialogHeader>
+                        {profileData && (
+                          <FollowersList userId={profileData.user._id as any} />
+                        )}
+                      </DialogContent>
+                    </Dialog>
                   </div>
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-[#667eea]" />
-                      <span className="text-sm text-[#86868B]">Mengikuti</span>
-                    </div>
-                    <span className="text-sm font-semibold text-[#1D1D1F]">
-                      {following?.length || 0}
-                    </span>
-                  </div>
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-[#667eea]" />
+                        <span className="text-sm text-[#86868B]">Mengikuti</span>
+                      </div>
+                      <Dialog open={showFollowing} onOpenChange={setShowFollowing}>
+                        <DialogTrigger asChild>
+                          <span className="text-sm font-semibold text-[#1D1D1F] cursor-pointer">
+                            {following?.length || 0}
+                          </span>
+                        </DialogTrigger>
+                        <DialogContent className="neumorphic-card border-0 max-w-md">
+                          <DialogHeader>
+                            <DialogTitle className="text-[#2d3748]">Mengikuti</DialogTitle>
+                          </DialogHeader>
+                          {profileData && (
+                            <FollowingList userId={profileData.user._id as any} />
+                          )}
+                        </DialogContent>
+                      </Dialog>
                 </div>
               </div>
 
