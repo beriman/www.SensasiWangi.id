@@ -776,6 +776,7 @@ export default function Marketplace() {
   const [sortBy, setSortBy] = useState("newest");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [tags, setTags] = useState("");
   const [location, setLocation] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -815,6 +816,13 @@ export default function Marketplace() {
     sortBy,
     searchQuery: searchQuery || undefined,
     location: location || undefined,
+    tags:
+      tags
+        ? tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean)
+        : undefined,
   });
 
   const sambatProducts = useQuery(api.marketplace.getSambatProducts, {
@@ -994,6 +1002,13 @@ export default function Marketplace() {
                   className="neumorphic-input border-0"
                 />
 
+                <Input
+                  placeholder="Tag (pisahkan dengan koma)"
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  className="neumorphic-input border-0"
+                />
+
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="neumorphic-input border-0">
                     <SelectValue placeholder="Urutkan" />
@@ -1012,17 +1027,69 @@ export default function Marketplace() {
 
           {/* Products Section */}
           <div className="mb-8">
-            <div className="flex items-center gap-4 mb-6">
-              <h2 className="text-2xl font-bold text-[#2d3748]">
-                {showSambatProducts ? "Produk Sambatan" : "Produk Reguler"}
-              </h2>
-              {showSambatProducts && (
-                <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                  <Zap className="h-3 w-3 mr-1" />
-                  Group Buying
+          <div className="flex items-center gap-4 mb-6">
+            <h2 className="text-2xl font-bold text-[#2d3748]">
+              {showSambatProducts ? "Produk Sambatan" : "Produk Reguler"}
+            </h2>
+            {showSambatProducts && (
+              <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                <Zap className="h-3 w-3 mr-1" />
+                Group Buying
+              </Badge>
+            )}
+          </div>
+
+          {(selectedCategory !== "all" ||
+            selectedCondition !== "all" ||
+            minPrice ||
+            maxPrice ||
+            location ||
+            tags) && (
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              {selectedCategory !== "all" && (
+                <Badge variant="secondary">{selectedCategory}</Badge>
+              )}
+              {selectedCondition !== "all" && (
+                <Badge variant="secondary">
+                  {
+                    CONDITIONS.find((c) => c.value === selectedCondition)?.label
+                  }
                 </Badge>
               )}
+              {minPrice && (
+                <Badge variant="secondary">Min Rp{minPrice}</Badge>
+              )}
+              {maxPrice && (
+                <Badge variant="secondary">Max Rp{maxPrice}</Badge>
+              )}
+              {location && <Badge variant="secondary">{location}</Badge>}
+              {tags &&
+                tags
+                  .split(",")
+                  .map((t) => t.trim())
+                  .filter(Boolean)
+                  .map((tag) => (
+                    <Badge key={tag} variant="secondary">
+                      #{tag}
+                    </Badge>
+                  ))}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSelectedCategory("all");
+                  setSelectedCondition("all");
+                  setMinPrice("");
+                  setMaxPrice("");
+                  setLocation("");
+                  setTags("");
+                }}
+                className="neumorphic-button-sm text-xs"
+              >
+                Clear
+              </Button>
             </div>
+          )}
 
             {showSambatProducts ? (
               <div
@@ -1085,6 +1152,7 @@ export default function Marketplace() {
                       setMinPrice("");
                       setMaxPrice("");
                       setLocation("");
+                      setTags("");
                     }}
                     className="neumorphic-button text-[#2d3748] bg-transparent border-0 shadow-none"
                   >
