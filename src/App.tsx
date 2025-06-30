@@ -31,6 +31,7 @@ import ResetPassword from "./pages/reset-password";
 import OrderReviewPage from "./pages/order-review";
 import OrderDetail from "./pages/order-detail";
 import MarketplaceCheckout from "./pages/marketplace-checkout";
+import CartPage from "./pages/cart";
 import Messages from "./pages/messages";
 import Leaderboard from "./pages/leaderboard";
 
@@ -75,6 +76,7 @@ function App() {
               path="/marketplace/sambat/create"
               element={<MarketplaceSambatCreate />}
             />
+            <Route path="/marketplace/cart" element={<CartPage />} />
             <Route
               path="/marketplace/checkout"
               element={<MarketplaceCheckout />}
