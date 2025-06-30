@@ -80,6 +80,14 @@ function AdminContent() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [systemMessage, setSystemMessage] = useState("");
+  const [couponForm, setCouponForm] = useState({
+    code: "",
+    discountType: "percentage",
+    amount: 0,
+    expiresAt: "",
+    productId: "",
+    sellerId: "",
+  });
   const navigate = useNavigate();
 
   const pendingOrders = useQuery(api.marketplace.getPendingOrders);
@@ -120,6 +128,9 @@ function AdminContent() {
   const updateSuggestionPriority = useMutation(
     api.marketplace.updateSuggestionPriority,
   );
+  const coupons = useQuery(api.marketplace.listCoupons);
+  const createCoupon = useMutation(api.marketplace.createCoupon);
+  const deleteCoupon = useMutation(api.marketplace.deleteCoupon);
 
   // Data statistik real-time
   const stats = {
@@ -198,6 +209,13 @@ function AdminContent() {
             >
               <CheckCircle className="w-4 h-4 mr-2" />
               Pesanan
+            </TabsTrigger>
+            <TabsTrigger
+              value="coupons"
+              className="neumorphic-button-sm data-[state=active]:bg-white data-[state=active]:shadow-inner text-[#1D1D1F]"
+            >
+              <Ticket className="w-4 h-4 mr-2" />
+              Kupon
             </TabsTrigger>
             <TabsTrigger
               value="order-reports"
@@ -1227,6 +1245,139 @@ function AdminContent() {
                         ))}
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="coupons" className="space-y-6">
+            <Card className="neumorphic-card border-0">
+              <CardHeader>
+                <CardTitle className="text-[#1D1D1F]">Manajemen Kupon</CardTitle>
+                <CardDescription className="text-[#86868B]">
+                  Buat dan hapus kode kupon diskon
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[#1D1D1F]">Kode</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Tipe</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Jumlah</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Kadaluarsa</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {!coupons
+                      ? null
+                      : coupons.map((c: any) => (
+                          <TableRow key={c._id}>
+                            <TableCell className="text-[#1D1D1F]">{c.code}</TableCell>
+                            <TableCell className="text-[#86868B]">
+                              {c.discountType}
+                            </TableCell>
+                            <TableCell className="text-[#86868B]">
+                              {c.discountType === "percentage" ? `${c.amount}%` : c.amount}
+                            </TableCell>
+                            <TableCell className="text-[#86868B]">
+                              {new Date(c.expiresAt).toLocaleDateString("id-ID")}
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                size="sm"
+                                className="neumorphic-button-sm h-8 px-3 text-xs"
+                                onClick={async () => {
+                                  await deleteCoupon({ couponId: c._id });
+                                }}
+                              >
+                                Hapus
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                  </TableBody>
+                </Table>
+                <div className="space-y-2 mt-4">
+                  <Input
+                    placeholder="Kode"
+                    value={couponForm.code}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, code: e.target.value })
+                    }
+                    className="neumorphic-input border-0"
+                  />
+                  <Select
+                    value={couponForm.discountType}
+                    onValueChange={(val) =>
+                      setCouponForm({ ...couponForm, discountType: val })
+                    }
+                  >
+                    <SelectTrigger className="neumorphic-input border-0">
+                      <SelectValue placeholder="Tipe" />
+                    </SelectTrigger>
+                    <SelectContent className="neumorphic-card border-0">
+                      <SelectItem value="percentage">Persentase</SelectItem>
+                      <SelectItem value="amount">Nominal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="number"
+                    placeholder="Jumlah"
+                    value={couponForm.amount}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, amount: Number(e.target.value) })
+                    }
+                    className="neumorphic-input border-0"
+                  />
+                  <Input
+                    type="date"
+                    value={couponForm.expiresAt}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, expiresAt: e.target.value })
+                    }
+                    className="neumorphic-input border-0"
+                  />
+                  <Input
+                    placeholder="Product ID (opsional)"
+                    value={couponForm.productId}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, productId: e.target.value })
+                    }
+                    className="neumorphic-input border-0"
+                  />
+                  <Input
+                    placeholder="Seller ID (opsional)"
+                    value={couponForm.sellerId}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, sellerId: e.target.value })
+                    }
+                    className="neumorphic-input border-0"
+                  />
+                  <Button
+                    className="neumorphic-button"
+                    onClick={async () => {
+                      await createCoupon({
+                        code: couponForm.code,
+                        discountType: couponForm.discountType,
+                        amount: Number(couponForm.amount),
+                        expiresAt: new Date(couponForm.expiresAt).getTime(),
+                        productId: couponForm.productId ? (couponForm.productId as any) : undefined,
+                        sellerId: couponForm.sellerId ? (couponForm.sellerId as any) : undefined,
+                      });
+                      setCouponForm({
+                        code: "",
+                        discountType: "percentage",
+                        amount: 0,
+                        expiresAt: "",
+                        productId: "",
+                        sellerId: "",
+                      });
+                    }}
+                  >
+                    Tambah Kupon
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
