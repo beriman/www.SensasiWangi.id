@@ -14,6 +14,7 @@ import MarketplaceSambat from "./pages/marketplace-sambat";
 import MarketplaceSambatCreate from "./pages/marketplace-sambat-create";
 import MarketplaceSambatDetail from "./pages/marketplace-sambat-detail";
 import MarketplaceProduct from "./pages/marketplace-product";
+import MarketplaceWishlist from "./pages/marketplace-wishlist";
 import SellerOrders from "./pages/seller-orders";
 import Admin from "./pages/admin";
 import Kursus from "./pages/kursus";
@@ -62,6 +63,7 @@ function App() {
               path="/marketplace/product/:id"
               element={<MarketplaceProduct />}
             />
+            <Route path="/marketplace/wishlist" element={<MarketplaceWishlist />} />
             <Route path="/marketplace/sell" element={<MarketplaceSell />} />
             <Route path="/marketplace/my-shop" element={<MyShop />} />
             <Route path="/marketplace/add" element={<MarketplaceSell />} />

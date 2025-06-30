@@ -63,6 +63,17 @@ app.get('/api/fragrances', async (req, res) => {
   }
 });
 
+app.get('/api/wishlists/:userId', async (req, res) => {
+  try {
+    const result = await convex.query(api.marketplace.getWishlistByUser, {
+      userId: req.params.userId,
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/stats', async (req, res) => {
   try {
     const stats = await convex.query(api.marketplace.getDatabaseStats, {});

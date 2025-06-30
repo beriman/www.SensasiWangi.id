@@ -22,6 +22,17 @@ const MarketplaceIcon = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const WishlistIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      d="M3.172 5.172a4 4 0 015.656 0L12 8.343l3.172-3.171a4 4 0 115.656 5.656L12 21.657l-8.828-8.829a4 4 0 010-5.656z"
+    />
+  </svg>
+);
+
 const KursusIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path
@@ -58,6 +69,7 @@ const LeaderboardIcon = (props: SVGProps<SVGSVGElement>) => (
 export const NAV_ITEMS = [
   { label: "Forum", to: "/forum", icon: ForumIcon },
   { label: "Marketplace", to: "/marketplace", icon: MarketplaceIcon },
+  { label: "Wishlist", to: "/marketplace/wishlist", icon: WishlistIcon },
   { label: "Kursus", to: "/kursus", icon: KursusIcon },
   { label: "Database", to: "/database", icon: DatabaseIcon },
   { label: "Leaderboard", to: "/leaderboard", icon: LeaderboardIcon },

@@ -2884,3 +2884,75 @@ export const refreshAllShipments = internalAction({
   },
 });
 
+export const addToWishlist = mutation({
+  args: { productId: v.id("products") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    const existing = await ctx.db
+      .query("wishlists")
+      .withIndex("by_user_product", (q) =>
+        q.eq("userId", user._id).eq("productId", args.productId),
+      )
+      .unique();
+    if (existing) return existing._id;
+
+    return await ctx.db.insert("wishlists", {
+      userId: user._id,
+      productId: args.productId,
+      createdAt: Date.now(),
+    });
+  },
+});
+
+export const removeFromWishlist = mutation({
+  args: { productId: v.id("products") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Anda harus login");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user) throw new Error("User tidak ditemukan");
+
+    const existing = await ctx.db
+      .query("wishlists")
+      .withIndex("by_user_product", (q) =>
+        q.eq("userId", user._id).eq("productId", args.productId),
+      )
+      .unique();
+    if (existing) {
+      await ctx.db.delete(existing._id);
+      return true;
+    }
+    return false;
+  },
+});
+
+export const getWishlistByUser = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const items = await ctx.db
+      .query("wishlists")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .collect();
+
+    const products: any[] = [];
+    for (const item of items) {
+      const product = await ctx.db.get(item.productId);
+      if (product) products.push(product);
+    }
+    return products;
+  },
+});
+
