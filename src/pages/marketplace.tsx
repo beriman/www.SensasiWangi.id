@@ -76,7 +76,7 @@ const SORT_OPTIONS = [
   { value: "liked", label: "Paling Disukai" },
 ];
 
-type CartItem = { id: string; title: string; price: number };
+type CartItem = { id: string; title: string; price: number; quantity?: number };
 
 function ProductCard({
   product,
@@ -715,7 +715,10 @@ function CartDialog({
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(price);
-  const total = cart.reduce((sum, i) => sum + i.price, 0);
+  const total = cart.reduce(
+    (sum, i) => sum + i.price * (i.quantity || 1),
+    0,
+  );
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -736,8 +739,12 @@ function CartDialog({
               key={item.id}
               className="flex items-center justify-between"
             >
-              <span className="flex-1 mr-2 line-clamp-1">{item.title}</span>
-              <span className="text-sm">{formatPrice(item.price)}</span>
+              <span className="flex-1 mr-2 line-clamp-1">
+                {item.title} x{item.quantity || 1}
+              </span>
+              <span className="text-sm">
+                {formatPrice(item.price * (item.quantity || 1))}
+              </span>
               <Button
                 size="icon"
                 variant="ghost"
@@ -786,14 +793,27 @@ export default function Marketplace() {
   useEffect(() => {
     const stored = localStorage.getItem("marketplaceCart");
     if (stored) {
-      setCart(JSON.parse(stored));
+      const items = JSON.parse(stored).map((i: any) => ({
+        ...i,
+        quantity: i.quantity || 1,
+      }));
+      setCart(items);
     }
   }, []);
 
   const addToCart = (item: CartItem) => {
     setCart((prev) => {
-      if (prev.some((p) => p.id === item.id)) return prev;
-      const updated = [...prev, item];
+      const existing = prev.find((p) => p.id === item.id);
+      let updated: CartItem[];
+      if (existing) {
+        updated = prev.map((p) =>
+          p.id === item.id
+            ? { ...p, quantity: (p.quantity || 1) + 1 }
+            : p,
+        );
+      } else {
+        updated = [...prev, { ...item, quantity: 1 }];
+      }
       localStorage.setItem("marketplaceCart", JSON.stringify(updated));
       return updated;
     });
@@ -1218,7 +1238,7 @@ export default function Marketplace() {
       <CartDialog
         cart={cart}
         onRemove={removeFromCart}
-        onCheckout={() => navigate("/marketplace/checkout")}
+        onCheckout={() => navigate("/marketplace/cart")}
       />
     </div>
   );

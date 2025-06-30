@@ -30,7 +30,12 @@ const PAYMENT_METHODS = [
   { value: "qris", label: "QRIS" },
 ];
 
-type CartItem = { id: string; title: string; price: number };
+type CartItem = {
+  id: string;
+  title: string;
+  price: number;
+  quantity?: number;
+};
 
 export default function MarketplaceCheckout() {
   const { user } = useUser();
@@ -74,11 +79,19 @@ export default function MarketplaceCheckout() {
   useEffect(() => {
     if (productId) {
       if (product) {
-        setCart([{ id: product._id, title: product.title, price: product.price }]);
+        setCart([
+          { id: product._id, title: product.title, price: product.price, quantity: 1 },
+        ]);
       }
     } else {
       const stored = localStorage.getItem("marketplaceCart");
-      if (stored) setCart(JSON.parse(stored));
+      if (stored) {
+        const items = JSON.parse(stored).map((i: any) => ({
+          ...i,
+          quantity: i.quantity || 1,
+        }));
+        setCart(items);
+      }
     }
   }, [productId, product]);
 
@@ -86,11 +99,12 @@ export default function MarketplaceCheckout() {
     const loadCost = async () => {
       if (!shippingMethod || !shippingAddress.city || cart.length === 0) return;
       try {
+        const qty = cart.reduce((s, i) => s + (i.quantity || 1), 0);
         const cost = await calculateCost({
           origin: shippingAddress.city,
           destination: shippingAddress.city,
           courier: shippingMethod,
-          weight: cart.length * 1000,
+          weight: qty * 1000,
         });
         setShippingCost(cost);
       } catch (err) {
@@ -113,7 +127,10 @@ export default function MarketplaceCheckout() {
       minimumFractionDigits: 0,
     }).format(price);
 
-  const subtotal = cart.reduce((s, i) => s + i.price, 0);
+  const subtotal = cart.reduce(
+    (s, i) => s + i.price * (i.quantity || 1),
+    0,
+  );
   const totalAmount = subtotal + shippingCost;
 
   if (productId && product === undefined) return <div>Loading...</div>;
@@ -179,8 +196,12 @@ export default function MarketplaceCheckout() {
             <div className="space-y-2">
               {cart.map((item) => (
                 <div key={item.id} className="flex justify-between text-sm">
-                  <span>{item.title}</span>
-                  <span>{formatPrice(item.price)}</span>
+                  <span>
+                    {item.title} x{item.quantity || 1}
+                  </span>
+                  <span>
+                    {formatPrice(item.price * (item.quantity || 1))}
+                  </span>
                 </div>
               ))}
               <div className="flex justify-between text-sm">
