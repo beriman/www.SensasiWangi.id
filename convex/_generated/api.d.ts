@@ -28,6 +28,7 @@ import type * as progress from "../progress.js";
 import type * as rewards from "../rewards.js";
 import type * as search from "../search.js";
 import type * as users from "../users.js";
+import type * as webhooks from "../webhooks.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -53,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   rewards: typeof rewards;
   search: typeof search;
   users: typeof users;
+  webhooks: typeof webhooks;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
