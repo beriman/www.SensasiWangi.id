@@ -961,6 +961,13 @@ export default function Marketplace() {
                 <Plus className="h-4 w-4 mr-2" />
                 Jual Produk
               </Button>
+              <Button
+                onClick={() => navigate("/marketplace/wishlist")}
+                className="neumorphic-button text-[#2d3748] bg-transparent border-0 shadow-none"
+              >
+                <Heart className="h-4 w-4 mr-2" />
+                Wishlist
+              </Button>
             </div>
 
             {showFilters && (

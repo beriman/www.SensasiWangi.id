@@ -558,6 +558,15 @@ export default defineSchema({
     .index("by_item", ["itemId"])
     .index("by_user_item", ["userId", "itemId"]),
 
+  wishlists: defineTable({
+    userId: v.id("users"),
+    productId: v.id("products"),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_product", ["productId"])
+    .index("by_user_product", ["userId", "productId"]),
+
   savedSearches: defineTable({
     userId: v.id("users"),
     name: v.string(),

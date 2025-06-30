@@ -1,12 +1,15 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Star, Share, Instagram, Twitter } from "lucide-react";
+import { useUser } from "@clerk/clerk-react";
 import { Helmet } from "react-helmet";
 
 export default function MarketplaceProduct() {
   const { id } = useParams();
+  const { user } = useUser();
+  const addWishlist = useMutation(api.marketplace.addToWishlist);
   const product = useQuery(
     api.marketplace.getProductById,
     id ? { productId: id as any } : "skip",
@@ -100,6 +103,13 @@ export default function MarketplaceProduct() {
               </p>
             )}
             <Button className="mt-4">Beli</Button>
+            <Button
+              variant="outline"
+              className="mt-4 ml-2"
+              onClick={() => user && addWishlist({ productId: product._id })}
+            >
+              Tambah ke Wishlist
+            </Button>
             <div className="flex gap-2 mt-4">
               <Button
                 variant="secondary"
