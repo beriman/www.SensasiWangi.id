@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Table,
   TableBody,
@@ -101,6 +102,7 @@ function AdminContent() {
   const tempBanUser = useMutation(api.admin.tempBanUser);
   const permBanUser = useMutation(api.admin.permBanUser);
   const resolveOrderReport = useMutation(api.marketplace.resolveOrderReport);
+  const voteReport = useMutation(api.forum.voteReport);
   const broadcastMessage = useMutation(api.admin.broadcastSystemMessage);
   const clearCache = useMutation(api.admin.clearSystemCache);
   const backupDatabase = useMutation(api.admin.backupDatabase);
@@ -120,6 +122,9 @@ function AdminContent() {
   const updateSuggestionPriority = useMutation(
     api.marketplace.updateSuggestionPriority,
   );
+
+  const { toast } = useToast();
+  const [reportStatuses, setReportStatuses] = useState<Record<string, string>>({});
 
   // Data statistik real-time
   const stats = {
@@ -399,6 +404,7 @@ function AdminContent() {
                       <TableHead className="text-[#1D1D1F]">Konten</TableHead>
                       <TableHead className="text-[#1D1D1F]">Pelapor</TableHead>
                       <TableHead className="text-[#1D1D1F]">Suara</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Status</TableHead>
                       <TableHead className="text-[#1D1D1F]">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -417,6 +423,15 @@ function AdminContent() {
                         <TableCell className="text-center text-[#1D1D1F]">
                           {report.votes}
                         </TableCell>
+                        <TableCell className="text-center">
+                          {reportStatuses[report.id] ? (
+                            <Badge variant="secondary" className="text-xs">
+                              {reportStatuses[report.id]}
+                            </Badge>
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
                             <Button
@@ -425,6 +440,30 @@ function AdminContent() {
                             >
                               <Eye className="w-3 h-3 mr-1" />
                               Lihat
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="neumorphic-button-sm h-8 px-3 text-xs"
+                              onClick={async () => {
+                                await voteReport({ reportId: report.id, value: 1 });
+                                setReportStatuses((s) => ({ ...s, [report.id]: "Diterima" }));
+                                toast({ title: "Laporan diterima" });
+                              }}
+                            >
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Terima
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="neumorphic-button-sm h-8 px-3 text-xs"
+                              onClick={async () => {
+                                await voteReport({ reportId: report.id, value: -1 });
+                                setReportStatuses((s) => ({ ...s, [report.id]: "Ditolak" }));
+                                toast({ title: "Laporan ditolak" });
+                              }}
+                            >
+                              <XCircle className="w-3 h-3 mr-1" />
+                              Tolak
                             </Button>
                           </div>
                         </TableCell>
