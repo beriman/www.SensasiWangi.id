@@ -3,6 +3,8 @@ import { useQuery, useMutation } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "@/components/ui/use-toast";
+import { ToastAction } from "@/components/ui/toast";
+import { Link } from "react-router-dom";
 import { Bell, MessageCircle, Heart, Award, TrendingUp } from "lucide-react";
 
 interface NotificationWithIcon {
@@ -116,6 +118,11 @@ export default function NotificationListener() {
               {notification.message}
             </div>
           ),
+          action: notification.url ? (
+            <ToastAction altText="Lihat">
+              <Link to={notification.url}>Buka</Link>
+            </ToastAction>
+          ) : undefined,
           className: "neumorphic-card border-0 shadow-none bg-[#F5F5F7]",
         });
 
