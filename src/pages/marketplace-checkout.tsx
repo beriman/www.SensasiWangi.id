@@ -48,6 +48,17 @@ export default function MarketplaceCheckout() {
     productId ? { productId: productId as any } : "skip",
   );
 
+  const couponInfo = useQuery(
+    api.marketplace.validateCoupon,
+    couponCode && productId && product
+      ? {
+          code: couponCode,
+          productId: productId as any,
+          sellerId: (product as any)?.sellerId,
+        }
+      : "skip",
+  );
+
   const [cart, setCart] = useState<CartItem[]>([]);
   const calculateCost = useAction(api.marketplace.calculateShippingCost);
 
@@ -67,6 +78,7 @@ export default function MarketplaceCheckout() {
   const [shippingMethod, setShippingMethod] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("transfer");
   const [qrString, setQrString] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState("");
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -131,7 +143,12 @@ export default function MarketplaceCheckout() {
     (s, i) => s + i.price * (i.quantity || 1),
     0,
   );
-  const totalAmount = subtotal + shippingCost;
+  const couponDiscount = couponInfo
+    ? couponInfo.discountType === "percentage"
+      ? (subtotal * couponInfo.amount) / 100
+      : couponInfo.amount
+    : 0;
+  const totalAmount = subtotal - couponDiscount + shippingCost;
 
   if (productId && product === undefined) return <div>Loading...</div>;
   if (productId && product === null) return <div>Produk tidak ditemukan</div>;
@@ -154,6 +171,7 @@ export default function MarketplaceCheckout() {
           shippingMethod,
           shippingCost,
           paymentMethod,
+          couponCode: couponCode || undefined,
           notes: notes.trim() || undefined,
         });
         ids.push(res.orderId as any);
@@ -208,6 +226,12 @@ export default function MarketplaceCheckout() {
                 <span>Ongkir</span>
                 <span>{formatPrice(shippingCost)}</span>
               </div>
+              {couponDiscount > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Diskon Kupon</span>
+                  <span>-{formatPrice(couponDiscount)}</span>
+                </div>
+              )}
               <div className="flex justify-between font-semibold border-t pt-2">
                 <span>Total</span>
                 <span>{formatPrice(totalAmount)}</span>
@@ -335,6 +359,16 @@ export default function MarketplaceCheckout() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label className="text-[#2d3748] font-medium mb-2 block">
+                Kode Kupon
+              </Label>
+              <Input
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                className="neumorphic-input border-0"
+              />
             </div>
             <div>
               <Label className="text-[#2d3748] font-medium mb-2 block">

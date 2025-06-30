@@ -741,4 +741,15 @@ export default defineSchema({
   })
     .index("by_week", ["weekStart"])
     .index("by_week_points", ["weekStart", "points"]),
+
+  discountCoupons: defineTable({
+    code: v.string(),
+    discountType: v.string(), // "percentage" or "amount"
+    amount: v.number(),
+    expiresAt: v.number(),
+    productId: v.optional(v.id("products")),
+    sellerId: v.optional(v.id("users")),
+  })
+    .index("by_code", ["code"])
+    .index("by_seller", ["sellerId"]),
 });

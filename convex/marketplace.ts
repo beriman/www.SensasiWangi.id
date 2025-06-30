@@ -570,6 +570,7 @@ export const createOrder = mutation({
     shippingMethod: v.string(),
     shippingCost: v.number(),
     paymentMethod: v.string(),
+    couponCode: v.optional(v.string()),
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -613,7 +614,30 @@ export const createOrder = mutation({
     const now = Date.now();
     const points = user.contributionPoints ?? 0;
     const discountRate = points >= 500 ? 0.1 : points >= 100 ? 0.05 : 0;
-    const discountedPrice = product.price - product.price * discountRate;
+
+    let priceAfterCoupon = product.price;
+    if (args.couponCode) {
+      const coupon = await ctx.db
+        .query("discountCoupons")
+        .withIndex("by_code", (q) => q.eq("code", args.couponCode))
+        .unique();
+      if (
+        !coupon ||
+        coupon.expiresAt < now ||
+        (coupon.productId && coupon.productId !== args.productId) ||
+        (coupon.sellerId && coupon.sellerId !== product.sellerId)
+      ) {
+        throw new Error("Kupon tidak valid");
+      }
+      const disc =
+        coupon.discountType === "percentage"
+          ? priceAfterCoupon * (coupon.amount / 100)
+          : coupon.amount;
+      priceAfterCoupon = Math.max(0, priceAfterCoupon - disc);
+    }
+
+    const discountedPrice =
+      priceAfterCoupon - priceAfterCoupon * discountRate;
     const totalAmount = discountedPrice + args.shippingCost;
 
     let vaNumber = "";
@@ -2638,6 +2662,66 @@ export const updateSuggestionPriority = mutation({
       priority: args.priority,
       updatedAt: Date.now(),
     });
+  },
+});
+
+export const createCoupon = mutation({
+  args: {
+    code: v.string(),
+    discountType: v.string(),
+    amount: v.number(),
+    expiresAt: v.number(),
+    productId: v.optional(v.id("products")),
+    sellerId: v.optional(v.id("users")),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user || user.role !== "admin") throw new Error("Unauthorized");
+    return await ctx.db.insert("discountCoupons", args);
+  },
+});
+
+export const listCoupons = query({
+  handler: async (ctx) => {
+    return await ctx.db.query("discountCoupons").collect();
+  },
+});
+
+export const deleteCoupon = mutation({
+  args: { couponId: v.id("discountCoupons") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.subject))
+      .unique();
+    if (!user || user.role !== "admin") throw new Error("Unauthorized");
+    await ctx.db.delete(args.couponId);
+  },
+});
+
+export const validateCoupon = query({
+  args: {
+    code: v.string(),
+    productId: v.id("products"),
+    sellerId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const coupon = await ctx.db
+      .query("discountCoupons")
+      .withIndex("by_code", (q) => q.eq("code", args.code))
+      .unique();
+    if (!coupon) return null;
+    if (coupon.expiresAt < Date.now()) return null;
+    if (coupon.productId && coupon.productId !== args.productId) return null;
+    if (coupon.sellerId && coupon.sellerId !== args.sellerId) return null;
+    return coupon;
   },
 });
 
