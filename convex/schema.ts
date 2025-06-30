@@ -362,6 +362,16 @@ export default defineSchema({
     twitter: v.optional(v.string()),
     website: v.optional(v.string()),
     interests: v.optional(v.array(v.string())),
+    shippingAddress: v.optional(
+      v.object({
+        name: v.string(),
+        phone: v.string(),
+        address: v.string(),
+        city: v.string(),
+        postalCode: v.string(),
+        province: v.string(),
+      }),
+    ),
     avatar: v.optional(v.string()),
     isVerified: v.boolean(),
     rating: v.number(),

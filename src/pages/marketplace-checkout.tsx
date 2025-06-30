@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -43,12 +44,23 @@ export default function MarketplaceCheckout() {
     productId ? { productId: productId as any } : "skip",
   );
 
+  const currentUser = useQuery(
+    api.users.getUserByToken,
+    user?.id ? { tokenIdentifier: user.id } : "skip",
+  );
+
+  const profile = useQuery(
+    api.users.getUserProfile,
+    currentUser ? { userId: currentUser._id } : "skip",
+  );
+
   const [cart, setCart] = useState<CartItem[]>([]);
   const calculateCost = useAction(api.marketplace.calculateShippingCost);
 
   const createOrder = useMutation(api.marketplace.createOrder);
   const generateUploadUrl = useMutation(api.marketplace.generateUploadUrl);
   const uploadPaymentProof = useMutation(api.marketplace.uploadPaymentProof);
+  const updateProfile = useMutation(api.users.updateUserProfile);
 
   const [orderId, setOrderId] = useState<string | null>(null);
   const [shippingAddress, setShippingAddress] = useState({
@@ -66,6 +78,7 @@ export default function MarketplaceCheckout() {
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [shippingCost, setShippingCost] = useState(0);
+  const [saveAddress, setSaveAddress] = useState(false);
 
   useEffect(() => {
     if (productId) {
@@ -77,6 +90,12 @@ export default function MarketplaceCheckout() {
       if (stored) setCart(JSON.parse(stored));
     }
   }, [productId, product]);
+
+  useEffect(() => {
+    if (profile?.profile?.shippingAddress) {
+      setShippingAddress(profile.profile.shippingAddress as any);
+    }
+  }, [profile]);
 
   useEffect(() => {
     const loadCost = async () => {
@@ -131,6 +150,9 @@ export default function MarketplaceCheckout() {
         });
         ids.push(res.orderId as any);
         if (paymentMethod === "qris") setQrString(res.qrString || "");
+      }
+      if (saveAddress) {
+        await updateProfile({ shippingAddress });
       }
       setOrderId(ids[0] as any);
       localStorage.removeItem("marketplaceCart");
@@ -270,6 +292,16 @@ export default function MarketplaceCheckout() {
                   className="neumorphic-input border-0 mt-1"
                 />
               </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="saveAddress"
+                checked={saveAddress}
+                onCheckedChange={(v) => setSaveAddress(!!v)}
+              />
+              <Label htmlFor="saveAddress" className="text-sm">
+                Simpan alamat ke profil
+              </Label>
             </div>
             <div>
               <Label className="text-[#2d3748] font-medium mb-2 block">

@@ -134,6 +134,7 @@ export const createOrUpdateUser = mutation({
             instagram: undefined,
             twitter: undefined,
             website: undefined,
+            shippingAddress: undefined,
             avatar: null,
             isVerified: false,
             rating: 0,
@@ -192,6 +193,7 @@ export const createOrUpdateUser = mutation({
       instagram: undefined,
       twitter: undefined,
       website: undefined,
+      shippingAddress: undefined,
       avatar: null,
       isVerified: false,
       rating: 0,
@@ -228,6 +230,16 @@ export const updateUserProfile = mutation({
     twitter: v.optional(v.string()),
     website: v.optional(v.string()),
     avatar: v.optional(v.string()),
+    shippingAddress: v.optional(
+      v.object({
+        name: v.string(),
+        phone: v.string(),
+        address: v.string(),
+        city: v.string(),
+        postalCode: v.string(),
+        province: v.string(),
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -256,6 +268,7 @@ export const updateUserProfile = mutation({
     twitter: args.twitter,
     website: args.website,
     avatar: args.avatar,
+    shippingAddress: args.shippingAddress,
     lastActive: now,
   } as any;
     if (existing) {
@@ -266,6 +279,7 @@ export const updateUserProfile = mutation({
       userId: user._id,
       ...profilePatch,
       avatar: args.avatar ?? null,
+      shippingAddress: args.shippingAddress,
       isVerified: false,
       rating: 0,
       totalReviews: 0,
