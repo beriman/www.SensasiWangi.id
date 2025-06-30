@@ -6,6 +6,7 @@ import RoleProtectedRoute from "@/components/wrappers/RoleProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Papa from "papaparse";
 
 export default function SellerOrders() {
   return (
@@ -27,12 +28,37 @@ function SellerOrdersContent() {
     currentUser ? { userId: currentUser._id, type: "seller" } : "skip",
   );
 
+  const handleExport = () => {
+    if (!myOrders || myOrders.length === 0) return;
+    const data = myOrders.map((o: any) => ({
+      orderDate: new Date(o.createdAt).toLocaleDateString("id-ID"),
+      buyerName: o.buyerName,
+      productTitle: o.productTitle,
+      status: o.orderStatus,
+      totalAmount: o.totalAmount,
+    }));
+    const csv = Papa.unparse(data);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "orders.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (myOrders === undefined) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
       <main className="flex-grow container mx-auto px-4 py-16 space-y-6">
-        <h1 className="text-3xl font-bold mb-4">Pesanan Saya</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold">Pesanan Saya</h1>
+          <Button size="sm" onClick={handleExport}>
+            Export CSV
+          </Button>
+        </div>
         {(!myOrders || myOrders.length === 0) ? (
           <p className="text-center text-[#86868B]">Belum ada pesanan.</p>
         ) : (
