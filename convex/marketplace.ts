@@ -671,6 +671,15 @@ export const createOrder = mutation({
       updatedAt: now,
     });
 
+    if (await allowNotification(ctx, product.sellerId, "order")) {
+      await ctx.runMutation(api.notifications.createNotification, {
+        userId: product.sellerId,
+        type: "order",
+        message: `Pesanan baru untuk produk ${product.title}`,
+        url: `/marketplace/lapak/orders/${orderId}`,
+      });
+    }
+
     return { orderId, qrString };
   },
 });

@@ -15,6 +15,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import RoleProtectedRoute from "@/components/wrappers/RoleProtectedRoute";
 import { useToast } from "@/components/ui/use-toast";
+import NotificationListener from "@/components/notification-listener";
 
 export default function MyShop() {
   return (
@@ -60,6 +61,7 @@ function MyShopContent() {
 
   return (
     <div className="min-h-screen flex flex-col neumorphic-bg">
+      <NotificationListener />
       <main className="flex-grow container mx-auto px-4 py-16 space-y-12">
         <section>
           <h1 className="text-3xl font-bold mb-4">Produk Saya</h1>
