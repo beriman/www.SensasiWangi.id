@@ -47,12 +47,12 @@ Dasbor admin akan menjadi antarmuka terpusat untuk semua tugas administratif.
 #### 3.3.2. Kursus (Courses)
 -   Buat, edit, atau hapus kursus dan materi pelajaran. (Implemented)
 -   Lihat progres belajar dari semua pengguna. (Implemented)
--   Kelola pendaftaran kursus. (Not Implemented)
+-   Kelola pendaftaran kursus. (Implemented)
 
 #### 3.3.3. Forum
 -   Moderasi konten: Hapus postingan atau komentar yang tidak pantas. (Implemented)
 -   Sematkan (pin) topik penting. (Implemented)
--   Buat kategori atau sub-forum baru. (Not Implemented)
+-   Buat kategori atau sub-forum baru. (Implemented)
 
 ## 4. Rencana Implementasi Teknis
 
