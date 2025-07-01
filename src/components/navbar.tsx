@@ -100,25 +100,7 @@ export function Navbar() {
               </svg>
               Dashboard
             </Button>
-            <Link
-              to="/login"
-              className="neumorphic-button-sm inline-flex items-center px-4 py-2 text-sm font-medium text-[#1D1D1F] bg-transparent transition-all duration-200 border-0 shadow-none hover:scale-105 active:scale-95"
-            >
-              <svg
-                className="w-4 h-4 mr-1.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3v1"
-                />
-              </svg>
-              Login
-            </Link>
+            
           </div>
 
           {/* Mobile Menu - Dropdown */}
@@ -168,27 +150,7 @@ export function Navbar() {
                     Dashboard
                   </div>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/login"
-                    className="flex items-center px-2 py-2 text-[#1D1D1F] hover:bg-[#F5F5F7] rounded-lg transition-colors"
-                  >
-                    <svg
-                      className="w-4 h-4 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3v1"
-                      />
-                    </svg>
-                    Login
-                  </Link>
-                </DropdownMenuItem>
+                
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
