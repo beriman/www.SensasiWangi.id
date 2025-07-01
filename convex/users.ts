@@ -185,6 +185,7 @@ export const createOrUpdateUser = mutation({
       email: identity.email,
       tokenIdentifier: identity.subject,
       role: args.role ?? "buyer",
+      active: true, // Set active to true by default for new users
       contributionPoints: 0,
       weeklyContributionPoints: 0,
       badges: [],

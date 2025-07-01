@@ -1,19 +1,74 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-// Contoh fungsi untuk mendapatkan semua pengguna
+// Helper function to check if the user is an admin
+async function isAdmin(ctx) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new Error("Not authenticated");
+  }
+  const user = await ctx.db.query("users").withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
+  if (user?.role !== "admin") {
+    throw new Error("Unauthorized");
+  }
+  return user;
+}
+
+// Query to get all users (admin only)
 export const getAllUsers = query({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-    // Cek peran dari database
-    const user = await ctx.db.query("users").withIndex("by_token", q => q.eq("tokenIdentifier", identity.tokenIdentifier)).unique();
-    if (user?.role !== "admin") {
-      throw new Error("Unauthorized");
-    }
+    await isAdmin(ctx);
     return await ctx.db.query("users").collect();
+  },
+});
+
+// Mutation to update a user's role (admin only)
+export const updateUserRole = mutation({
+  args: {
+    userId: v.id("users"),
+    newRole: v.string(),
+  },
+  handler: async (ctx, { userId, newRole }) => {
+    await isAdmin(ctx);
+    await ctx.db.patch(userId, { role: newRole });
+  },
+});
+
+// Mutation to toggle a user's active status (admin only)
+export const toggleUserActiveStatus = mutation({
+  args: {
+    userId: v.id("users"),
+    isActive: v.boolean(),
+  },
+  handler: async (ctx, { userId, isActive }) => {
+    await isAdmin(ctx);
+    await ctx.db.patch(userId, { active: isActive });
+  },
+});
+
+// Query to get admin dashboard statistics (admin only)
+export const getAdminDashboardStats = query({
+  handler: async (ctx) => {
+    await isAdmin(ctx);
+
+    const totalUsers = await ctx.db.query("users").count();
+    const totalProducts = await ctx.db.query("products").count();
+    const totalCourses = await ctx.db.query("courses").count();
+    const totalForumPostsToday = await ctx.db.query("topics")
+      .filter(q => q.gte(q.field("createdAt"), Date.now() - 24 * 60 * 60 * 1000))
+      .count();
+    const totalSales = await ctx.db.query("orders")
+      .filter(q => q.eq(q.field("paymentStatus"), "paid"))
+      .collect()
+      .then(orders => orders.reduce((sum, order) => sum + order.totalAmount, 0));
+
+    return {
+      totalUsers,
+      totalProducts,
+      totalCourses,
+      totalForumPostsToday,
+      totalSales,
+    };
   },
 });
 

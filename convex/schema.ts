@@ -8,6 +8,7 @@ export default defineSchema({
     image: v.optional(v.string()),
     tokenIdentifier: v.string(),
     role: v.string(),
+    active: v.boolean(),
     contributionPoints: v.number(),
     weeklyContributionPoints: v.number(),
     badges: v.array(v.string()),
