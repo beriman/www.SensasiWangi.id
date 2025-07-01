@@ -12,6 +12,8 @@ const AdminPage = () => {
   const courses = useQuery(api.admin.getAllCoursesAdmin);
   const lessons = useQuery(api.admin.getAllLessonsAdmin);
   const progress = useQuery(api.admin.getAllProgressAdmin);
+  const topics = useQuery(api.admin.getAllTopicsAdmin);
+  const comments = useQuery(api.admin.getAllCommentsAdmin);
 
   const updateUserRole = useMutation(api.admin.updateUserRole);
   const toggleUserActiveStatus = useMutation(api.admin.toggleUserActiveStatus);
@@ -26,6 +28,9 @@ const AdminPage = () => {
   const createLessonAdmin = useMutation(api.admin.createLessonAdmin);
   const updateLessonAdmin = useMutation(api.admin.updateLessonAdmin);
   const deleteLessonAdmin = useMutation(api.admin.deleteLessonAdmin);
+  const deleteTopicAdmin = useMutation(api.admin.deleteTopicAdmin);
+  const toggleTopicPinnedStatusAdmin = useMutation(api.admin.toggleTopicPinnedStatusAdmin);
+  const deleteCommentAdmin = useMutation(api.admin.deleteCommentAdmin);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -213,6 +218,37 @@ const AdminPage = () => {
         alert('Lesson deleted successfully!');
       } catch (error) {
         alert('Failed to delete lesson: ' + error.message);
+      }
+    }
+  };
+
+  const handleDeleteTopic = async (topicId) => {
+    if (window.confirm('Are you sure you want to delete this topic?')) {
+      try {
+        await deleteTopicAdmin({ topicId });
+        alert('Topic deleted successfully!');
+      } catch (error) {
+        alert('Failed to delete topic: ' + error.message);
+      }
+    }
+  };
+
+  const handleToggleTopicPinnedStatus = async (topicId, isPinned) => {
+    try {
+      await toggleTopicPinnedStatusAdmin({ topicId, isPinned });
+      alert('Topic pinned status updated successfully!');
+    } catch (error) {
+      alert('Failed to update topic pinned status: ' + error.message);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (window.confirm('Are you sure you want to delete this comment?')) {
+      try {
+        await deleteCommentAdmin({ commentId });
+        alert('Comment deleted successfully!');
+      } catch (error) {
+        alert('Failed to delete comment: ' + error.message);
       }
     }
   };
@@ -850,6 +886,87 @@ const AdminPage = () => {
           </div>
         ) : (
           <p>Loading progress data or you do not have permission to view this page.</p>
+        )}
+      </div>
+
+      {/* Forum Management */}
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+        <h2 className="text-xl font-semibold mb-4">Forum Management</h2>
+        <h3 className="text-lg font-semibold mb-2">Topics</h3>
+        {topics ? (
+          <div className="overflow-x-auto mb-4">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pinned</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {topics.map((topic) => (
+                  <tr key={topic._id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{topic.title}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{topic.authorName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <input
+                        type="checkbox"
+                        checked={topic.isPinned}
+                        onChange={(e) => handleToggleTopicPinnedStatus(topic._id, e.target.checked)}
+                        className="form-checkbox h-5 w-5 text-blue-600"
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <button
+                        onClick={() => handleDeleteTopic(topic._id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p>Loading topics or you do not have permission to view this page.</p>
+        )}
+
+        <h3 className="text-lg font-semibold mb-2">Comments</h3>
+        {comments ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Content</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Topic ID</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {comments.map((comment) => (
+                  <tr key={comment._id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{comment.content.substring(0, 50)}...</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{comment.authorName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{comment.topicId.toString().substring(0, 8)}...</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <button
+                        onClick={() => handleDeleteComment(comment._id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p>Loading comments or you do not have permission to view this page.</p>
         )}
       </div>
     </div>

@@ -349,3 +349,53 @@ export const getAllProgressAdmin = query({
     return await ctx.db.query("progress").collect();
   },
 });
+
+// Query to get all topics for admin (admin only)
+export const getAllTopicsAdmin = query({
+  handler: async (ctx) => {
+    await isAdmin(ctx);
+    return await ctx.db.query("topics").collect();
+  },
+});
+
+// Mutation to delete a topic (admin only)
+export const deleteTopicAdmin = mutation({
+  args: {
+    topicId: v.id("topics"),
+  },
+  handler: async (ctx, { topicId }) => {
+    await isAdmin(ctx);
+    await ctx.db.delete(topicId);
+  },
+});
+
+// Mutation to toggle a topic's pinned status (admin only)
+export const toggleTopicPinnedStatusAdmin = mutation({
+  args: {
+    topicId: v.id("topics"),
+    isPinned: v.boolean(),
+  },
+  handler: async (ctx, { topicId, isPinned }) => {
+    await isAdmin(ctx);
+    await ctx.db.patch(topicId, { isPinned });
+  },
+});
+
+// Query to get all comments for admin (admin only)
+export const getAllCommentsAdmin = query({
+  handler: async (ctx) => {
+    await isAdmin(ctx);
+    return await ctx.db.query("comments").collect();
+  },
+});
+
+// Mutation to delete a comment (admin only)
+export const deleteCommentAdmin = mutation({
+  args: {
+    commentId: v.id("comments"),
+  },
+  handler: async (ctx, { commentId }) => {
+    await isAdmin(ctx);
+    await ctx.db.delete(commentId);
+  },
+});
