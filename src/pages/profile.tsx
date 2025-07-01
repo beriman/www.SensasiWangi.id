@@ -436,6 +436,7 @@ function ProfileContent() {
                           )}
                         </DialogContent>
                       </Dialog>
+                    </div>
                 </div>
               </div>
 
