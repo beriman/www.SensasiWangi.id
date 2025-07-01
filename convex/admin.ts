@@ -132,3 +132,98 @@ export const permBanUser = mutation({
     await ctx.db.patch(args.userId, { bannedUntil: -1, role: "banned" });
   },
 });
+
+// Query to get all products for admin (admin only)
+export const getAllProductsAdmin = query({
+  handler: async (ctx) => {
+    await isAdmin(ctx);
+    return await ctx.db.query("products").collect();
+  },
+});
+
+// Query to get all orders for admin (admin only)
+export const getAllOrdersAdmin = query({
+  handler: async (ctx) => {
+    await isAdmin(ctx);
+    return await ctx.db.query("orders").collect();
+  },
+});
+
+// Mutation to update a product (admin only)
+export const updateProductAdmin = mutation({
+  args: {
+    productId: v.id("products"),
+    updatedFields: v.object({
+      title: v.optional(v.string()),
+      description: v.optional(v.string()),
+      price: v.optional(v.number()),
+      stock: v.optional(v.number()),
+      category: v.optional(v.string()),
+      status: v.optional(v.string()),
+    }),
+  },
+  handler: async (ctx, { productId, updatedFields }) => {
+    await isAdmin(ctx);
+    await ctx.db.patch(productId, updatedFields);
+  },
+});
+
+// Mutation to delete a product (admin only)
+export const deleteProductAdmin = mutation({
+  args: {
+    productId: v.id("products"),
+  },
+  handler: async (ctx, { productId }) => {
+    await isAdmin(ctx);
+    await ctx.db.delete(productId);
+  },
+});
+
+// Mutation to create a new category (admin only)
+export const createCategoryAdmin = mutation({
+  args: {
+    name: v.string(),
+    icon: v.string(),
+    type: v.string(),
+    order: v.number(),
+    isActive: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    await isAdmin(ctx);
+    return await ctx.db.insert("categories", {
+      ...args,
+      count: 0, // New categories start with 0 count
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Mutation to update an existing category (admin only)
+export const updateCategoryAdmin = mutation({
+  args: {
+    categoryId: v.id("categories"),
+    updatedFields: v.object({
+      name: v.optional(v.string()),
+      icon: v.optional(v.string()),
+      type: v.optional(v.string()),
+      order: v.optional(v.number()),
+      isActive: v.optional(v.boolean()),
+    }),
+  },
+  handler: async (ctx, { categoryId, updatedFields }) => {
+    await isAdmin(ctx);
+    await ctx.db.patch(categoryId, { ...updatedFields, updatedAt: Date.now() });
+  },
+});
+
+// Mutation to delete a category (admin only)
+export const deleteCategoryAdmin = mutation({
+  args: {
+    categoryId: v.id("categories"),
+  },
+  handler: async (ctx, { categoryId }) => {
+    await isAdmin(ctx);
+    await ctx.db.delete(categoryId);
+  },
+});
