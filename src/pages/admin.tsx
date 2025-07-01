@@ -9,6 +9,9 @@ const AdminPage = () => {
   const products = useQuery(api.admin.getAllProductsAdmin);
   const orders = useQuery(api.admin.getAllOrdersAdmin);
   const categories = useQuery(api.categories.getCategories);
+  const courses = useQuery(api.admin.getAllCoursesAdmin);
+  const lessons = useQuery(api.admin.getAllLessonsAdmin);
+  const progress = useQuery(api.admin.getAllProgressAdmin);
 
   const updateUserRole = useMutation(api.admin.updateUserRole);
   const toggleUserActiveStatus = useMutation(api.admin.toggleUserActiveStatus);
@@ -17,6 +20,12 @@ const AdminPage = () => {
   const createCategoryAdmin = useMutation(api.admin.createCategoryAdmin);
   const updateCategoryAdmin = useMutation(api.admin.updateCategoryAdmin);
   const deleteCategoryAdmin = useMutation(api.admin.deleteCategoryAdmin);
+  const createCourseAdmin = useMutation(api.admin.createCourseAdmin);
+  const updateCourseAdmin = useMutation(api.admin.updateCourseAdmin);
+  const deleteCourseAdmin = useMutation(api.admin.deleteCourseAdmin);
+  const createLessonAdmin = useMutation(api.admin.createLessonAdmin);
+  const updateLessonAdmin = useMutation(api.admin.updateLessonAdmin);
+  const deleteLessonAdmin = useMutation(api.admin.deleteLessonAdmin);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -29,6 +38,16 @@ const AdminPage = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [categoryForm, setCategoryForm] = useState({
     name: '', icon: '', type: '', order: 0, isActive: true
+  });
+
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [courseForm, setCourseForm] = useState({
+    title: '', description: '', category: '', level: '', price: 0, image: '', instructor: ''
+  });
+
+  const [editingLesson, setEditingLesson] = useState(null);
+  const [lessonForm, setLessonForm] = useState({
+    courseId: '' as Id<"courses">, title: '', videoUrl: '', order: 0
   });
 
   const handleRoleChange = async (userId, newRole) => {
@@ -115,6 +134,85 @@ const AdminPage = () => {
         alert('Category deleted successfully!');
       } catch (error) {
         alert('Failed to delete category: ' + error.message);
+      }
+    }
+  };
+
+  const handleCreateCourse = async () => {
+    try {
+      await createCourseAdmin(courseForm);
+      alert('Course created successfully!');
+      setCourseForm({ title: '', description: '', category: '', level: '', price: 0, image: '', instructor: '' });
+    } catch (error) {
+      alert('Failed to create course: ' + error.message);
+    }
+  };
+
+  const handleEditCourseClick = (course) => {
+    setEditingCourse(course._id);
+    setCourseForm({
+      title: course.title, description: course.description, category: course.category,
+      level: course.level, price: course.price, image: course.image || '', instructor: course.instructor
+    });
+  };
+
+  const handleUpdateCourse = async (courseId) => {
+    try {
+      await updateCourseAdmin({ courseId, updatedFields: courseForm });
+      alert('Course updated successfully!');
+      setEditingCourse(null);
+      setCourseForm({ title: '', description: '', category: '', level: '', price: 0, image: '', instructor: '' });
+    } catch (error) {
+      alert('Failed to update course: ' + error.message);
+    }
+  };
+
+  const handleDeleteCourse = async (courseId) => {
+    if (window.confirm('Are you sure you want to delete this course?')) {
+      try {
+        await deleteCourseAdmin({ courseId });
+        alert('Course deleted successfully!');
+      } catch (error) {
+        alert('Failed to delete course: ' + error.message);
+      }
+    }
+  };
+
+  const handleCreateLesson = async () => {
+    try {
+      await createLessonAdmin(lessonForm);
+      alert('Lesson created successfully!');
+      setLessonForm({ courseId: '' as Id<"courses">, title: '', videoUrl: '', order: 0 });
+    } catch (error) {
+      alert('Failed to create lesson: ' + error.message);
+    }
+  };
+
+  const handleEditLessonClick = (lesson) => {
+    setEditingLesson(lesson._id);
+    setLessonForm({
+      courseId: lesson.courseId, title: lesson.title, videoUrl: lesson.videoUrl, order: lesson.order
+    });
+  };
+
+  const handleUpdateLesson = async (lessonId) => {
+    try {
+      await updateLessonAdmin({ lessonId, updatedFields: lessonForm });
+      alert('Lesson updated successfully!');
+      setEditingLesson(null);
+      setLessonForm({ courseId: '' as Id<"courses">, title: '', videoUrl: '', order: 0 });
+    } catch (error) {
+      alert('Failed to update lesson: ' + error.message);
+    }
+  };
+
+  const handleDeleteLesson = async (lessonId) => {
+    if (window.confirm('Are you sure you want to delete this lesson?')) {
+      try {
+        await deleteLessonAdmin({ lessonId });
+        alert('Lesson deleted successfully!');
+      } catch (error) {
+        alert('Failed to delete lesson: ' + error.message);
       }
     }
   };
@@ -492,6 +590,266 @@ const AdminPage = () => {
           </div>
         ) : (
           <p>Loading categories or you do not have permission to view this page.</p>
+        )}
+      </div>
+
+      {/* Course Management */}
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+        <h2 className="text-xl font-semibold mb-4">Course Management</h2>
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">{editingCourse ? 'Edit Course' : 'Create New Course'}</h3>
+          <input
+            type="text"
+            placeholder="Title"
+            value={courseForm.title}
+            onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
+            className="p-2 border rounded-md w-full mb-2"
+          />
+          <textarea
+            placeholder="Description"
+            value={courseForm.description}
+            onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+            className="p-2 border rounded-md w-full mb-2"
+          ></textarea>
+          <input
+            type="text"
+            placeholder="Category"
+            value={courseForm.category}
+            onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })}
+            className="p-2 border rounded-md w-full mb-2"
+          />
+          <input
+            type="text"
+            placeholder="Level"
+            value={courseForm.level}
+            onChange={(e) => setCourseForm({ ...courseForm, level: e.target.value })}
+            className="p-2 border rounded-md w-full mb-2"
+          />
+          <input
+            type="number"
+            placeholder="Price"
+            value={courseForm.price}
+            onChange={(e) => setCourseForm({ ...courseForm, price: parseFloat(e.target.value) })}
+            className="p-2 border rounded-md w-full mb-2"
+          />
+          <input
+            type="text"
+            placeholder="Image URL"
+            value={courseForm.image}
+            onChange={(e) => setCourseForm({ ...courseForm, image: e.target.value })}
+            className="p-2 border rounded-md w-full mb-2"
+          />
+          <input
+            type="text"
+            placeholder="Instructor"
+            value={courseForm.instructor}
+            onChange={(e) => setCourseForm({ ...courseForm, instructor: e.target.value })}
+            className="p-2 border rounded-md w-full mb-2"
+          />
+          {editingCourse ? (
+            <button
+              onClick={() => handleUpdateCourse(editingCourse)}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
+            >
+              Save Changes
+            </button>
+          ) : (
+            <button
+              onClick={handleCreateCourse}
+              className="bg-green-500 text-white px-4 py-2 rounded-md mr-2"
+            >
+              Create Course
+            </button>
+          )}
+          {editingCourse && (
+            <button
+              onClick={() => {
+                setEditingCourse(null);
+                setCourseForm({ title: '', description: '', category: '', level: '', price: 0, image: '', instructor: '' });
+              }}
+              className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+
+        {courses ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Instructor</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {courses.map((course) => (
+                  <tr key={course._id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{course.title}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{course.category}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{course.level}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{course.instructor}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <button
+                        onClick={() => handleEditCourseClick(course)}
+                        className="text-indigo-600 hover:text-indigo-900 mr-2"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCourse(course._id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p>Loading courses or you do not have permission to view this page.</p>
+        )}
+      </div>
+
+      {/* Lesson Management */}
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+        <h2 className="text-xl font-semibold mb-4">Lesson Management</h2>
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">{editingLesson ? 'Edit Lesson' : 'Create New Lesson'}</h3>
+          <select
+            value={lessonForm.courseId}
+            onChange={(e) => setLessonForm({ ...lessonForm, courseId: e.target.value as Id<"courses"> })}
+            className="p-2 border rounded-md w-full mb-2"
+          >
+            <option value="">Select Course</option>
+            {courses?.map(course => (
+              <option key={course._id} value={course._id}>{course.title}</option>
+            ))}
+          </select>
+          <input
+            type="text"
+            placeholder="Title"
+            value={lessonForm.title}
+            onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
+            className="p-2 border rounded-md w-full mb-2"
+          />
+          <input
+            type="text"
+            placeholder="Video URL"
+            value={lessonForm.videoUrl}
+            onChange={(e) => setLessonForm({ ...lessonForm, videoUrl: e.target.value })}
+            className="p-2 border rounded-md w-full mb-2"
+          />
+          <input
+            type="number"
+            placeholder="Order"
+            value={lessonForm.order}
+            onChange={(e) => setLessonForm({ ...lessonForm, order: parseInt(e.target.value) })}
+            className="p-2 border rounded-md w-full mb-2"
+          />
+          {editingLesson ? (
+            <button
+              onClick={() => handleUpdateLesson(editingLesson)}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
+            >
+              Save Changes
+            </button>
+          ) : (
+            <button
+              onClick={handleCreateLesson}
+              className="bg-green-500 text-white px-4 py-2 rounded-md mr-2"
+            >
+              Create Lesson
+            </button>
+          )}
+          {editingLesson && (
+            <button
+              onClick={() => {
+                setEditingLesson(null);
+                setLessonForm({ courseId: '' as Id<"courses">, title: '', videoUrl: '', order: 0 });
+              }}
+              className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+
+        {lessons ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course ID</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {lessons.map((lesson) => (
+                  <tr key={lesson._id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{lesson.title}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lesson.courseId.toString().substring(0, 8)}...</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lesson.order}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <button
+                        onClick={() => handleEditLessonClick(lesson)}
+                        className="text-indigo-600 hover:text-indigo-900 mr-2"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteLesson(lesson._id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p>Loading lessons or you do not have permission to view this page.</p>
+        )}
+      </div>
+
+      {/* Course Progress Management */}
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+        <h2 className="text-xl font-semibold mb-4">Course Progress Management</h2>
+        {progress ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User ID</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lesson ID</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress (%)</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {progress.map((p) => (
+                  <tr key={p._id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{p.userId.toString().substring(0, 8)}...</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.lessonId.toString().substring(0, 8)}...</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.progress}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.completed ? 'Yes' : 'No'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p>Loading progress data or you do not have permission to view this page.</p>
         )}
       </div>
     </div>

@@ -227,3 +227,125 @@ export const deleteCategoryAdmin = mutation({
     await ctx.db.delete(categoryId);
   },
 });
+
+// Query to get all courses for admin (admin only)
+export const getAllCoursesAdmin = query({
+  handler: async (ctx) => {
+    await isAdmin(ctx);
+    return await ctx.db.query("courses").collect();
+  },
+});
+
+// Mutation to create a new course (admin only)
+export const createCourseAdmin = mutation({
+  args: {
+    title: v.string(),
+    description: v.string(),
+    category: v.string(),
+    level: v.string(),
+    price: v.number(),
+    image: v.optional(v.string()),
+    instructor: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await isAdmin(ctx);
+    return await ctx.db.insert("courses", {
+      ...args,
+      discussionTopicId: undefined, // Optional field
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Mutation to update an existing course (admin only)
+export const updateCourseAdmin = mutation({
+  args: {
+    courseId: v.id("courses"),
+    updatedFields: v.object({
+      title: v.optional(v.string()),
+      description: v.optional(v.string()),
+      category: v.optional(v.string()),
+      level: v.optional(v.string()),
+      price: v.optional(v.number()),
+      image: v.optional(v.string()),
+      instructor: v.optional(v.string()),
+    }),
+  },
+  handler: async (ctx, { courseId, updatedFields }) => {
+    await isAdmin(ctx);
+    await ctx.db.patch(courseId, { ...updatedFields, updatedAt: Date.now() });
+  },
+});
+
+// Mutation to delete a course (admin only)
+export const deleteCourseAdmin = mutation({
+  args: {
+    courseId: v.id("courses"),
+  },
+  handler: async (ctx, { courseId }) => {
+    await isAdmin(ctx);
+    await ctx.db.delete(courseId);
+  },
+});
+
+// Query to get all lessons for admin (admin only)
+export const getAllLessonsAdmin = query({
+  handler: async (ctx) => {
+    await isAdmin(ctx);
+    return await ctx.db.query("lessons").collect();
+  },
+});
+
+// Mutation to create a new lesson (admin only)
+export const createLessonAdmin = mutation({
+  args: {
+    courseId: v.id("courses"),
+    title: v.string(),
+    videoUrl: v.string(),
+    order: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await isAdmin(ctx);
+    return await ctx.db.insert("lessons", {
+      ...args,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Mutation to update an existing lesson (admin only)
+export const updateLessonAdmin = mutation({
+  args: {
+    lessonId: v.id("lessons"),
+    updatedFields: v.object({
+      title: v.optional(v.string()),
+      videoUrl: v.optional(v.string()),
+      order: v.optional(v.number()),
+    }),
+  },
+  handler: async (ctx, { lessonId, updatedFields }) => {
+    await isAdmin(ctx);
+    await ctx.db.patch(lessonId, { ...updatedFields, updatedAt: Date.now() });
+  },
+});
+
+// Mutation to delete a lesson (admin only)
+export const deleteLessonAdmin = mutation({
+  args: {
+    lessonId: v.id("lessons"),
+  },
+  handler: async (ctx, { lessonId }) => {
+    await isAdmin(ctx);
+    await ctx.db.delete(lessonId);
+  },
+});
+
+// Query to get all progress for admin (admin only)
+export const getAllProgressAdmin = query({
+  handler: async (ctx) => {
+    await isAdmin(ctx);
+    return await ctx.db.query("progress").collect();
+  },
+});
