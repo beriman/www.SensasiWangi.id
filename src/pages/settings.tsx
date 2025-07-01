@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 
 export default function Settings() {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={["buyer", "seller", "admin"]}>
       <SettingsContent />
     </ProtectedRoute>
   );

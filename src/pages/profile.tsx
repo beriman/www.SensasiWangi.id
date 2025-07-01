@@ -36,7 +36,7 @@ import { useEffect, useRef, useState } from "react";
 
 export default function Profile() {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={["buyer", "seller", "admin"]}>
       <ProfileContent />
     </ProtectedRoute>
   );

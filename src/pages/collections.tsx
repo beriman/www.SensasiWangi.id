@@ -7,7 +7,7 @@ import ProtectedRoute from "@/components/wrappers/ProtectedRoute";
 
 export default function Collections() {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={["buyer", "seller", "admin"]}>
       <CollectionsContent />
     </ProtectedRoute>
   );
