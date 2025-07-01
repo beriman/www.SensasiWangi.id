@@ -18,6 +18,7 @@ import MarketplaceWishlist from "./pages/marketplace-wishlist";
 import MyOrders from "./pages/my-orders";
 import SellerOrders from "./pages/seller-orders";
 import Admin from "./pages/admin";
+import ProtectedRoute from "./components/wrappers/ProtectedRoute";
 import Kursus from "./pages/kursus";
 import CourseDetail from "./pages/course-detail";
 import LessonPage from "./pages/lesson";
@@ -87,7 +88,9 @@ function App() {
               element={<MarketplaceCheckout />}
             />
             <Route path="/marketplace/order/:orderId" element={<OrderDetail />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+              <Route path="/admin" element={<Admin />} />
+            </Route>
             <Route path="/kursus" element={<Kursus />} />
             <Route path="/kursus/:id" element={<CourseDetail />} />
             <Route path="/lesson/:id" element={<LessonPage />} />
