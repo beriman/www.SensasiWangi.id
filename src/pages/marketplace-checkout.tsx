@@ -48,6 +48,8 @@ export default function MarketplaceCheckout() {
     productId ? { productId: productId as any } : "skip",
   );
 
+  const [couponCode, setCouponCode] = useState("");
+
   const couponInfo = useQuery(
     api.marketplace.validateCoupon,
     couponCode && productId && product
@@ -78,7 +80,6 @@ export default function MarketplaceCheckout() {
   const [shippingMethod, setShippingMethod] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("transfer");
   const [qrString, setQrString] = useState<string | null>(null);
-  const [couponCode, setCouponCode] = useState("");
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

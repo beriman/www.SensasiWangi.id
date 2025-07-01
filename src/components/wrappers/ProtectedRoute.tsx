@@ -5,9 +5,10 @@ import { api } from '../../../convex/_generated/api';
 
 interface ProtectedRouteProps {
   allowedRoles: string[];
+  children?: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, children }) => {
   const currentUser = useQuery(api.users.getCurrentUser);
 
   if (currentUser === undefined) {
@@ -16,7 +17,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
   }
 
   if (currentUser && allowedRoles.includes(currentUser.role)) {
-    return <Outlet />;
+    return children ? <>{children}</> : <Outlet />;
   } else if (currentUser && !allowedRoles.includes(currentUser.role)) {
     // User is logged in but not authorized
     return <Navigate to="/" replace />;

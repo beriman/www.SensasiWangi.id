@@ -253,6 +253,7 @@ export const createProduct = mutation({
     tags: v.array(v.string()),
     isNegotiable: v.boolean(),
     stock: v.number(), // Tambah parameter stok
+    type: v.union(v.literal("biasa"), v.literal("sambatan")),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -297,6 +298,7 @@ export const createProduct = mutation({
       sambatCount: 0,
       isNegotiable: args.isNegotiable,
       stock: args.stock, // Set nilai stok
+      type: args.type,
       createdAt: now,
       updatedAt: now,
     });
@@ -348,6 +350,7 @@ export const updateProduct = mutation({
     isNegotiable: v.optional(v.boolean()),
     stock: v.optional(v.number()),
     status: v.optional(v.string()),
+    type: v.optional(v.union(v.literal("biasa"), v.literal("sambatan"))),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -389,6 +392,7 @@ export const updateProduct = mutation({
     if (args.isNegotiable !== undefined) updateData.isNegotiable = args.isNegotiable;
     if (args.stock !== undefined) updateData.stock = args.stock;
     if (args.status !== undefined) updateData.status = args.status;
+    if (args.type !== undefined) updateData.type = args.type;
 
     await ctx.db.patch(args.productId, {
       ...updateData,
@@ -570,6 +574,8 @@ export const createOrder = mutation({
     shippingMethod: v.string(),
     shippingCost: v.number(),
     paymentMethod: v.string(),
+    quantity: v.optional(v.number()),
+    is_sambatan: v.optional(v.boolean()),
     couponCode: v.optional(v.string()),
     notes: v.optional(v.string()),
   },
@@ -673,6 +679,8 @@ export const createOrder = mutation({
       sellerName: seller.name || "Anonymous",
       productTitle: product.title,
       price: discountedPrice,
+      quantity: args.quantity ?? 1,
+      is_sambatan: args.is_sambatan ?? false,
       shippingAddress: args.shippingAddress,
       origin: args.origin,
       destination: args.destination,
@@ -693,7 +701,7 @@ export const createOrder = mutation({
     // Update status dan kurangi stok
     await ctx.db.patch(args.productId, {
       status: "sold",
-      stock: product.stock - 1, // Kurangi stok
+      stock: product.stock - (args.quantity ?? 1), // Kurangi stok sesuai jumlah
       updatedAt: now,
     });
 
