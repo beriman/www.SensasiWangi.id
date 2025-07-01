@@ -165,6 +165,7 @@ export default defineSchema({
     likes: v.number(),
     sambatCount: v.number(),
     isNegotiable: v.boolean(),
+    type: v.union(v.literal("biasa"), v.literal("sambatan")),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -208,6 +209,8 @@ export default defineSchema({
     sellerName: v.string(),
     productTitle: v.string(),
     price: v.number(),
+    quantity: v.number(),
+    is_sambatan: v.boolean(),
     shippingAddress: v.object({
       name: v.string(),
       phone: v.string(),
@@ -270,6 +273,7 @@ export default defineSchema({
     targetUserName: v.string(),
     rating: v.number(), // 1-5
     comment: v.string(),
+    image: v.optional(v.string()),
     type: v.string(), // "seller" or "buyer"
     createdAt: v.number(),
   })

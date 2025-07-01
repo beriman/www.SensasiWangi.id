@@ -65,6 +65,8 @@ import {
   Server,
   HardDrive,
   Zap,
+  DollarSign,
+  Ticket,
 } from "lucide-react";
 import RoleProtectedRoute from "@/components/wrappers/RoleProtectedRoute";
 
@@ -249,6 +251,13 @@ function AdminContent() {
             >
               <Settings className="w-4 h-4 mr-2" />
               Pemeliharaan
+            </TabsTrigger>
+            <TabsTrigger
+              value="finance"
+              className="neumorphic-button-sm data-[state=active]:bg-white data-[state=active]:shadow-inner text-[#1D1D1F]"
+            >
+              <DollarSign className="w-4 h-4 mr-2" />
+              Keuangan
             </TabsTrigger>
           </TabsList>
 
@@ -1752,6 +1761,43 @@ function AdminContent() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="finance" className="space-y-6">
+            <Card className="neumorphic-card border-0">
+              <CardHeader>
+                <CardTitle className="text-[#1D1D1F]">Verifikasi Pembayaran</CardTitle>
+                <CardDescription className="text-[#86868B]">
+                  Verifikasi pembayaran yang masuk dari pengguna.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[#1D1D1F]">Order ID</TableHead>
+                      <TableHead className="text-[#1D1D1F]">User</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Jumlah</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Bukti</TableHead>
+                      <TableHead className="text-[#1D1D1F]">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {/* Placeholder data - replace with actual data from your backend */}
+                    <TableRow>
+                      <TableCell>#12345</TableCell>
+                      <TableCell>John Doe</TableCell>
+                      <TableCell>Rp 150.000</TableCell>
+                      <TableCell><a href="#" className="text-blue-500">Lihat Bukti</a></TableCell>
+                      <TableCell>
+                        <Button size="sm" className="neumorphic-button-sm">Verifikasi</Button>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
         </Tabs>
       </div>
 

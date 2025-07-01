@@ -1,12 +1,13 @@
+
 import React from 'react';
 
-const OrderHistoryPage = () => {
+const MyOrdersPage = () => {
   return (
     <div>
-      <h1>Order History</h1>
+      <h1>My Orders</h1>
       {/* User's order history will go here */}
     </div>
   );
 };
 
-export default OrderHistoryPage;
+export default MyOrdersPage;
