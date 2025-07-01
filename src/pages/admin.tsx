@@ -28,9 +28,11 @@ const AdminPage = () => {
   const createLessonAdmin = useMutation(api.admin.createLessonAdmin);
   const updateLessonAdmin = useMutation(api.admin.updateLessonAdmin);
   const deleteLessonAdmin = useMutation(api.admin.deleteLessonAdmin);
+  const deleteProgressAdmin = useMutation(api.admin.deleteProgressAdmin);
   const deleteTopicAdmin = useMutation(api.admin.deleteTopicAdmin);
   const toggleTopicPinnedStatusAdmin = useMutation(api.admin.toggleTopicPinnedStatusAdmin);
   const deleteCommentAdmin = useMutation(api.admin.deleteCommentAdmin);
+  const createForumCategoryAdmin = useMutation(api.admin.createForumCategoryAdmin);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -53,6 +55,10 @@ const AdminPage = () => {
   const [editingLesson, setEditingLesson] = useState(null);
   const [lessonForm, setLessonForm] = useState({
     courseId: '' as Id<"courses">, title: '', videoUrl: '', order: 0
+  });
+
+  const [forumCategoryForm, setForumCategoryForm] = useState({
+    name: '', description: ''
   });
 
   const handleRoleChange = async (userId, newRole) => {
@@ -222,6 +228,17 @@ const AdminPage = () => {
     }
   };
 
+  const handleDeleteProgress = async (progressId) => {
+    if (window.confirm('Are you sure you want to delete this progress entry?')) {
+      try {
+        await deleteProgressAdmin({ progressId });
+        alert('Progress entry deleted successfully!');
+      } catch (error) {
+        alert('Failed to delete progress entry: ' + error.message);
+      }
+    }
+  };
+
   const handleDeleteTopic = async (topicId) => {
     if (window.confirm('Are you sure you want to delete this topic?')) {
       try {
@@ -250,6 +267,16 @@ const AdminPage = () => {
       } catch (error) {
         alert('Failed to delete comment: ' + error.message);
       }
+    }
+  };
+
+  const handleCreateForumCategory = async () => {
+    try {
+      await createForumCategoryAdmin(forumCategoryForm);
+      alert('Forum category created successfully!');
+      setForumCategoryForm({ name: '', description: '' });
+    } catch (error) {
+      alert('Failed to create forum category: ' + error.message);
     }
   };
 
@@ -339,7 +366,7 @@ const AdminPage = () => {
                         <option value="user">User</option>
                         <option value="seller">Seller</option>
                         <option value="admin">Admin</option>
-                        <option value="banned">Banned</option>
+                        <option value="banned">Bignorant</option>
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -870,6 +897,7 @@ const AdminPage = () => {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lesson ID</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress (%)</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -879,6 +907,14 @@ const AdminPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.lessonId.toString().substring(0, 8)}...</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.progress}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.completed ? 'Yes' : 'No'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <button
+                        onClick={() => handleDeleteProgress(p._id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -892,6 +928,29 @@ const AdminPage = () => {
       {/* Forum Management */}
       <div className="bg-white p-6 rounded-lg shadow-md mb-8">
         <h2 className="text-xl font-semibold mb-4">Forum Management</h2>
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">Create New Forum Category</h3>
+          <input
+            type="text"
+            placeholder="Category Name"
+            value={forumCategoryForm.name}
+            onChange={(e) => setForumCategoryForm({ ...forumCategoryForm, name: e.target.value })}
+            className="p-2 border rounded-md w-full mb-2"
+          />
+          <textarea
+            placeholder="Description (Optional)"
+            value={forumCategoryForm.description}
+            onChange={(e) => setForumCategoryForm({ ...forumCategoryForm, description: e.target.value })}
+            className="p-2 border rounded-md w-full mb-2"
+          ></textarea>
+          <button
+            onClick={handleCreateForumCategory}
+            className="bg-green-500 text-white px-4 py-2 rounded-md"
+          >
+            Create Forum Category
+          </button>
+        </div>
+
         <h3 className="text-lg font-semibold mb-2">Topics</h3>
         {topics ? (
           <div className="overflow-x-auto mb-4">

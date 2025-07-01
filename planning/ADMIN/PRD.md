@@ -39,20 +39,20 @@ Dasbor admin akan menjadi antarmuka terpusat untuk semua tugas administratif.
 ### 3.3. Manajemen Konten (Content Management)
 
 #### 3.3.1. Marketplace
--   Lihat semua produk yang dijual oleh semua penjual.
--   Edit atau hapus produk yang tidak sesuai.
--   Kelola kategori produk.
--   Lihat dan kelola pesanan yang masuk.
+-   Lihat semua produk yang dijual oleh semua penjual. (Implemented)
+-   Edit atau hapus produk yang tidak sesuai. (Implemented)
+-   Kelola kategori produk. (Implemented)
+-   Lihat dan kelola pesanan yang masuk. (Implemented)
 
 #### 3.3.2. Kursus (Courses)
--   Buat, edit, atau hapus kursus dan materi pelajaran.
--   Lihat progres belajar dari semua pengguna.
--   Kelola pendaftaran kursus.
+-   Buat, edit, atau hapus kursus dan materi pelajaran. (Implemented)
+-   Lihat progres belajar dari semua pengguna. (Implemented)
+-   Kelola pendaftaran kursus. (Not Implemented)
 
 #### 3.3.3. Forum
--   Moderasi konten: Hapus postingan atau komentar yang tidak pantas.
--   Sematkan (pin) topik penting.
--   Buat kategori atau sub-forum baru.
+-   Moderasi konten: Hapus postingan atau komentar yang tidak pantas. (Implemented)
+-   Sematkan (pin) topik penting. (Implemented)
+-   Buat kategori atau sub-forum baru. (Not Implemented)
 
 ## 4. Rencana Implementasi Teknis
 

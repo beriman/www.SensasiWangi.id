@@ -350,6 +350,17 @@ export const getAllProgressAdmin = query({
   },
 });
 
+// Mutation to delete a progress entry (admin only)
+export const deleteProgressAdmin = mutation({
+  args: {
+    progressId: v.id("progress"),
+  },
+  handler: async (ctx, { progressId }) => {
+    await isAdmin(ctx);
+    await ctx.db.delete(progressId);
+  },
+});
+
 // Query to get all topics for admin (admin only)
 export const getAllTopicsAdmin = query({
   handler: async (ctx) => {
@@ -397,5 +408,30 @@ export const deleteCommentAdmin = mutation({
   handler: async (ctx, { commentId }) => {
     await isAdmin(ctx);
     await ctx.db.delete(commentId);
+  },
+});
+
+// Mutation to create a new forum category (admin only)
+export const createForumCategoryAdmin = mutation({
+  args: {
+    name: v.string(),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await isAdmin(ctx);
+    // Assuming a 'forumCategories' table exists or needs to be created in schema.ts
+    // For now, we'll just insert into 'categories' table with a specific type if applicable
+    // Or, if a dedicated forumCategories table is needed, it should be added to schema.ts first.
+    // For simplicity, let's assume 'categories' table can be used for forum categories with a specific 'type'.
+    return await ctx.db.insert("categories", {
+      name: args.name,
+      icon: "", // Default icon for forum category
+      type: "forum", // Specific type for forum categories
+      order: 999, // Default order
+      isActive: true,
+      count: 0,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
   },
 });
