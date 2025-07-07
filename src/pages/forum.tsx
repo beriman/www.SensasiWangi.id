@@ -1321,7 +1321,7 @@ export default function Forum() {
                       <div className="flex items-center gap-2 text-[#718096]">
                         <MessageCircle className="h-5 w-5" />
                         <span>{commentList.length} Balasan</span>
-                        </div>
+                      </div>
                         {currentUser &&
                           selectedTopic.authorId === currentUser._id && (
                             <Button
@@ -1364,7 +1364,6 @@ export default function Forum() {
                             </Button>
                           </>
                         )}
-                      </div>
 
                       {/* Comments Section */}
                       <div className="space-y-4">
@@ -1787,5 +1786,4 @@ export default function Forum() {
           </div>
         </div>
       </main>
-    );
-}
+    }
