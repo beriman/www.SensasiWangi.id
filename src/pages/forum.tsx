@@ -1679,7 +1679,6 @@ export default function Forum() {
                             </CardContent>
                           </Card>
                         ))}
-                      </>
                     )}
                   </div>
 
@@ -1695,8 +1694,8 @@ export default function Forum() {
                     </div>
                   )}
                 </div>
-              </>
-            )}
+              )}
+            </div>
 
                 <Dialog
                 open={isEditCommentOpen}
