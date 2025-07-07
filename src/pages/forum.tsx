@@ -1695,6 +1695,12 @@ export default function Forum() {
                 </div>
               )}
 
+              </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <Dialog
                 open={isEditCommentOpen}
                 onOpenChange={setIsEditCommentOpen}
@@ -1786,4 +1792,6 @@ export default function Forum() {
           </div>
         </div>
       </main>
-    }
+    </div>
+  );
+}
