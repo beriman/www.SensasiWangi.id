@@ -1318,6 +1318,8 @@ export default function Forum() {
                         </DialogContent>
                       </Dialog>
 
+                      </div>
+
                       <div className="flex items-center gap-2 text-[#718096]">
                         <MessageCircle className="h-5 w-5" />
                         <span>{commentList.length} Balasan</span>
@@ -1693,15 +1695,10 @@ export default function Forum() {
                     </div>
                   )}
                 </div>
-              )}
+              </>
+            )}
 
-              </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <Dialog
+                <Dialog
                 open={isEditCommentOpen}
                 onOpenChange={setIsEditCommentOpen}
               >
