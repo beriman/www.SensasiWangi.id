@@ -54,6 +54,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/forum" element={<Forum />} />
+            <Route path="/forum/:category" element={<Forum />} />
+            <Route path="/thread/:id" element={<Forum />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/u/:id" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
