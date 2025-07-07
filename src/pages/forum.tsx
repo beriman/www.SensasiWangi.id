@@ -230,10 +230,7 @@ export default function Forum() {
 
   useEffect(() => {
     if (id && singleTopic) {
-      setSelectedTopic(singleTopic);
-      setEditTopicTitle(singleTopic.title);
-      setEditTopicContent(singleTopic.content);
-      setIsTopicDetailOpen(true);
+      handleTopicClick(singleTopic);
     }
   }, [id, singleTopic]);
 
@@ -1790,6 +1787,5 @@ export default function Forum() {
           </div>
         </div>
       </main>
-    </div>
-  );
+    );
 }

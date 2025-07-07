@@ -1,0 +1,10 @@
+{
+    "checkpointing": {"enabled": true},
+    "mcpServers": {
+        "context7":             {"command": "npx","args": ["-y","@upstash/context7-mcp"]} ,
+        "sequential-thinking":  {"command": "npx","args": ["-y","@modelcontextprotocol/server-sequential-thinking"]},
+        "playwright-mcp":       {"command": "npx","args": ["-y","@smithery/cli@latest","run","@cloudflare/playwright-mcp","--key","9f01d890-44f3-40e9-a230-3e7c6d1dc11d"]}
+
+
+    }
+}
