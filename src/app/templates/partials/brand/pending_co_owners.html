@@ -1,0 +1,38 @@
+<div id="brand-pending-co-owners" class="pending-co-owner-column">
+  <h3>Undangan Co-owner Pending</h3>
+  <p id="co-owner-feedback" hx-swap-oob="outerHTML" role="status" aria-live="polite" class="feedback">
+    {{ message or "" }}
+  </p>
+  <ul class="pending-list">
+    {% for member in pending_members %}
+      <li class="pending-item">
+        <div class="member-info">
+          <span class="member-name">{{ member.display_name or member.username }}</span>
+          {% if member.note %}
+            <span class="member-note">{{ member.note }}</span>
+          {% endif %}
+        </div>
+        <div class="member-actions">
+          <form
+            hx-post="/brands/{{ brand.slug }}/co-owners/{{ member.profile_id }}/approve"
+            hx-target="#brand-pending-co-owners"
+            hx-swap="outerHTML"
+            class="inline-form"
+          >
+            <button type="submit" class="approve-button">Setujui</button>
+          </form>
+          <form
+            hx-delete="/brands/{{ brand.slug }}/co-owners/{{ member.profile_id }}"
+            hx-target="#brand-pending-co-owners"
+            hx-swap="outerHTML"
+            class="inline-form"
+          >
+            <button type="submit" class="cancel-button">Batalkan</button>
+          </form>
+        </div>
+      </li>
+    {% else %}
+      <li class="empty">Belum ada undangan co-owner yang menunggu.</li>
+    {% endfor %}
+  </ul>
+</div>
