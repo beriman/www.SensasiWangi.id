@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <title>Detail Brand - {{ brand.name }}</title>
+  </head>
+  <body class="bg-slate-50 text-slate-800">
+    <main class="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10">
+      <header class="space-y-2">
+        <p class="text-sm uppercase tracking-wider text-slate-500">Brand</p>
+        <h1 class="text-3xl font-bold">{{ brand.name }}</h1>
+        {% if brand.tagline %}
+        <p class="text-lg text-slate-600">{{ brand.tagline }}</p>
+        {% endif %}
+      </header>
+
+      <section aria-labelledby="co-owner-section" class="rounded-2xl bg-white p-6 shadow-sm">
+        <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+          <div class="md:w-1/2">
+            <h2 id="co-owner-section" class="text-xl font-semibold">Kelola Co-owner</h2>
+            <p class="mt-2 text-sm text-slate-500">
+              Undang anggota tim baru sebagai co-owner atau kelola undangan yang masih menunggu konfirmasi.
+            </p>
+
+            <form
+              id="invite-co-owner-form"
+              class="mt-6 space-y-4"
+              hx-post="{{ url_for('brands:invite_co_owner', slug=brand.slug) }}"
+              hx-target="#pending-co-owners"
+              hx-swap="outerHTML"
+              hx-indicator="#invite-loading"
+            >
+              <div class="space-y-1">
+                <label for="co-owner-username" class="text-sm font-medium text-slate-600">Username</label>
+                <input
+                  id="co-owner-username"
+                  name="username"
+                  type="text"
+                  required
+                  class="w-full rounded-lg border border-slate-200 px-3 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                  placeholder="contoh: parfumlover"
+                />
+              </div>
+              <div class="space-y-1">
+                <label for="co-owner-note" class="text-sm font-medium text-slate-600">Catatan (opsional)</label>
+                <textarea
+                  id="co-owner-note"
+                  name="note"
+                  rows="3"
+                  class="w-full rounded-lg border border-slate-200 px-3 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                  placeholder="Sertakan pesan untuk co-owner"
+                ></textarea>
+              </div>
+              <div class="flex items-center gap-3">
+                <button
+                  type="submit"
+                  class="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
+                >
+                  Kirim Undangan
+                </button>
+                <span id="invite-loading" class="htmx-indicator text-sm text-slate-400" aria-live="polite">Mengirim...</span>
+              </div>
+            </form>
+            <div id="invite-feedback" aria-live="polite" class="mt-2 text-sm text-emerald-600"></div>
+          </div>
+
+          <div class="md:w-1/2">
+            {% set pending_co_owners = pending_co_owners if pending_co_owners is defined else [] %}
+            {% set co_owners = co_owners if co_owners is defined else [] %}
+            {% set message = message if message is defined else '' %}
+            {% include "pages/brand/partials/pending_co_owners.html" %}
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
