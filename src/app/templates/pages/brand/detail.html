@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Detail Brand</title>
+  </head>
+  <body>
+    <main class="brand-detail">
+      <header>
+        <h1>{{ brand.name }}</h1>
+      </header>
+
+      <section class="co-owner-invite">
+        <h2>Undang Co-owner</h2>
+        <form
+          hx-post="/brands/{{ brand.slug }}/co-owners"
+          hx-target="#brand-pending-co-owners"
+          hx-swap="outerHTML"
+          class="invite-form"
+        >
+          <label for="invite-username">Nama pengguna</label>
+          <input id="invite-username" name="username" type="text" required />
+
+          <label for="invite-note">Catatan (opsional)</label>
+          <textarea id="invite-note" name="note" rows="3"></textarea>
+
+          <button type="submit">Kirim Undangan</button>
+        </form>
+        <p id="co-owner-feedback" role="status" aria-live="polite" class="feedback"></p>
+      </section>
+
+      {% include "partials/brand/pending_co_owners.html" %}
+    </main>
+  </body>
+</html>
