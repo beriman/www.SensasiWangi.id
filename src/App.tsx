@@ -29,8 +29,6 @@ import Polling from "./pages/polling";
 import FAQ from "./pages/faq";
 import Help from "./pages/help";
 import Onboarding from "./pages/onboarding";
-import Login from "./pages/login";
-import Signup from "./pages/signup";
 import ResetPassword from "./pages/reset-password";
 import OrderReviewPage from "./pages/order-review";
 import OrderDetail from "./pages/order-detail";
@@ -38,6 +36,8 @@ import MarketplaceCheckout from "./pages/marketplace-checkout";
 import CartPage from "./pages/cart";
 import Messages from "./pages/messages";
 import Leaderboard from "./pages/leaderboard";
+import SignInPage from "./pages/auth/signin";
+import SignUpPage from "./pages/auth/signup";
 
 import Settings from "./pages/settings";
 import { Toaster } from "@/components/ui/toaster";
@@ -106,8 +106,10 @@ function App() {
             <Route path="/order/:orderId/review" element={<OrderReviewPage />} />
             <Route path="*" element={<NotFound />} />
           </Route>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Navigate to="/auth/signin" replace />} />
+          <Route path="/signup" element={<Navigate to="/auth/signup" replace />} />
+          <Route path="/auth/signin" element={<SignInPage />} />
+          <Route path="/auth/signup" element={<SignUpPage />} />
           <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
         {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}

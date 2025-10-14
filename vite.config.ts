@@ -36,6 +36,7 @@ export default defineConfig({
     preserveSymlinks: true,
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@clerk/clerk-react": path.resolve(__dirname, "./src/stubs/clerk-react"),
       react: "react",
       "react-dom": "react-dom",
     },

@@ -1,30 +1,24 @@
-import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
+import React from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuthContext } from "@/providers/auth-provider";
 
 interface ProtectedRouteProps {
   allowedRoles: string[];
   children?: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, children }) => {
-  const currentUser = useQuery(api.users.getCurrentUser);
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const { user, isLoading } = useAuthContext();
 
-  if (currentUser === undefined) {
-    // Still loading user data
-    return <div>Loading...</div>; 
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
-  if (currentUser && allowedRoles.includes(currentUser.role)) {
-    return children ? <>{children}</> : <Outlet />;
-  } else if (currentUser && !allowedRoles.includes(currentUser.role)) {
-    // User is logged in but not authorized
-    return <Navigate to="/" replace />;
-  } else {
-    // User is not logged in
-    return <Navigate to="/login" replace />;
+  if (!user) {
+    return <Navigate to="/auth/signin" replace />;
   }
+
+  return children ? <>{children}</> : <Outlet />;
 };
 
 export default ProtectedRoute;
