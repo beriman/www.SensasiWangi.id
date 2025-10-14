@@ -2,17 +2,22 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useAuthContext } from "@/providers/auth-provider";
+import { supabase } from "@/lib/supabase";
 
 export default function Onboarding() {
-  const { user } = useUser();
+  const { user } = useAuthContext();
   const navigate = useNavigate();
   const createOrUpdateUser = useMutation(api.users.createOrUpdateUser);
 
   const [step, setStep] = useState(0);
-  const [displayName, setDisplayName] = useState(user?.fullName || "");
+  const initialName =
+    (user?.user_metadata?.full_name as string | undefined) ||
+    user?.user_metadata?.name ||
+    "";
+  const [displayName, setDisplayName] = useState(initialName);
   const [interests, setInterests] = useState("");
   const [location, setLocation] = useState("");
   const [role, setRole] = useState<"buyer" | "business">("buyer");
@@ -34,7 +39,16 @@ export default function Onboarding() {
       const parts = displayName.trim().split(" ");
       const firstName = parts.shift() || "";
       const lastName = parts.join(" ");
-      await user.update({ firstName, lastName });
+      await supabase.auth.updateUser({
+        data: {
+          full_name: displayName,
+          first_name: firstName,
+          last_name: lastName,
+          role,
+          interests,
+          location,
+        },
+      });
     }
     navigate("/dashboard");
   };

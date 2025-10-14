@@ -1,8 +1,6 @@
-import { useUser } from "@clerk/clerk-react";
-import { useQuery } from "convex/react";
 import { ReactNode } from "react";
 import { Navigate } from "react-router";
-import { api } from "../../../convex/_generated/api";
+import { useAuthContext } from "@/providers/auth-provider";
 
 interface RoleProtectedRouteProps {
   children: ReactNode;
@@ -21,29 +19,19 @@ function LoadingSpinner() {
 }
 
 export default function RoleProtectedRoute({ children, roles }: RoleProtectedRouteProps) {
-  const { user, isLoaded: isUserLoaded } = useUser();
-  const userData = useQuery(
-    api.users.getUserByToken,
-    isUserLoaded && user?.id ? { tokenIdentifier: user.id } : "skip"
-  );
+  const { user, isLoading } = useAuthContext();
 
-  if (!isUserLoaded) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 
   if (!user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/auth/signin" replace />;
   }
 
-  if (userData === undefined) {
-    return <LoadingSpinner />;
-  }
+  const role = (user.user_metadata?.role as string | undefined) ?? "user";
 
-  if (userData === null) {
-    return <Navigate to="/" replace />;
-  }
-
-  if (!roles.includes(userData.role)) {
+  if (!roles.includes(role)) {
     return <Navigate to="/dashboard" replace />;
   }
 

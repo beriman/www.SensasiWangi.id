@@ -16,7 +16,8 @@
 
     "strict": false,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@clerk/clerk-react": ["./src/stubs/clerk-react.tsx"]
     }
   },
   "include": ["src", "src/pages/dashboard.tsx", "src/pages/success.tsx"],
